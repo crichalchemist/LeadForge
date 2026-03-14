@@ -34,6 +34,11 @@ async def apply_sentiment_feedback(
         logger.warning("no_lead_score_for_feedback", business_id=str(outreach.business_id))
         return None
 
+    # Idempotency: skip if sentiment feedback already applied
+    if lead_score.sentiment_adjustment is not None:
+        logger.info("sentiment_feedback_already_applied", business_id=str(outreach.business_id))
+        return None
+
     multiplier = _compute_multiplier(outreach)
     if multiplier is None:
         return None
