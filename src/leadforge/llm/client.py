@@ -19,7 +19,7 @@ class VLLMClient:
         if self._client is None or self._client.is_closed:
             self._client = httpx.AsyncClient(
                 base_url=self.base_url,
-                timeout=30.0,
+                timeout=120.0,
             )
         return self._client
 

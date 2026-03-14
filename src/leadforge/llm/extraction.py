@@ -1,10 +1,19 @@
 import json
+import re
 
 import structlog
 
 from leadforge.llm.client import VLLMClient
 
 logger = structlog.get_logger()
+
+_FENCE_RE = re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", re.DOTALL)
+
+
+def _strip_fences(text: str) -> str:
+    """Strip markdown code fences from LLM output before JSON parsing."""
+    m = _FENCE_RE.search(text)
+    return m.group(1).strip() if m else text.strip()
 
 EXTRACTION_PROMPT = """Extract business information from this website content.
 Return ONLY a JSON object with these fields (use null if not found):
@@ -66,7 +75,7 @@ async def extract_website_data(
         if not response:
             return {}
 
-        return json.loads(response.strip())
+        return json.loads(_strip_fences(response))
     except (json.JSONDecodeError, Exception) as e:
         logger.warning("website_extraction_failed", error=str(e))
         return {}
@@ -104,7 +113,7 @@ async def estimate_revenue(
             # Fallback: use niche median
             return NICHE_MEDIAN_REVENUE.get(niche)
 
-        result = json.loads(response.strip())
+        result = json.loads(_strip_fences(response))
         return result.get("estimated_monthly_revenue")
     except (json.JSONDecodeError, Exception) as e:
         logger.warning("revenue_estimation_failed", error=str(e))

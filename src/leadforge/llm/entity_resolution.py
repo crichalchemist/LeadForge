@@ -1,10 +1,19 @@
 import json
+import re
 
 import structlog
 
 from leadforge.llm.client import VLLMClient
 
 logger = structlog.get_logger()
+
+_FENCE_RE = re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", re.DOTALL)
+
+
+def _strip_fences(text: str) -> str:
+    """Strip markdown code fences from LLM output before JSON parsing."""
+    m = _FENCE_RE.search(text)
+    return m.group(1).strip() if m else text.strip()
 
 ENTITY_RESOLUTION_PROMPT = """Compare these two business records and determine if they are the same business.
 
@@ -55,7 +64,7 @@ async def resolve_entities(
             return {"is_match": False, "confidence": 0.0, "reason": "LLM unavailable"}
 
         # Parse JSON response
-        result = json.loads(response.strip())
+        result = json.loads(_strip_fences(response))
         return {
             "is_match": result.get("is_match", False)
             and result.get("confidence", 0) >= MERGE_THRESHOLD,
