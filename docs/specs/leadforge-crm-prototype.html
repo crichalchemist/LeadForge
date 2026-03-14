@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadForge CRM — Design Prototype v2.2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0a0a0f;
+  --bg-primary: #0f0f18;
+  --bg-surface: #151521;
+  --bg-elevated: #1a1a2e;
+  --bg-hover: #22223a;
+  --border-subtle: rgba(139, 92, 246, 0.12);
+  --border-default: rgba(139, 92, 246, 0.25);
+  --border-bright: rgba(139, 92, 246, 0.5);
+  --purple-dim: #6d5acd;
+  --purple: #8b5cf6;
+  --purple-bright: #a78bfa;
+  --purple-glow: rgba(139, 92, 246, 0.15);
+  --blue: #3b82f6;
+  --blue-bright: #60a5fa;
+  --blue-dim: #2563eb;
+  --cyan: #22d3ee;
+  --cyan-dim: #0891b2;
+  --green: #4ade80;
+  --green-bright: #86efac;
+  --green-dim: #16a34a;
+  --yellow: #facc15;
+  --yellow-bright: #fde047;
+  --yellow-dim: #ca8a04;
+  --neon-green: #39ff14;
+  --neon-yellow: #ccff00;
+  --text-primary: #e4e4ef;
+  --text-secondary: #9d9db8;
+  --text-tertiary: #5e5e7e;
+  --danger: #ef4444;
+  --danger-dim: #991b1b;
+  --warm: #f97316;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg-deep); color: var(--text-primary); font-family: var(--font-mono); font-size: 13px; line-height: 1.5; overflow-x: hidden; }
+
+.app { display: grid; grid-template-columns: 56px 1fr; grid-template-rows: 48px 1fr; height: 100vh; }
+.sidebar { grid-row: 1 / -1; background: var(--bg-primary); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px; }
+.sidebar-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--text-tertiary); cursor: pointer; font-size: 16px; transition: all 0.15s; }
+.sidebar-icon:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.sidebar-icon.active { background: var(--purple-glow); color: var(--purple-bright); border: 1px solid var(--border-default); }
+.sidebar-logo { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--neon-green); }
+
+.topbar { background: var(--bg-primary); border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.topbar-title { font-family: var(--font-display); font-size: 15px; font-weight: 500; color: var(--text-primary); }
+.topbar-breadcrumb { font-size: 12px; color: var(--text-tertiary); }
+.topbar-breadcrumb span { color: var(--purple); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-search { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 6px 12px; color: var(--text-secondary); font-family: var(--font-mono); font-size: 12px; width: 220px; outline: none; transition: border-color 0.15s; }
+.topbar-search:focus { border-color: var(--purple); }
+.topbar-search::placeholder { color: var(--text-tertiary); }
+
+.main { background: var(--bg-deep); overflow-y: auto; }
+
+.metrics-bar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; padding: 16px 20px; }
+.metric-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 16px; }
+.metric-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-tertiary); margin-bottom: 4px; }
+.metric-value { font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+.metric-value.green { color: var(--neon-green); }
+.metric-value.yellow { color: var(--yellow); }
+.metric-value.blue { color: var(--blue-bright); }
+.metric-value.purple { color: var(--purple-bright); }
+.metric-value.cyan { color: var(--cyan); }
+.metric-value.warm { color: var(--warm); }
+.metric-delta { font-size: 10px; color: var(--green); margin-top: 2px; }
+.metric-delta.neg { color: var(--danger); }
+
+.pipeline-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 8px; }
+.pipeline-tabs { display: flex; gap: 2px; }
+.pipeline-tab { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-tertiary); cursor: pointer; transition: all 0.15s; border: 1px solid transparent; }
+.pipeline-tab:hover { color: var(--text-secondary); background: var(--bg-surface); }
+.pipeline-tab.active { color: var(--neon-green); background: var(--bg-elevated); border-color: var(--border-default); }
+.pipeline-filters { display: flex; gap: 8px; }
+.filter-btn { padding: 5px 12px; border-radius: var(--radius-sm); font-size: 11px; font-family: var(--font-mono); color: var(--text-tertiary); background: var(--bg-surface); border: 1px solid var(--border-subtle); cursor: pointer; transition: all 0.15s; }
+.filter-btn:hover { border-color: var(--border-default); color: var(--text-secondary); }
+
+.kanban { display: grid; grid-template-columns: repeat(6, minmax(200px, 1fr)); gap: 8px; padding: 0 20px 20px; overflow-x: auto; min-height: calc(100vh - 220px); }
+.kanban-col { background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 10px; display: flex; flex-direction: column; }
+.col-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 10px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 8px; }
+.col-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
+.col-title.scored { color: var(--text-tertiary); }
+.col-title.queued { color: var(--purple); }
+.col-title.contacted { color: var(--blue-bright); }
+.col-title.engaged { color: var(--cyan); }
+.col-title.meeting { color: var(--yellow); }
+.col-title.won { color: var(--neon-green); }
+.col-count { font-size: 11px; color: var(--text-tertiary); background: var(--bg-surface); padding: 2px 8px; border-radius: 10px; }
+.col-cards { display: flex; flex-direction: column; gap: 6px; flex: 1; overflow-y: auto; }
+
+.lead-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
+.lead-card:hover { border-color: var(--border-default); background: var(--bg-elevated); transform: translateY(-1px); }
+.lead-card .biz-name { font-family: var(--font-display); font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lead-card .biz-niche { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.lead-card .biz-meta { display: flex; align-items: center; justify-content: space-between; }
+.lead-card .biz-zip { font-size: 11px; color: var(--text-tertiary); }
+.lead-card .biz-score { font-size: 12px; font-weight: 600; font-family: var(--font-display); padding: 2px 8px; border-radius: var(--radius-sm); }
+.score-a { color: var(--neon-green); background: rgba(57, 255, 20, 0.1); border: 1px solid rgba(57, 255, 20, 0.2); }
+.score-b { color: var(--yellow); background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.2); }
+.score-c { color: var(--warm); background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.2); }
+.lead-card .biz-tier { font-size: 10px; color: var(--text-tertiary); margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+.tier-dot { width: 6px; height: 6px; border-radius: 50%; }
+.tier-1 { background: var(--blue); }
+.tier-2 { background: var(--purple); }
+.tier-3 { background: var(--cyan); }
+.sentiment-bar { height: 2px; border-radius: 1px; margin-top: 8px; }
+.sentiment-pos { background: linear-gradient(90deg, var(--bg-surface), var(--neon-green)); }
+.sentiment-neu { background: linear-gradient(90deg, var(--bg-surface), var(--yellow)); }
+.sentiment-neg { background: linear-gradient(90deg, var(--bg-surface), var(--danger)); }
+
+.detail-overlay { position: fixed; top: 0; right: 0; width: 420px; height: 100vh; background: var(--bg-primary); border-left: 1px solid var(--border-default); z-index: 100; display: none; flex-direction: column; overflow-y: auto; }
+.detail-overlay.open { display: flex; }
+.detail-header { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); }
+.detail-header .close-btn { float: right; color: var(--text-tertiary); cursor: pointer; font-size: 16px; }
+.detail-header .close-btn:hover { color: var(--text-primary); }
+.detail-biz-name { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+.detail-biz-sub { font-size: 12px; color: var(--text-tertiary); }
+.detail-section { padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); }
+.detail-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--purple); margin-bottom: 10px; font-weight: 500; }
+.detail-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.detail-label { font-size: 12px; color: var(--text-tertiary); }
+.detail-value { font-size: 12px; color: var(--text-primary); }
+.score-breakdown { display: flex; gap: 8px; margin-top: 8px; }
+.score-bar-wrap { flex: 1; }
+.score-bar-label { font-size: 10px; color: var(--text-tertiary); margin-bottom: 4px; display: flex; justify-content: space-between; }
+.score-bar { height: 4px; background: var(--bg-hover); border-radius: 2px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 2px; }
+.fill-deficit { background: var(--purple); }
+.fill-viability { background: var(--neon-green); }
+.fill-pressure { background: var(--yellow); }
+
+.timeline-item { display: flex; gap: 10px; padding: 8px 0; }
+.timeline-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.timeline-content { flex: 1; }
+.timeline-date { font-size: 10px; color: var(--text-tertiary); }
+.timeline-text { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+.status-badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
+.status-scored { color: var(--text-tertiary); border: 1px solid var(--border-subtle); }
+.status-queued { color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.08); }
+.status-contacted { color: var(--blue-bright); border: 1px solid rgba(96, 165, 250, 0.3); background: rgba(96, 165, 250, 0.08); }
+.status-engaged { color: var(--cyan); border: 1px solid rgba(34, 211, 238, 0.3); background: rgba(34, 211, 238, 0.08); }
+.status-meeting { color: var(--yellow); border: 1px solid rgba(250, 204, 21, 0.3); background: rgba(250, 204, 21, 0.08); }
+.status-won { color: var(--neon-green); border: 1px solid rgba(57, 255, 20, 0.3); background: rgba(57, 255, 20, 0.08); }
+
+.page-label { position: fixed; bottom: 16px; right: 16px; font-size: 10px; color: var(--text-tertiary); letter-spacing: 1px; text-transform: uppercase; opacity: 0.5; z-index: 50; }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo">LF</div>
+    <div class="sidebar-icon active" title="Pipeline">&#9636;</div>
+    <div class="sidebar-icon" title="Leads">&#9783;</div>
+    <div class="sidebar-icon" title="Outreach">&#9742;</div>
+    <div class="sidebar-icon" title="Reports">&#9634;</div>
+    <div class="sidebar-icon" title="Scrape">&#8645;</div>
+    <div style="flex:1"></div>
+    <div class="sidebar-icon" title="Settings">&#9881;</div>
+  </nav>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Pipeline</div>
+      <div class="topbar-breadcrumb"><span>60619</span> / barbershops / all tiers</div>
+    </div>
+    <div class="topbar-right">
+      <input class="topbar-search" placeholder="search leads..." />
+      <div style="font-size:11px;color:var(--text-tertiary)">v2.2</div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="metrics-bar">
+      <div class="metric-card">
+        <div class="metric-label">total leads</div>
+        <div class="metric-value purple">2,847</div>
+        <div class="metric-delta">+312 this week</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">contacted</div>
+        <div class="metric-value blue">1,204</div>
+        <div class="metric-delta">42.3% of total</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">meetings booked</div>
+        <div class="metric-value cyan">89</div>
+        <div class="metric-delta">7.4% of contacted</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">won / month</div>
+        <div class="metric-value green">23</div>
+        <div class="metric-delta">+8 vs last month</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">avg sentiment</div>
+        <div class="metric-value yellow">+0.34</div>
+        <div class="metric-delta">neutral-positive</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">pipeline value</div>
+        <div class="metric-value warm">$18.4K</div>
+        <div class="metric-delta">$14.2K won</div>
+      </div>
+    </div>
+
+    <div class="pipeline-header">
+      <div class="pipeline-tabs">
+        <div class="pipeline-tab active">kanban</div>
+        <div class="pipeline-tab">table</div>
+        <div class="pipeline-tab">map</div>
+      </div>
+      <div class="pipeline-filters">
+        <div class="filter-btn">zip: all</div>
+        <div class="filter-btn">niche: all</div>
+        <div class="filter-btn">tier: all</div>
+        <div class="filter-btn">score: 40+</div>
+      </div>
+    </div>
+
+    <div class="kanban">
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title scored">scored</span><span class="col-count">1,247</span></div>
+        <div class="col-cards">
+          <div class="lead-card" onclick="openDetail()">
+            <div class="biz-name">Precision Cuts</div>
+            <div class="biz-niche">barbershop</div>
+            <div class="biz-meta"><span class="biz-zip">60619</span><span class="biz-score score-a">87</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-2"></span>tier 2 &middot; $400-1,200</div>
+          </div>
+          <div class="lead-card">
+            <div class="biz-name">South Side Auto Parts</div>
+            <div class="biz-niche">used auto parts</div>
+            <div class="biz-meta"><span class="biz-zip">60620</span><span class="biz-score score-a">82</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-1"></span>tier 1 &middot; $150-500</div>
+          </div>
+          <div class="lead-card">
+            <div class="biz-name">Rosa's Nail Studio</div>
+            <div class="biz-niche">nail salon</div>
+            <div class="biz-meta"><span class="biz-zip">60608</span><span class="biz-score score-b">68</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-1"></span>tier 1 &middot; $150-500</div>
+          </div>
+          <div class="lead-card">
+            <div class="biz-name">Mike's Mobile Repair</div>
+            <div class="biz-niche">mobile mechanic</div>
+            <div class="biz-meta"><span class="biz-zip">60621</span><span class="biz-score score-b">63</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-1"></span>tier 1 &middot; $150-500</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title queued">queued</span><span class="col-count">396</span></div>
+        <div class="col-cards">
+          <div class="lead-card">
+            <div class="biz-name">King's Throne Barbers</div>
+            <div class="biz-niche">barbershop</div>
+            <div class="biz-meta"><span class="biz-zip">60649</span><span class="biz-score score-a">91</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-2"></span>tier 2 &middot; $400-1,200</div>
+          </div>
+          <div class="lead-card">
+            <div class="biz-name">Hernandez Lawn Care</div>
+            <div class="biz-niche">lawn service</div>
+            <div class="biz-meta"><span class="biz-zip">60623</span><span class="biz-score score-a">84</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-1"></span>tier 1 &middot; $150-500</div>
+          </div>
+          <div class="lead-card">
+            <div class="biz-name">Chatham Smoke &amp; Vape</div>
+            <div class="biz-niche">smoke shop</div>
+            <div class="biz-meta"><span class="biz-zip">60619</span><span class="biz-score score-b">72</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-1"></span>tier 1 &middot; $150-500</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title contacted">contacted</span><span class="col-count">204</span></div>
+        <div class="col-cards">
+          <div class="lead-card">
+            <div class="biz-name">El Pueblo Meats</div>
+            <div class="biz-niche">meat market</div>
+            <div class="biz-meta"><span class="biz-zip">60608</span><span class="biz-score score-a">85</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-2"></span>tier 2 &middot; $400-1,200</div>
+            <div class="sentiment-bar sentiment-pos"></div>
+          </div>
+          <div class="lead-card">
+            <div class="biz-name">Diamond Nails</div>
+            <div class="biz-niche">nail salon</div>
+            <div class="biz-meta"><span class="biz-zip">60647</span><span class="biz-score score-b">74</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-1"></span>tier 1 &middot; $150-500</div>
+            <div class="sentiment-bar sentiment-neu"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title engaged">engaged</span><span class="col-count">89</span></div>
+        <div class="col-cards">
+          <div class="lead-card">
+            <div class="biz-name">Quick Tow Chicago</div>
+            <div class="biz-niche">towing</div>
+            <div class="biz-meta"><span class="biz-zip">60609</span><span class="biz-score score-a">88</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-2"></span>tier 2 &middot; $400-1,200</div>
+            <div class="sentiment-bar sentiment-pos"></div>
+          </div>
+          <div class="lead-card">
+            <div class="biz-name">Gresham Pet Clinic</div>
+            <div class="biz-niche">veterinarian</div>
+            <div class="biz-meta"><span class="biz-zip">60620</span><span class="biz-score score-a">83</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-3"></span>tier 3 &middot; $900-2,500</div>
+            <div class="sentiment-bar sentiment-pos"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title meeting">meeting</span><span class="col-count">34</span></div>
+        <div class="col-cards">
+          <div class="lead-card">
+            <div class="biz-name">Fade Factory</div>
+            <div class="biz-niche">barbershop</div>
+            <div class="biz-meta"><span class="biz-zip">60619</span><span class="biz-score score-a">92</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-2"></span>tier 2 &middot; $400-1,200</div>
+            <div class="sentiment-bar sentiment-pos"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title won">won</span><span class="col-count">23</span></div>
+        <div class="col-cards">
+          <div class="lead-card" style="border-color: rgba(57, 255, 20, 0.25);">
+            <div class="biz-name">Crown & Glory Beauty</div>
+            <div class="biz-niche">beauty shop</div>
+            <div class="biz-meta"><span class="biz-zip">60649</span><span class="biz-score score-a">94</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-2"></span>$650/mo &middot; signed</div>
+            <div class="sentiment-bar sentiment-pos"></div>
+          </div>
+          <div class="lead-card" style="border-color: rgba(57, 255, 20, 0.25);">
+            <div class="biz-name">Pilsen Tire Center</div>
+            <div class="biz-niche">tire shop</div>
+            <div class="biz-meta"><span class="biz-zip">60608</span><span class="biz-score score-a">86</span></div>
+            <div class="biz-tier"><span class="tier-dot tier-1"></span>$350/mo &middot; signed</div>
+            <div class="sentiment-bar sentiment-pos"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="detail-overlay" id="detailPanel">
+  <div class="detail-header">
+    <span class="close-btn" onclick="closeDetail()">&times;</span>
+    <div class="detail-biz-name">Precision Cuts</div>
+    <div class="detail-biz-sub">barbershop &middot; 60619 &middot; <span class="status-badge status-scored">scored</span></div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-title">acquisition score</div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px;">
+      <span style="font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--neon-green);">87</span>
+      <span style="font-size:12px;color:var(--text-tertiary);">tier A &middot; high priority</span>
+    </div>
+    <div class="score-breakdown">
+      <div class="score-bar-wrap">
+        <div class="score-bar-label"><span>digital deficit</span><span style="color:var(--purple)">78</span></div>
+        <div class="score-bar"><div class="score-bar-fill fill-deficit" style="width:78%"></div></div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-label"><span>viability</span><span style="color:var(--neon-green)">91</span></div>
+        <div class="score-bar"><div class="score-bar-fill fill-viability" style="width:91%"></div></div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-label"><span>pressure</span><span style="color:var(--yellow)">82</span></div>
+        <div class="score-bar"><div class="score-bar-fill fill-pressure" style="width:82%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-title">contact</div>
+    <div class="detail-row"><span class="detail-label">phone</span><span class="detail-value">(773) 555-0184</span></div>
+    <div class="detail-row"><span class="detail-label">owner</span><span class="detail-value">Marcus Williams</span></div>
+    <div class="detail-row"><span class="detail-label">address</span><span class="detail-value">7842 S Cottage Grove Ave</span></div>
+    <div class="detail-row"><span class="detail-label">email</span><span class="detail-value" style="color:var(--text-tertiary)">not found</span></div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-title">digital presence</div>
+    <div class="detail-row"><span class="detail-label">website</span><span class="detail-value" style="color:var(--danger)">none</span></div>
+    <div class="detail-row"><span class="detail-label">google reviews</span><span class="detail-value">47 (4.6 avg)</span></div>
+    <div class="detail-row"><span class="detail-label">yelp reviews</span><span class="detail-value">12 (4.0 avg)</span></div>
+    <div class="detail-row"><span class="detail-label">GBP completeness</span><span class="detail-value" style="color:var(--yellow)">0.42</span></div>
+    <div class="detail-row"><span class="detail-label">instagram</span><span class="detail-value" style="color:var(--danger)">none</span></div>
+    <div class="detail-row"><span class="detail-label">facebook</span><span class="detail-value" style="color:var(--text-tertiary)">dormant (142d)</span></div>
+    <div class="detail-row"><span class="detail-label">google ads</span><span class="detail-value" style="color:var(--danger)">none</span></div>
+    <div class="detail-row"><span class="detail-label">customer UGC tags</span><span class="detail-value" style="color:var(--neon-green)">83</span></div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-title">competitive context</div>
+    <div class="detail-row"><span class="detail-label">competitors in zip</span><span class="detail-value">7</span></div>
+    <div class="detail-row"><span class="detail-label">competitors w/ ads</span><span class="detail-value" style="color:var(--yellow)">3</span></div>
+    <div class="detail-row"><span class="detail-label">zip avg rating</span><span class="detail-value">4.1</span></div>
+    <div class="detail-row"><span class="detail-label">zip digital maturity</span><span class="detail-value">0.38</span></div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-title">price tier</div>
+    <div class="detail-row"><span class="detail-label">predicted tier</span><span class="detail-value" style="color:var(--purple)">tier 2</span></div>
+    <div class="detail-row"><span class="detail-label">reference range</span><span class="detail-value">$400 &ndash; $1,200/mo</span></div>
+    <div class="detail-row"><span class="detail-label">est. monthly revenue</span><span class="detail-value">$22,000</span></div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-title">outreach brief</div>
+    <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;padding:8px 12px;background:var(--bg-surface);border-radius:var(--radius-md);border-left:2px solid var(--purple);">
+      This barbershop has 47 Google reviews at 4.6 stars and 83 customer location tags on Instagram, but no website, dormant Facebook, and incomplete GBP. Three of seven competitors in 60619 are running Google Ads. The pitch: their reputation is invisible to anyone searching online, and competitors are actively capturing that traffic.
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-title">outreach timeline</div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--purple)"></div>
+      <div class="timeline-content">
+        <div class="timeline-date">scored &middot; mar 12, 2026</div>
+        <div class="timeline-text">Lead scored at 87. Auto-queued for outreach (tier A).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-label">leadforge crm &middot; prototype v2.2</div>
+
+<script>
+function openDetail() { document.getElementById('detailPanel').classList.add('open'); }
+function closeDetail() { document.getElementById('detailPanel').classList.remove('open'); }
+</script>
+</body>
+</html>

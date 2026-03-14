@@ -1,0 +1,58 @@
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': import.meta.env.VITE_API_KEY || '',
+  },
+});
+
+export default api;
+
+// Businesses
+export const fetchBusinesses = (params: Record<string, string | number>) =>
+  api.get('/businesses', { params }).then((r) => r.data);
+
+export const fetchBusiness = (id: string) =>
+  api.get(`/businesses/${id}`).then((r) => r.data);
+
+export const updateBusiness = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/businesses/${id}`, data).then((r) => r.data);
+
+// Leads
+export const fetchRankedLeads = (params: Record<string, string | number>) =>
+  api.get('/leads/ranked', { params }).then((r) => r.data);
+
+export const fetchScoreHistory = (businessId: string) =>
+  api.get(`/leads/${businessId}/score`).then((r) => r.data);
+
+// Pipeline
+export const fetchPipelineBoard = () =>
+  api.get('/pipeline/board').then((r) => r.data);
+
+export const transitionStage = (outreachId: string, newStage: string) =>
+  api.patch(`/pipeline/${outreachId}/stage`, { new_stage: newStage }).then((r) => r.data);
+
+// Outreach
+export const fetchOutreachHistory = (businessId: string) =>
+  api.get(`/outreach/by-business/${businessId}`).then((r) => r.data);
+
+export const fetchOutreach = (id: string) =>
+  api.get(`/outreach/${id}`).then((r) => r.data);
+
+export const fetchTranscript = (id: string) =>
+  api.get(`/outreach/${id}/transcript`).then((r) => r.data);
+
+export const updateOutreach = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/outreach/${id}`, data).then((r) => r.data);
+
+// Reports
+export const fetchFunnel = () =>
+  api.get('/reports/funnel').then((r) => r.data);
+
+export const fetchScoreDistribution = () =>
+  api.get('/reports/score-distribution').then((r) => r.data);
+
+export const fetchZipPerformance = () =>
+  api.get('/reports/zip-performance').then((r) => r.data);

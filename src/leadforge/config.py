@@ -13,5 +13,12 @@ class Settings(BaseSettings):
     SOCRATA_PAGE_SIZE: int = 1000
     GOOGLE_PLACES_MAX_CONCURRENT: int = 5
 
+    # API
+    API_KEY: str = ""
+    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+
+    # Recalibration
+    RECALIBRATION_SCORE_CHANGE_THRESHOLD: float = 0.10
+
 
 settings = Settings()

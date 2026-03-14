@@ -38,6 +38,11 @@ services:
       - .env
     volumes:
       - ./src:/app/src
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   worker:
     build: .
@@ -51,6 +56,29 @@ services:
       - .env
     volumes:
       - ./src:/app/src
+
+  celery-beat:
+    build: .
+    command: celery -A leadforge.tasks.celery_app beat --loglevel=info
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      app:
+        condition: service_healthy
 
 volumes:
   pgdata:

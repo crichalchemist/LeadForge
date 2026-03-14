@@ -42,3 +42,7 @@ To maintain organization across the 4-phase build:
 | 012 | TCPA compliance: business lines only, one concurrent call, flag mobiles | Accepted | 2026-03-14 |
 | 013 | Retell integration: webhook-driven async, idempotent handlers | Accepted | 2026-03-14 |
 | 014 | Sentiment feedback: multiplicative on composite, one adjustment per call, capped at 100 | Accepted | 2026-03-14 |
+| 015 | Frontend stack: React + Vite + Tailwind, React Query for server state, @dnd-kit for DnD | Accepted | 2026-03-14 |
+| 016 | API auth: API key for MVP, upgrade path to OAuth2/OIDC | Accepted | 2026-03-14 |
+| 017 | Recalibration: 90-day full re-enrichment, score versioning for audit trail | Accepted | 2026-03-14 |
+| 018 | Pipeline transitions: valid transition enforcement in backend, optimistic updates in frontend | Accepted | 2026-03-14 |
