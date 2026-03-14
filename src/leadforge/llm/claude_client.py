@@ -5,19 +5,24 @@ from leadforge.config import settings
 
 logger = structlog.get_logger()
 
-CLAUDE_MODEL = getattr(settings, "CLAUDE_MODEL", "claude-sonnet-4-5-20250514")
-
 
 class ClaudeClient:
-    """Async wrapper for Anthropic Claude API."""
+    """Async wrapper for Anthropic Claude API via Azure Foundry."""
 
-    def __init__(self, api_key: str | None = None):
-        self.api_key = api_key or getattr(settings, "ANTHROPIC_API_KEY", "")
+    def __init__(self):
         self._client: AsyncAnthropic | None = None
 
     def _get_client(self) -> AsyncAnthropic:
         if self._client is None:
-            self._client = AsyncAnthropic(api_key=self.api_key)
+            resource = settings.ANTHROPIC_FOUNDRY_RESOURCE
+            if resource:
+                self._client = AsyncAnthropic(
+                    base_url=f"https://{resource}.cognitiveservices.azure.com/anthropic/",
+                    api_key=settings.ANTHROPIC_FOUNDRY_API_KEY,
+                )
+            else:
+                # Fallback to standard Anthropic API if no Foundry resource
+                self._client = AsyncAnthropic()
         return self._client
 
     async def complete(
@@ -27,7 +32,7 @@ class ClaudeClient:
         try:
             client = self._get_client()
             message = await client.messages.create(
-                model=CLAUDE_MODEL,
+                model=settings.ANTHROPIC_DEFAULT_SONNET_MODEL,
                 max_tokens=max_tokens,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,

@@ -1,10 +1,18 @@
 import json
+import re
 
 import structlog
 
 from leadforge.llm.claude_client import ClaudeClient
 
 logger = structlog.get_logger()
+
+_FENCE_RE = re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", re.DOTALL)
+
+
+def _strip_fences(text: str) -> str:
+    m = _FENCE_RE.search(text)
+    return m.group(1).strip() if m else text.strip()
 
 SENTIMENT_PROMPT = """Analyze this call transcript between a marketing agent and a small business owner.
 
@@ -46,7 +54,7 @@ async def analyze_sentiment(
         if not response:
             return _empty_sentiment()
 
-        result = json.loads(response.strip())
+        result = json.loads(_strip_fences(response))
         # Clamp sentiment score
         score = result.get("sentiment_score", 0.0)
         result["sentiment_score"] = max(-1.0, min(1.0, score))

@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     API_KEY: str = ""
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
 
+    # Anthropic (Azure Foundry)
+    ANTHROPIC_FOUNDRY_RESOURCE: str = ""
+    ANTHROPIC_FOUNDRY_API_KEY: str = ""
+    ANTHROPIC_DEFAULT_SONNET_MODEL: str = "claude-sonnet-4-5-2"
+
     # vLLM
     VLLM_BASE_URL: str = "http://localhost:8001/v1"
     VLLM_MODEL: str = "Qwen/Qwen2.5-3B-Instruct"

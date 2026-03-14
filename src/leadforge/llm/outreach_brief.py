@@ -1,4 +1,5 @@
 import json
+import re
 
 import structlog
 
@@ -7,6 +8,13 @@ from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.llm.claude_client import ClaudeClient
 
 logger = structlog.get_logger()
+
+_FENCE_RE = re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", re.DOTALL)
+
+
+def _strip_fences(text: str) -> str:
+    m = _FENCE_RE.search(text)
+    return m.group(1).strip() if m else text.strip()
 
 OUTREACH_BRIEF_PROMPT = """Generate an outreach brief for calling this small \
 business owner about digital marketing services.
@@ -123,7 +131,7 @@ async def generate_outreach_brief(
         if not response:
             return _fallback_brief(business, nof_eligible=nof_eligible)
 
-        return json.loads(response.strip())
+        return json.loads(_strip_fences(response))
     except (json.JSONDecodeError, Exception) as e:
         logger.warning("outreach_brief_failed", error=str(e), business=business.name)
         return _fallback_brief(business, nof_eligible=nof_eligible)

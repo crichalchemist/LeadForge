@@ -21,6 +21,7 @@ dependencies = [
     "celery[redis]>=5.4.0",
     "python-dotenv>=1.0.0",
     "anthropic>=0.42.0",
+    "azure-ai-inference>=1.0.0b9",
 ]
 
 [project.optional-dependencies]

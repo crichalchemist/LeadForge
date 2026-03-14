@@ -1,4 +1,5 @@
 import json
+import re
 
 import structlog
 
@@ -6,6 +7,13 @@ from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.llm.claude_client import ClaudeClient
 
 logger = structlog.get_logger()
+
+_FENCE_RE = re.compile(r"```(?:json)?\s*\n?(.*?)\n?\s*```", re.DOTALL)
+
+
+def _strip_fences(text: str) -> str:
+    m = _FENCE_RE.search(text)
+    return m.group(1).strip() if m else text.strip()
 
 GBP_ASSESSMENT_PROMPT = """Assess the Google Business Profile completeness for this business.
 
@@ -47,7 +55,7 @@ async def assess_gbp(
                 "recommendations": [],
             }
 
-        return json.loads(response.strip())
+        return json.loads(_strip_fences(response))
     except (json.JSONDecodeError, Exception) as e:
         logger.warning("gbp_assessment_failed", error=str(e))
         return {

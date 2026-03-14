@@ -6,24 +6,25 @@ from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
 
-# Maps our niche types to Socrata license description search terms
+# Maps our niche types to Socrata business_activity search terms
 # Chicago Data Portal business licenses dataset: data.cityofchicago.org resource ID "r5kz-chrr"
+# Terms validated against live dataset 2026-03-14
 NICHE_MAPPING: dict[NicheType, list[str]] = {
-    NicheType.BARBERSHOPS: ["barber"],
-    NicheType.NAIL_SALONS: ["nail salon", "manicur"],
-    NicheType.BEAUTY_SHOPS: ["beauty salon", "hair salon", "cosmetology"],
-    NicheType.BEAUTY_SUPPLY: ["beauty supply"],
-    NicheType.TIRE_SHOPS: ["tire"],
-    NicheType.BARS: ["tavern", "liquor", "bar"],
+    NicheType.BARBERSHOPS: ["hair service"],
+    NicheType.NAIL_SALONS: ["nail service"],
+    NicheType.BEAUTY_SHOPS: ["hair, nail, and skin care", "hair service"],
+    NicheType.BEAUTY_SUPPLY: ["hair service", "nail service"],
+    NicheType.TIRE_SHOPS: ["sale and storage of tires"],
+    NicheType.BARS: ["tavern"],
     NicheType.SMOKE_SHOPS: ["tobacco"],
-    NicheType.MEAT_MARKETS: ["meat market", "butcher"],
-    NicheType.TOWING: ["towing"],
-    NicheType.LAWN_SERVICES: ["lawn", "landscap"],
-    NicheType.MOBILE_MECHANICS: ["auto repair", "mechanic"],
-    NicheType.USED_AUTO_PARTS: ["auto parts", "junk"],
-    NicheType.SEPTIC_SERVICES: ["plumb", "septic"],
-    NicheType.VETERINARIANS: ["veterinar", "animal hospital"],
-    NicheType.SECURITY_SERVICES: ["security", "guard"],
+    NicheType.MEAT_MARKETS: ["butcher"],
+    NicheType.TOWING: ["tow truck", "tow storage"],
+    NicheType.LAWN_SERVICES: ["landscap"],
+    NicheType.MOBILE_MECHANICS: ["motor vehicle repair"],
+    NicheType.USED_AUTO_PARTS: ["junk peddler"],
+    NicheType.SEPTIC_SERVICES: ["plumb"],
+    NicheType.VETERINARIANS: ["veterinar"],
+    NicheType.SECURITY_SERVICES: ["security service"],
 }
 
 
