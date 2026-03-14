@@ -79,7 +79,7 @@ async def get_grant_board(session: AsyncSession = Depends(get_db)):
     counts = dict((await session.execute(count_q)).all())
 
     columns = []
-    for group_name, stages in BOARD_GROUPS.items():
+    for _group_name, stages in BOARD_GROUPS.items():
         for stage in stages:
             count = counts.get(stage, 0)
 
@@ -101,7 +101,9 @@ async def get_grant_board(session: AsyncSession = Depends(get_db)):
                     business_name=row[1],
                     corridor_name=row[0].corridor_name,
                     estimated_grant=row[0].base_grant_amount,
-                    days_in_stage=(now - row[0].updated_at).days
+                    days_in_stage=(
+                        now - row[0].updated_at.replace(tzinfo=timezone.utc)
+                    ).days
                     if row[0].updated_at
                     else 0,
                 )
