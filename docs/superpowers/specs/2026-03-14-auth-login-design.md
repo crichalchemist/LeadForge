@@ -1,7 +1,7 @@
 # LeadForge CRM Authentication & Login
 
 **Date:** 2026-03-14
-**Status:** Approved
+**Status:** Final
 **Scope:** JWT-based authentication with login page for the CRM dashboard
 
 **Supersedes:** ADR-016 (API key auth for MVP). The static API key approach was a placeholder; this design replaces it with proper user-based authentication as planned in the ADR-016 "upgrade path" section.
