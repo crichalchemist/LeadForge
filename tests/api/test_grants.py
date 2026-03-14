@@ -3,10 +3,6 @@
 import uuid
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from leadforge.db.models.business import Business
-from leadforge.db.models.grant_application import GrantApplication, NOFStage
 
 
 @pytest.mark.asyncio

@@ -1,6 +1,5 @@
 """Tests for NOF grant financial calculator."""
 
-import pytest
 
 from leadforge.grants.financial_calculator import compute_grant_financials
 

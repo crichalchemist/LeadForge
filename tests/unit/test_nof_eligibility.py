@@ -2,8 +2,6 @@
 
 from datetime import date, timedelta
 
-import pytest
-
 from leadforge.db.models.business import LicenseStatus, NicheType
 from leadforge.scoring.nof_eligibility import compute_nof_eligibility
 
