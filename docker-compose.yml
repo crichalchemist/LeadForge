@@ -70,6 +70,32 @@ services:
     volumes:
       - ./src:/app/src
 
+  vllm:
+    image: vllm/vllm-openai:latest-cpu
+    ports:
+      - "8001:8000"
+    environment:
+      - VLLM_CPU_KVCACHE_SPACE=4
+    command: >
+      --model Qwen/Qwen2.5-3B-Instruct
+      --device cpu
+      --dtype float32
+      --max-model-len 4096
+      --cpu-offload-gb 0
+    volumes:
+      - vllm-cache:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          memory: 12g
+          cpus: "6"
+
   frontend:
     build:
       context: ./frontend
@@ -82,3 +108,4 @@ services:
 
 volumes:
   pgdata:
+  vllm-cache:

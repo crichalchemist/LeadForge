@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     API_KEY: str = ""
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
 
+    # vLLM
+    VLLM_BASE_URL: str = "http://localhost:8001/v1"
+    VLLM_MODEL: str = "Qwen/Qwen2.5-3B-Instruct"
+
     # Recalibration
     RECALIBRATION_SCORE_CHANGE_THRESHOLD: float = 0.10
 

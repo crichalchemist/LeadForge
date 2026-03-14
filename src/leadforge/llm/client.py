@@ -5,7 +5,7 @@ from leadforge.config import settings
 
 logger = structlog.get_logger()
 
-VLLM_BASE_URL = getattr(settings, "VLLM_BASE_URL", "http://localhost:8000/v1")
+VLLM_BASE_URL = settings.VLLM_BASE_URL
 
 
 class VLLMClient:
@@ -32,7 +32,7 @@ class VLLMClient:
             response = await client.post(
                 "/chat/completions",
                 json={
-                    "model": getattr(settings, "VLLM_MODEL", "default"),
+                    "model": settings.VLLM_MODEL,
                     "messages": [{"role": "user", "content": prompt}],
                     "max_tokens": max_tokens,
                     "temperature": temperature,
