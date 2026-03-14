@@ -4,6 +4,8 @@
 **Status:** Approved
 **Scope:** JWT-based authentication with login page for the CRM dashboard
 
+**Supersedes:** ADR-016 (API key auth for MVP). The static API key approach was a placeholder; this design replaces it with proper user-based authentication as planned in the ADR-016 "upgrade path" section.
+
 ## Context
 
 The LeadForge CRM dashboard currently uses a static `X-API-Key` header for API protection, with no login page or session management. The frontend sends a hardcoded key from `VITE_API_KEY` in every request. This design adds proper user authentication with a login flow, JWT tokens, role-based access, and CLI user management for a small internal team (2-5 people).
@@ -33,6 +35,8 @@ The LeadForge CRM dashboard currently uses a static `X-API-Key` header for API p
 
 No refresh token table. Refresh tokens are stateless JWTs with expiry. Revocation is handled by setting `is_active=false` on the user — their next refresh attempt fails.
 
+**Logout limitation:** Clearing the refresh cookie on logout is client-side only. A previously extracted refresh token remains valid until expiry. This is acceptable for a small internal team; a token revocation table can be added later if needed.
+
 ### UserRole enum
 
 ```python
@@ -57,7 +61,7 @@ class UserRole(str, enum.Enum):
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/auth/login` | Public | `{email, password}` -> `{access_token, user}` + sets `refresh_token` HTTP-only cookie |
+| POST | `/auth/login` | Public | `{email, password}` -> `{access_token, user}` + sets `refresh_token` HTTP-only cookie. Updates `last_login_at`. |
 | POST | `/auth/refresh` | Cookie | Reads refresh cookie -> returns new `{access_token}` |
 | POST | `/auth/logout` | Authenticated | Clears refresh cookie |
 | GET | `/auth/me` | Authenticated | Returns current user profile |
@@ -71,10 +75,20 @@ Replace existing `verify_api_key` with:
 
 ### Route protection
 
-- All existing protected routes use `get_current_user` (any authenticated user can read)
-- Write operations (PATCH, POST, DELETE) on businesses, pipeline transitions, outreach, grants use `require_admin`
+| Route group | GET (read) | PATCH/POST/DELETE (write) |
+|-------------|-----------|--------------------------|
+| `/businesses` | `get_current_user` | `require_admin` |
+| `/leads` | `get_current_user` | N/A (read-only) |
+| `/pipeline` | `get_current_user` | `require_admin` |
+| `/outreach` | `get_current_user` | `require_admin` |
+| `/grants` | `get_current_user` | `require_admin` |
+| `/reports` | `get_current_user` | N/A (read-only) |
+| `/health` | Public | N/A |
+| `/webhooks` | Public (Retell signature verified) | N/A |
+| `/auth/*` | Per-endpoint (see Endpoints table) | — |
+
 - The old `X-API-Key` mechanism is removed entirely
-- Webhooks and health check remain public
+- Login endpoint returns generic "Invalid credentials" on failure (no user enumeration)
 
 ### JWT structure
 
@@ -95,7 +109,7 @@ Both signed with `JWT_SECRET_KEY` using HS256.
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `JWT_SECRET_KEY` | (required) | Random 64-char hex secret |
+| `JWT_SECRET_KEY` | (required) | Random secret, generate with `openssl rand -hex 32`. Changing invalidates all tokens. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | 60 | Access token lifetime |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | 30 | Refresh token lifetime |
 
@@ -112,15 +126,15 @@ Both signed with `JWT_SECRET_KEY` using HS256.
 ### Auth state management (`useAuth.ts`)
 
 - Access token stored in React state (memory only — not localStorage, XSS-safe)
-- On app load, calls `/auth/refresh` to restore session from refresh cookie (survives page refresh)
-- Exposes: `login()`, `logout()`, `user`, `isAuthenticated`, `isAdmin`
+- On app load, calls `/auth/refresh` to restore session from refresh cookie (survives page refresh). Shows a loading spinner until resolved; on failure, redirects to `/login`
+- Exposes: `login()`, `logout()`, `user`, `isLoading`, `isAuthenticated`, `isAdmin`
 - Wrapped in `AuthProvider` context at app root
 
 ### Axios client changes (`client.ts`)
 
 - Remove static `X-API-Key` header
 - Request interceptor: attach `Authorization: Bearer <token>` from auth state
-- Response interceptor: on 401, attempt `/auth/refresh` once, retry original request. If refresh fails, redirect to `/login`
+- Response interceptor: on 401, attempt `/auth/refresh` once (deduplicated — concurrent 401s share a single refresh promise to avoid race conditions), retry original request. If refresh fails, redirect to `/login`
 - Add `withCredentials: true` for cookie support
 
 ### Routing changes (`App.tsx`)
@@ -155,7 +169,7 @@ leadforge create-user --email admin@example.com --name "Jane Doe" --role admin
 ```
 
 - Prompts for password interactively (stays out of shell history)
-- Validates email format, checks for duplicates
+- Validates: email format, duplicate check, minimum 12 characters for password
 - Hashes password with bcrypt, inserts into `users` table
 - Prints confirmation: `Created user admin@example.com (role: admin)`
 
@@ -167,7 +181,6 @@ No list-users, delete-user, or reset-password commands in this iteration.
 
 - `python-jose[cryptography]` — JWT encode/decode
 - `passlib[bcrypt]` — Password hashing
-- `python-multipart` — FastAPI form parsing (if not already present)
 
 ### Frontend
 
@@ -179,12 +192,22 @@ No new dependencies.
 - Creates `userrole` enum type
 - No data migration
 
+## Migration from API Key Auth
+
+For existing deployments upgrading from `X-API-Key`:
+1. `uv run alembic upgrade head` (adds users table)
+2. `uv run leadforge create-user --email you@example.com --role admin`
+3. Add `JWT_SECRET_KEY` to `.env` (generate with `openssl rand -hex 32`)
+4. Remove `API_KEY` and `VITE_API_KEY` from `.env` (no longer used)
+5. Restart API server — login page now required
+
 ## First-Run Workflow
 
 1. `uv run alembic upgrade head`
-2. `uv run leadforge create-user --email you@example.com --role admin`
-3. Start API server, open frontend, see login page
-4. Log in, land on dashboard
+2. Add `JWT_SECRET_KEY` to `.env`
+3. `uv run leadforge create-user --email you@example.com --role admin`
+4. Start API server, open frontend, see login page
+5. Log in, land on dashboard
 
 ## Files Modified
 
@@ -213,3 +236,18 @@ No new dependencies.
 | `frontend/src/hooks/useAuth.ts` | Auth context + hook |
 | `frontend/src/components/auth/ProtectedRoute.tsx` | Route guard |
 | `tests/api/test_auth.py` | Auth endpoint tests |
+
+## Test Scenarios (`tests/api/test_auth.py`)
+
+- Login with valid credentials returns access_token + sets refresh cookie
+- Login with wrong password returns 401 "Invalid credentials"
+- Login with nonexistent email returns 401 "Invalid credentials" (no enumeration)
+- Login with deactivated user returns 401
+- `/auth/me` with valid token returns user profile
+- `/auth/me` without token returns 401
+- `/auth/refresh` with valid cookie returns new access_token
+- `/auth/refresh` with expired cookie returns 401
+- Protected GET route accessible by viewer role
+- Protected PATCH route rejected for viewer role (403)
+- Protected PATCH route accessible by admin role
+- Token with deactivated user rejected on next request
