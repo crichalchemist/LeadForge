@@ -105,7 +105,7 @@ class TestApplySentimentFeedback:
 
         result = await apply_sentiment_feedback(session, outreach)
         assert result == 1.15
-        assert lead_score.composite_acquisition_score == 57.5  # 50 * 1.15
+        assert lead_score.composite_acquisition_score == pytest.approx(57.5)  # 50 * 1.15
 
     async def test_caps_at_100(self):
         lead_score = MagicMock(spec=LeadScore)

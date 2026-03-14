@@ -63,10 +63,15 @@ async def handle_call_complete(request: Request, session: AsyncSession = Depends
     logger.info("webhook_processed", call_id=call_id, disposition=outreach.call_disposition)
 
     # Dispatch sentiment analysis + feedback task (LLM-based, asynchronous)
-    from leadforge.tasks.sentiment_tasks import process_sentiment_task
-    process_sentiment_task.delay(str(outreach.id))
+    _dispatch_sentiment_task(str(outreach.id))
 
     return {"status": "ok", "call_id": call_id}
+
+
+def _dispatch_sentiment_task(outreach_id: str) -> None:
+    """Dispatch the sentiment Celery task. Separated for testability."""
+    from leadforge.tasks.sentiment_tasks import process_sentiment_task
+    process_sentiment_task.delay(outreach_id)
 
 
 @router.post("/call-event")
@@ -75,5 +80,5 @@ async def handle_call_event(request: Request):
     body = await request.json()
     event_type = body.get("event")
     call_id = body.get("call_id")
-    logger.info("retell_event", event=event_type, call_id=call_id)
+    logger.info("retell_event", event_type=event_type, call_id=call_id)
     return {"status": "ok"}

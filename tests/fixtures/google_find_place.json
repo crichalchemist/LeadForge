@@ -1,0 +1,16 @@
+{
+  "candidates": [
+    {
+      "place_id": "ChIJ_sample_place_id_123",
+      "name": "John's Barbershop",
+      "formatted_address": "123 E 75th St, Chicago, IL 60619",
+      "geometry": {
+        "location": {
+          "lat": 41.7580,
+          "lng": -87.6055
+        }
+      }
+    }
+  ],
+  "status": "OK"
+}

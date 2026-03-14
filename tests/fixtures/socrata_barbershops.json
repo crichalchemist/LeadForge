@@ -1,0 +1,22 @@
+[
+  {
+    "legal_name": "JOHNS BARBERSHOP INC",
+    "doing_business_as_name": "John's Barbershop",
+    "address": "123 E 75TH ST",
+    "zip_code": "60619",
+    "license_number": "2874631",
+    "license_status": "AAI",
+    "license_start_date": "2019-05-15T00:00:00.000",
+    "business_activity": "Barber Shop"
+  },
+  {
+    "legal_name": "FRESH CUTS LLC",
+    "doing_business_as_name": "Fresh Cuts Barbershop",
+    "address": "456 S COTTAGE GROVE AVE",
+    "zip_code": "60619",
+    "license_number": "2987654",
+    "license_status": "AAI",
+    "license_start_date": "2021-01-10T00:00:00.000",
+    "business_activity": "Barber Shop"
+  }
+]

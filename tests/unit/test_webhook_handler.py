@@ -81,8 +81,7 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        with patch("leadforge.voice.webhook_handler.process_sentiment_task") as mock_task:
-            mock_task.delay = MagicMock()
+        with patch("leadforge.voice.webhook_handler._dispatch_sentiment_task") as mock_dispatch:
             app.dependency_overrides[get_db] = mock_get_db
 
             transport = ASGITransport(app=app)
@@ -94,7 +93,7 @@ class TestCallCompleteWebhook:
             assert mock_outreach.call_disposition == CallDisposition.ANSWERED
             assert mock_outreach.status == PipelineStage.ENGAGED
             assert mock_outreach.call_sentiment_score == 0.7  # "Positive"
-            mock_task.delay.assert_called_once_with("outreach-123")
+            mock_dispatch.assert_called_once_with("outreach-123")
 
         app.dependency_overrides.clear()
 
@@ -118,8 +117,7 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        with patch("leadforge.voice.webhook_handler.process_sentiment_task") as mock_task:
-            mock_task.delay = MagicMock()
+        with patch("leadforge.voice.webhook_handler._dispatch_sentiment_task") as mock_dispatch:
             app.dependency_overrides[get_db] = mock_get_db
 
             transport = ASGITransport(app=app)

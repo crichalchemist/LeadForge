@@ -1,0 +1,19 @@
+{
+  "result": {
+    "place_id": "ChIJ_sample_place_id_123",
+    "name": "John's Barbershop",
+    "formatted_address": "123 E 75th St, Chicago, IL 60619",
+    "formatted_phone_number": "(773) 555-1234",
+    "website": "http://johnsbarbershop.com",
+    "rating": 4.5,
+    "user_ratings_total": 47,
+    "geometry": {
+      "location": {
+        "lat": 41.7580,
+        "lng": -87.6055
+      }
+    },
+    "business_status": "OPERATIONAL"
+  },
+  "status": "OK"
+}
