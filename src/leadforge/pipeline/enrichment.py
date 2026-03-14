@@ -2,14 +2,14 @@ import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from leadforge.db.models.business import Business
-from leadforge.scrapers.yelp import YelpClient
-from leadforge.scrapers.pagespeed import PageSpeedClient
-from leadforge.scrapers.whois_dns import check_domain
-from leadforge.scrapers.nextdoor import NextdoorClient
-from leadforge.scrapers.craigslist import CraigslistClient
-from leadforge.scrapers.thumbtack import ThumbtackClient
 from leadforge.scrapers.angi import AngiClient
 from leadforge.scrapers.apify_meta import ApifyMetaClient
+from leadforge.scrapers.craigslist import CraigslistClient
+from leadforge.scrapers.nextdoor import NextdoorClient
+from leadforge.scrapers.pagespeed import PageSpeedClient
+from leadforge.scrapers.thumbtack import ThumbtackClient
+from leadforge.scrapers.whois_dns import check_domain
+from leadforge.scrapers.yelp import YelpClient
 
 logger = structlog.get_logger()
 
@@ -46,19 +46,24 @@ async def enrich_business(session: AsyncSession, business: Business) -> None:
                     dp.website_quality_score = ps_data.get("website_quality_score")
                     logger.info("pagespeed_enriched", business=business.name)
         except Exception as e:
-            logger.warning("pagespeed_enrichment_failed", business=business.name, error=str(e))
+            logger.warning(
+                "pagespeed_enrichment_failed", business=business.name, error=str(e)
+            )
 
     # WHOIS/DNS check (if website exists)
     if dp.has_website and dp.website_url:
         try:
             from urllib.parse import urlparse
+
             domain = urlparse(dp.website_url).netloc or dp.website_url
             domain = domain.replace("www.", "")
             dns_data = check_domain(domain)
             dp.has_ssl = dns_data.get("has_ssl", False)
             logger.info("whois_enriched", business=business.name)
         except Exception as e:
-            logger.warning("whois_enrichment_failed", business=business.name, error=str(e))
+            logger.warning(
+                "whois_enrichment_failed", business=business.name, error=str(e)
+            )
 
     # Thumbtack
     try:
@@ -67,16 +72,22 @@ async def enrich_business(session: AsyncSession, business: Business) -> None:
             if tt_data and tt_data.get("thumbtack_hires"):
                 business.thumbtack_hires = tt_data.get("thumbtack_hires")
     except Exception as e:
-        logger.warning("thumbtack_enrichment_failed", business=business.name, error=str(e))
+        logger.warning(
+            "thumbtack_enrichment_failed", business=business.name, error=str(e)
+        )
 
     # Nextdoor (requires cookies, may not be available)
     try:
         async with NextdoorClient() as nextdoor:
             nd_data = await nextdoor.search_business(business.name, business.zip_code)
             if nd_data:
-                business.nextdoor_recommendations = nd_data.get("nextdoor_recommendations", 0)
+                business.nextdoor_recommendations = nd_data.get(
+                    "nextdoor_recommendations", 0
+                )
     except Exception as e:
-        logger.warning("nextdoor_enrichment_failed", business=business.name, error=str(e))
+        logger.warning(
+            "nextdoor_enrichment_failed", business=business.name, error=str(e)
+        )
 
     # Craigslist
     try:
@@ -86,7 +97,9 @@ async def enrich_business(session: AsyncSession, business: Business) -> None:
             if cl_data and cl_data.get("craigslist_has_presence"):
                 logger.info("craigslist_presence_found", business=business.name)
     except Exception as e:
-        logger.warning("craigslist_enrichment_failed", business=business.name, error=str(e))
+        logger.warning(
+            "craigslist_enrichment_failed", business=business.name, error=str(e)
+        )
 
     # Angi
     try:
@@ -109,4 +122,6 @@ async def enrich_business(session: AsyncSession, business: Business) -> None:
         logger.warning("apify_enrichment_failed", business=business.name, error=str(e))
 
     await session.flush()
-    logger.info("enrichment_complete", business=business.name, business_id=str(business.id))
+    logger.info(
+        "enrichment_complete", business=business.name, business_id=str(business.id)
+    )

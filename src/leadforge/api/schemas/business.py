@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, datetime
 from typing import Optional
+
 from pydantic import BaseModel, ConfigDict
 
 from leadforge.db.models.business import LicenseStatus, NicheType

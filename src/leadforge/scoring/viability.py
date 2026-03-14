@@ -1,4 +1,5 @@
 from datetime import date
+
 from leadforge.db.models.business import Business
 from leadforge.db.models.digital_presence import DigitalPresence
 

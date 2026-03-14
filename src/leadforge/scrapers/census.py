@@ -1,4 +1,5 @@
 import structlog
+
 from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
@@ -9,6 +10,7 @@ CENSUS_VARIABLES = {
     "B01003_001E": "total_population",
     "B01001_001E": "total_population_alt",
 }
+
 
 class CensusClient(BaseAPIClient):
     """US Census Bureau ACS API client."""

@@ -1,16 +1,20 @@
 import uuid
-import structlog
 from datetime import datetime, timezone
-from sqlalchemy import select, and_
+
+import structlog
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from leadforge.db.models.business import Business, NicheType
 from leadforge.db.models.lead_score import LeadScore
-from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage, CallDisposition
-from leadforge.voice.retell_client import RetellClient
-from leadforge.voice.agent_config import build_agent_prompt
+from leadforge.db.models.outreach_record import (
+    OutreachRecord,
+    PipelineStage,
+)
 from leadforge.llm.outreach_brief import generate_outreach_brief
+from leadforge.voice.agent_config import build_agent_prompt
+from leadforge.voice.retell_client import RetellClient
 
 logger = structlog.get_logger()
 
@@ -27,7 +31,7 @@ def is_business_line(phone: str | None) -> bool:
     if not phone:
         return False
     # Strip formatting
-    digits = ''.join(c for c in phone if c.isdigit())
+    digits = "".join(c for c in phone if c.isdigit())
     if len(digits) < 10:
         return False
     # For now, assume all 10+ digit numbers from Google Places are business lines
@@ -66,7 +70,11 @@ async def queue_leads_for_outreach(
     for business, score in result.all():
         # TCPA: verify business line
         if not is_business_line(business.phone):
-            logger.info("skipping_no_business_line", business=business.name, phone=business.phone)
+            logger.info(
+                "skipping_no_business_line",
+                business=business.name,
+                phone=business.phone,
+            )
             continue
 
         outreach = OutreachRecord(
@@ -76,7 +84,11 @@ async def queue_leads_for_outreach(
         )
         session.add(outreach)
         queued.append(outreach)
-        logger.info("lead_queued", business=business.name, score=score.composite_acquisition_score)
+        logger.info(
+            "lead_queued",
+            business=business.name,
+            score=score.composite_acquisition_score,
+        )
 
     await session.flush()
     return queued
@@ -130,5 +142,7 @@ async def initiate_call(
     outreach.call_attempts += 1
 
     await session.flush()
-    logger.info("call_initiated", business=business.name, call_id=outreach.retell_call_id)
+    logger.info(
+        "call_initiated", business=business.name, call_id=outreach.retell_call_id
+    )
     return True

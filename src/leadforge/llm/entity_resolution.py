@@ -1,5 +1,7 @@
 import json
+
 import structlog
+
 from leadforge.llm.client import VLLMClient
 
 logger = structlog.get_logger()
@@ -25,7 +27,9 @@ Respond with ONLY a JSON object:
 MERGE_THRESHOLD = 0.8
 
 
-async def resolve_entities(record_a: dict, record_b: dict, client: VLLMClient | None = None) -> dict:
+async def resolve_entities(
+    record_a: dict, record_b: dict, client: VLLMClient | None = None
+) -> dict:
     """Compare two business records using LLM and return match result.
 
     Returns: {"is_match": bool, "confidence": float, "reason": str}
@@ -53,7 +57,8 @@ async def resolve_entities(record_a: dict, record_b: dict, client: VLLMClient | 
         # Parse JSON response
         result = json.loads(response.strip())
         return {
-            "is_match": result.get("is_match", False) and result.get("confidence", 0) >= MERGE_THRESHOLD,
+            "is_match": result.get("is_match", False)
+            and result.get("confidence", 0) >= MERGE_THRESHOLD,
             "confidence": result.get("confidence", 0.0),
             "reason": result.get("reason", ""),
         }

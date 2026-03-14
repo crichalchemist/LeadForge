@@ -1,9 +1,12 @@
 import asyncio
+
 import structlog
-from leadforge.scrapers.base import BaseAPIClient
+
 from leadforge.config import settings
+from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
+
 
 class ApifyMetaClient(BaseAPIClient):
     """Apify REST API client for Meta platform scraping (Instagram, Facebook, Threads)."""
@@ -18,7 +21,7 @@ class ApifyMetaClient(BaseAPIClient):
 
     def __init__(self):
         super().__init__(base_url="https://api.apify.com/v2", timeout=120.0)
-        self.api_token = getattr(settings, 'APIFY_API_TOKEN', '')
+        self.api_token = getattr(settings, "APIFY_API_TOKEN", "")
 
     async def run_actor(self, actor_id: str, input_data: dict) -> list[dict] | None:
         """Run an Apify actor and wait for results."""
@@ -78,7 +81,10 @@ class ApifyMetaClient(BaseAPIClient):
         """Get Instagram profile data for a business."""
         results = await self.run_actor(
             self.ACTORS["instagram_profile"],
-            {"directUrls": [f"https://www.instagram.com/{username}/"], "resultsLimit": 1},
+            {
+                "directUrls": [f"https://www.instagram.com/{username}/"],
+                "resultsLimit": 1,
+            },
         )
         if not results:
             return None
@@ -91,14 +97,21 @@ class ApifyMetaClient(BaseAPIClient):
             "ig_bio": profile.get("biography"),
         }
 
-    async def get_instagram_location_tags(self, place_name: str, location_id: str | None = None) -> dict | None:
+    async def get_instagram_location_tags(
+        self, place_name: str, location_id: str | None = None
+    ) -> dict | None:
         """Get Instagram posts tagged at a location."""
         if not location_id:
             return None
 
         results = await self.run_actor(
             self.ACTORS["instagram_location"],
-            {"directUrls": [f"https://www.instagram.com/explore/locations/{location_id}/"], "resultsLimit": 50},
+            {
+                "directUrls": [
+                    f"https://www.instagram.com/explore/locations/{location_id}/"
+                ],
+                "resultsLimit": 50,
+            },
         )
 
         return {
@@ -110,7 +123,10 @@ class ApifyMetaClient(BaseAPIClient):
         hashtag = business_name.lower().replace(" ", "").replace("'", "")
         results = await self.run_actor(
             self.ACTORS["instagram_hashtag"],
-            {"directUrls": [f"https://www.instagram.com/explore/tags/{hashtag}/"], "resultsLimit": 50},
+            {
+                "directUrls": [f"https://www.instagram.com/explore/tags/{hashtag}/"],
+                "resultsLimit": 50,
+            },
         )
 
         return {

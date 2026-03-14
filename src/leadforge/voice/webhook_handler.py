@@ -1,11 +1,15 @@
 import structlog
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from leadforge.api.deps import get_db
 from leadforge.config import settings
-from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage, CallDisposition
+from leadforge.db.models.outreach_record import (
+    CallDisposition,
+    OutreachRecord,
+    PipelineStage,
+)
 from leadforge.voice.retell_client import verify_retell_signature
 
 logger = structlog.get_logger()
@@ -13,7 +17,9 @@ logger = structlog.get_logger()
 router = APIRouter(prefix="/webhooks/retell", tags=["webhooks"])
 
 
-async def _get_outreach_by_call_id(session: AsyncSession, call_id: str) -> OutreachRecord | None:
+async def _get_outreach_by_call_id(
+    session: AsyncSession, call_id: str
+) -> OutreachRecord | None:
     """Find outreach record by Retell call ID."""
     result = await session.execute(
         select(OutreachRecord).where(OutreachRecord.retell_call_id == call_id)
@@ -22,7 +28,9 @@ async def _get_outreach_by_call_id(session: AsyncSession, call_id: str) -> Outre
 
 
 @router.post("/call-complete")
-async def handle_call_complete(request: Request, session: AsyncSession = Depends(get_db)):
+async def handle_call_complete(
+    request: Request, session: AsyncSession = Depends(get_db)
+):
     """Handle Retell webhook events (call_ended, call_analyzed).
 
     Retell sends webhooks with structure: {"event": "...", "call": {...}}
@@ -36,7 +44,9 @@ async def handle_call_complete(request: Request, session: AsyncSession = Depends
     # Verify webhook signature if API key is configured
     if settings.RETELL_API_KEY:
         signature = request.headers.get("x-retell-signature", "")
-        if signature and not verify_retell_signature(payload_bytes, signature, settings.RETELL_API_KEY):
+        if signature and not verify_retell_signature(
+            payload_bytes, signature, settings.RETELL_API_KEY
+        ):
             raise HTTPException(status_code=401, detail="Invalid webhook signature")
 
     body = await request.json()
@@ -63,7 +73,12 @@ async def handle_call_complete(request: Request, session: AsyncSession = Depends
             _handle_call_analyzed(outreach, call_data)
 
     await session.commit()
-    logger.info("webhook_processed", call_id=call_id, webhook_event=event, disposition=outreach.call_disposition)
+    logger.info(
+        "webhook_processed",
+        call_id=call_id,
+        webhook_event=event,
+        disposition=outreach.call_disposition,
+    )
 
     # Dispatch sentiment analysis task if we have a transcript
     if outreach.call_transcript:
@@ -109,6 +124,7 @@ def _handle_call_analyzed(outreach: OutreachRecord, call_data: dict) -> None:
 def _dispatch_sentiment_task(outreach_id: str) -> None:
     """Dispatch the sentiment Celery task. Separated for testability."""
     from leadforge.tasks.sentiment_tasks import process_sentiment_task
+
     process_sentiment_task.delay(outreach_id)
 
 

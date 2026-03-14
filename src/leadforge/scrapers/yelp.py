@@ -1,8 +1,10 @@
 import structlog
-from leadforge.scrapers.base import BaseAPIClient
+
 from leadforge.config import settings
+from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
+
 
 class YelpClient(BaseAPIClient):
     """Yelp Fusion API client."""
@@ -12,7 +14,7 @@ class YelpClient(BaseAPIClient):
 
     async def search_business(self, name: str, location: str) -> dict | None:
         """Search for a business by name and location."""
-        api_key = getattr(settings, 'YELP_API_KEY', '')
+        api_key = getattr(settings, "YELP_API_KEY", "")
         if not api_key:
             logger.warning("yelp_api_key_not_set")
             return None

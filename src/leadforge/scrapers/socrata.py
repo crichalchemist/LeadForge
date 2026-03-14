@@ -1,7 +1,8 @@
 import structlog
-from leadforge.scrapers.base import BaseAPIClient
+
 from leadforge.config import settings
 from leadforge.db.models.business import NicheType
+from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
 
@@ -24,6 +25,7 @@ NICHE_MAPPING: dict[NicheType, list[str]] = {
     NicheType.VETERINARIANS: ["veterinar", "animal hospital"],
     NicheType.SECURITY_SERVICES: ["security", "guard"],
 }
+
 
 class SocrataClient(BaseAPIClient):
     """Client for Chicago Data Portal (Socrata) business licenses."""
@@ -48,8 +50,7 @@ class SocrataClient(BaseAPIClient):
 
         # Build WHERE clause: zip_code match AND (term1 OR term2 OR ...)
         term_conditions = " OR ".join(
-            f"upper(business_activity) like upper('%{term}%')"
-            for term in search_terms
+            f"upper(business_activity) like upper('%{term}%')" for term in search_terms
         )
         where_clause = f"zip_code='{zip_code}' AND ({term_conditions})"
 
@@ -79,7 +80,13 @@ class SocrataClient(BaseAPIClient):
                 break
 
             all_results.extend(page)
-            logger.info("socrata_page_fetched", zip_code=zip_code, niche=niche.value, count=len(page), total=len(all_results))
+            logger.info(
+                "socrata_page_fetched",
+                zip_code=zip_code,
+                niche=niche.value,
+                count=len(page),
+                total=len(all_results),
+            )
 
             if len(page) < page_size:
                 break

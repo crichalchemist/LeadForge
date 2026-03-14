@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: '□' },
   { to: '/pipeline', label: 'Pipeline', icon: '▦' },
+  { to: '/grants', label: 'Grants', icon: '◈' },
   { to: '/leads', label: 'Leads', icon: '◎' },
   { to: '/reports', label: 'Reports', icon: '▤' },
 ];

@@ -1,11 +1,21 @@
-import uuid
-from datetime import date, datetime
-from typing import Optional
-from sqlalchemy import String, Integer, Float, Date, Enum as SAEnum, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from geoalchemy2 import Geometry
-from leadforge.db.models.base import Base, UUIDPrimaryKeyMixin, TimestampMixin
+from __future__ import annotations
+
 import enum
+from datetime import date
+from typing import TYPE_CHECKING, Optional
+
+from geoalchemy2 import Geometry
+from sqlalchemy import Date, Float, Integer, String
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from leadforge.db.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    from leadforge.db.models.digital_presence import DigitalPresence
+    from leadforge.db.models.grant_application import GrantApplication
+    from leadforge.db.models.lead_score import LeadScore
+    from leadforge.db.models.outreach_record import OutreachRecord
 
 
 class LicenseStatus(str, enum.Enum):
@@ -47,30 +57,51 @@ class Business(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     # License/registration
     license_number: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    license_status: Mapped[Optional[LicenseStatus]] = mapped_column(SAEnum(LicenseStatus), nullable=True)
+    license_status: Mapped[Optional[LicenseStatus]] = mapped_column(
+        SAEnum(LicenseStatus), nullable=True
+    )
     license_issue_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     incorporation_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Business metrics
     employee_count_est: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    estimated_monthly_revenue: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    estimated_monthly_revenue: Mapped[Optional[float]] = mapped_column(
+        Float, nullable=True
+    )
 
     # External IDs
-    google_place_id: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True)
+    google_place_id: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, nullable=True
+    )
 
     # Social/platform metrics (populated in Phase 2, nullable for now)
     thumbtack_hires: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    nextdoor_recommendations: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    nextdoor_recommendations: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True
+    )
     ig_location_tag_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    ig_hashtag_mention_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    ig_hashtag_mention_count: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True
+    )
     fb_checkin_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     fb_ugc_tag_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     total_customer_ugc: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # PostGIS geometry
-    location: Mapped[Optional[str]] = mapped_column(Geometry("POINT", srid=4326), nullable=True)
+    location: Mapped[Optional[str]] = mapped_column(
+        Geometry("POINT", srid=4326), nullable=True
+    )
 
     # Relationships
-    digital_presence: Mapped[Optional["DigitalPresence"]] = relationship(back_populates="business", uselist=False, cascade="all, delete-orphan")
-    lead_scores: Mapped[list["LeadScore"]] = relationship(back_populates="business", cascade="all, delete-orphan")
-    outreach_records: Mapped[list["OutreachRecord"]] = relationship(back_populates="business", cascade="all, delete-orphan")
+    digital_presence: Mapped[Optional["DigitalPresence"]] = relationship(
+        back_populates="business", uselist=False, cascade="all, delete-orphan"
+    )
+    lead_scores: Mapped[list["LeadScore"]] = relationship(
+        back_populates="business", cascade="all, delete-orphan"
+    )
+    outreach_records: Mapped[list["OutreachRecord"]] = relationship(
+        back_populates="business", cascade="all, delete-orphan"
+    )
+    grant_applications: Mapped[list["GrantApplication"]] = relationship(
+        back_populates="business", cascade="all, delete-orphan"
+    )

@@ -1,4 +1,5 @@
 from celery import Celery
+
 from leadforge.config import settings
 from leadforge.tasks.celery_beat_schedule import CELERY_BEAT_SCHEDULE
 
@@ -22,6 +23,7 @@ celery_app.conf.update(
         "leadforge.tasks.outreach_tasks.*": {"queue": "outreach"},
         "leadforge.tasks.sentiment_tasks.*": {"queue": "sentiment"},
         "leadforge.tasks.recalibration_tasks.*": {"queue": "recalibration"},
+        "leadforge.tasks.corridor_refresh_tasks.*": {"queue": "default"},
     },
     beat_schedule=CELERY_BEAT_SCHEDULE,
     broker_connection_retry_on_startup=True,

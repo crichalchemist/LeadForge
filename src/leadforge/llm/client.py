@@ -1,10 +1,12 @@
-import structlog
 import httpx
+import structlog
+
 from leadforge.config import settings
 
 logger = structlog.get_logger()
 
-VLLM_BASE_URL = getattr(settings, 'VLLM_BASE_URL', 'http://localhost:8000/v1')
+VLLM_BASE_URL = getattr(settings, "VLLM_BASE_URL", "http://localhost:8000/v1")
+
 
 class VLLMClient:
     """OpenAI-compatible async client for local vLLM server."""
@@ -21,14 +23,16 @@ class VLLMClient:
             )
         return self._client
 
-    async def complete(self, prompt: str, max_tokens: int = 500, temperature: float = 0.1) -> str | None:
+    async def complete(
+        self, prompt: str, max_tokens: int = 500, temperature: float = 0.1
+    ) -> str | None:
         """Generate a completion from the vLLM server."""
         try:
             client = await self._get_client()
             response = await client.post(
                 "/chat/completions",
                 json={
-                    "model": getattr(settings, 'VLLM_MODEL', 'default'),
+                    "model": getattr(settings, "VLLM_MODEL", "default"),
                     "messages": [{"role": "user", "content": prompt}],
                     "max_tokens": max_tokens,
                     "temperature": temperature,

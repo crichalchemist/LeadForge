@@ -1,7 +1,7 @@
-import pytest
 from unittest.mock import MagicMock
-from leadforge.scoring.digital_deficit import compute_digital_deficit
+
 from leadforge.db.models.digital_presence import DigitalPresence
+from leadforge.scoring.digital_deficit import compute_digital_deficit
 
 
 class TestDigitalDeficitScoring:

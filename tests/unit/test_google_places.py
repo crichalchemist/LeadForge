@@ -1,27 +1,33 @@
 import pytest
 import respx
 from httpx import Response
+
 from leadforge.scrapers.google_places import GooglePlacesClient
 
 
 class TestGooglePlacesClient:
-
     @pytest.mark.asyncio
     async def test_find_place_returns_candidate(self, google_find_place_response):
         with respx.mock:
-            respx.get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json").mock(
-                return_value=Response(200, json=google_find_place_response)
-            )
+            respx.get(
+                "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
+            ).mock(return_value=Response(200, json=google_find_place_response))
             async with GooglePlacesClient() as client:
-                result = await client.find_place("John's Barbershop", "123 E 75th St Chicago IL")
+                result = await client.find_place(
+                    "John's Barbershop", "123 E 75th St Chicago IL"
+                )
             assert result is not None
             assert result["place_id"] == "ChIJ_sample_place_id_123"
 
     @pytest.mark.asyncio
     async def test_find_place_no_results(self):
         with respx.mock:
-            respx.get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json").mock(
-                return_value=Response(200, json={"candidates": [], "status": "ZERO_RESULTS"})
+            respx.get(
+                "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
+            ).mock(
+                return_value=Response(
+                    200, json={"candidates": [], "status": "ZERO_RESULTS"}
+                )
             )
             async with GooglePlacesClient() as client:
                 result = await client.find_place("Nonexistent Business", "nowhere")

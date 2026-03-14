@@ -1,12 +1,12 @@
 import pytest
 import respx
 from httpx import Response
-from leadforge.scrapers.socrata import SocrataClient, NICHE_MAPPING
+
 from leadforge.db.models.business import NicheType
+from leadforge.scrapers.socrata import NICHE_MAPPING, SocrataClient
 
 
 class TestSocrataClient:
-
     @pytest.fixture
     def mock_socrata(self, socrata_barbershop_response):
         with respx.mock:
@@ -16,7 +16,9 @@ class TestSocrataClient:
             yield
 
     @pytest.mark.asyncio
-    async def test_search_businesses_returns_results(self, mock_socrata, socrata_barbershop_response):
+    async def test_search_businesses_returns_results(
+        self, mock_socrata, socrata_barbershop_response
+    ):
         async with SocrataClient() as client:
             results = await client.search_businesses("60619", NicheType.BARBERSHOPS)
         assert len(results) == 2
@@ -25,7 +27,9 @@ class TestSocrataClient:
     @pytest.mark.asyncio
     async def test_search_businesses_with_limit(self, mock_socrata):
         async with SocrataClient() as client:
-            results = await client.search_businesses("60619", NicheType.BARBERSHOPS, limit=1)
+            results = await client.search_businesses(
+                "60619", NicheType.BARBERSHOPS, limit=1
+            )
         assert len(results) <= 1
 
     @pytest.mark.asyncio
@@ -40,11 +44,15 @@ class TestSocrataClient:
 
     def test_normalize_result(self, socrata_barbershop_response):
         client = SocrataClient()
-        normalized = client.normalize_result(socrata_barbershop_response[0], NicheType.BARBERSHOPS)
+        normalized = client.normalize_result(
+            socrata_barbershop_response[0], NicheType.BARBERSHOPS
+        )
         assert normalized["name"] == "John's Barbershop"
         assert normalized["zip_code"] == "60619"
         assert normalized["niche"] == NicheType.BARBERSHOPS
-        assert normalized["license_status"] == "expired"  # AAI doesn't match "aal" or "active", so defaults to expired
+        assert (
+            normalized["license_status"] == "expired"
+        )  # AAI doesn't match "aal" or "active", so defaults to expired
 
     def test_niche_mapping_covers_all_niches(self):
         for niche in NicheType:
@@ -57,5 +65,7 @@ class TestSocrataClient:
         assert client._map_license_status("REV") == "revoked"
         assert client._map_license_status("REVOKED") == "revoked"
         assert client._map_license_status(None) == "unknown"
-        assert client._map_license_status("AAI") == "expired"  # Doesn't match "aal" or "active", so defaults to expired
+        assert (
+            client._map_license_status("AAI") == "expired"
+        )  # Doesn't match "aal" or "active", so defaults to expired
         assert client._map_license_status("EXPIRED") == "expired"

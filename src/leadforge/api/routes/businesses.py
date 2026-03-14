@@ -15,7 +15,6 @@ from leadforge.api.schemas.business import (
     BusinessUpdate,
 )
 from leadforge.db.models.business import Business, NicheType
-from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.db.models.lead_score import LeadScore
 from leadforge.db.models.outreach_record import OutreachRecord
 
@@ -35,7 +34,10 @@ async def list_businesses(
     max_score: Optional[float] = None,
     stage: Optional[str] = None,
     search: Optional[str] = None,
-    sort_by: str = Query("composite_acquisition_score", pattern="^(name|zip_code|composite_acquisition_score|created_at)$"),
+    sort_by: str = Query(
+        "composite_acquisition_score",
+        pattern="^(name|zip_code|composite_acquisition_score|created_at)$",
+    ),
     sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
 ):
     # Build base query
@@ -49,14 +51,21 @@ async def list_businesses(
         query = query.where(Business.name.ilike(f"%{search}%"))
 
     # Score filtering requires join
-    if min_score is not None or max_score is not None or sort_by == "composite_acquisition_score":
+    if (
+        min_score is not None
+        or max_score is not None
+        or sort_by == "composite_acquisition_score"
+    ):
         latest_score = (
             select(
                 LeadScore.business_id,
                 LeadScore.composite_acquisition_score,
                 LeadScore.price_tier,
                 func.row_number()
-                .over(partition_by=LeadScore.business_id, order_by=LeadScore.score_version.desc())
+                .over(
+                    partition_by=LeadScore.business_id,
+                    order_by=LeadScore.score_version.desc(),
+                )
                 .label("rn"),
             )
         ).subquery()
@@ -77,7 +86,11 @@ async def list_businesses(
     total = (await session.execute(count_q)).scalar() or 0
 
     # Sort
-    if sort_by == "composite_acquisition_score" and (min_score is not None or max_score is not None or sort_by == "composite_acquisition_score"):
+    if sort_by == "composite_acquisition_score" and (
+        min_score is not None
+        or max_score is not None
+        or sort_by == "composite_acquisition_score"
+    ):
         order_col = latest.c.composite_acquisition_score
     elif sort_by == "name":
         order_col = Business.name
@@ -105,10 +118,12 @@ async def list_businesses(
             select(
                 LeadScore,
                 func.row_number()
-                .over(partition_by=LeadScore.business_id, order_by=LeadScore.score_version.desc())
+                .over(
+                    partition_by=LeadScore.business_id,
+                    order_by=LeadScore.score_version.desc(),
+                )
                 .label("rn"),
-            )
-            .where(LeadScore.business_id.in_(biz_ids))
+            ).where(LeadScore.business_id.in_(biz_ids))
         ).subquery()
         score_q = select(LeadScore).join(
             score_with_rn,
@@ -122,10 +137,12 @@ async def list_businesses(
             select(
                 OutreachRecord,
                 func.row_number()
-                .over(partition_by=OutreachRecord.business_id, order_by=OutreachRecord.created_at.desc())
+                .over(
+                    partition_by=OutreachRecord.business_id,
+                    order_by=OutreachRecord.created_at.desc(),
+                )
                 .label("rn"),
-            )
-            .where(OutreachRecord.business_id.in_(biz_ids))
+            ).where(OutreachRecord.business_id.in_(biz_ids))
         ).subquery()
         outreach_q = select(OutreachRecord).join(
             outreach_with_rn,
@@ -147,13 +164,17 @@ async def list_businesses(
                     niche=b.niche,
                     license_status=b.license_status,
                     created_at=b.created_at,
-                    composite_acquisition_score=score.composite_acquisition_score if score else None,
+                    composite_acquisition_score=score.composite_acquisition_score
+                    if score
+                    else None,
                     price_tier=score.price_tier if score else None,
                     pipeline_stage=outreach.status.value if outreach else None,
                 )
             )
 
-    return BusinessListResponse(items=items, total=total, page=page, page_size=page_size)
+    return BusinessListResponse(
+        items=items, total=total, page=page, page_size=page_size
+    )
 
 
 @router.get("/{business_id}", response_model=BusinessDetail)
@@ -209,5 +230,9 @@ async def update_business(
         )
     )
     business = result.scalar_one()
-    logger.info("business_updated", business_id=str(business_id), fields=list(update_data.keys()))
+    logger.info(
+        "business_updated",
+        business_id=str(business_id),
+        fields=list(update_data.keys()),
+    )
     return business

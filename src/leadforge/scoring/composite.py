@@ -1,9 +1,9 @@
 from leadforge.db.models.business import Business
-from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.db.models.competitive_context import CompetitiveContext
+from leadforge.db.models.digital_presence import DigitalPresence
+from leadforge.scoring.competitive_pressure import compute_competitive_pressure
 from leadforge.scoring.digital_deficit import compute_digital_deficit
 from leadforge.scoring.viability import compute_viability
-from leadforge.scoring.competitive_pressure import compute_competitive_pressure
 
 # PRD weights
 WEIGHT_DEFICIT = 0.40
@@ -58,7 +58,11 @@ def compute_price_tier(business: Business, competitive_pressure: float) -> int:
         return 3
 
     # Tier 1: est_revenue < $15K OR employees < 3 OR competitive_pressure < 30
-    if (revenue is not None and revenue < 15000) or employees < 3 or competitive_pressure < 30:
+    if (
+        (revenue is not None and revenue < 15000)
+        or employees < 3
+        or competitive_pressure < 30
+    ):
         return 1
 
     # Default: Tier 2

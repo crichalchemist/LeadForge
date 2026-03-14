@@ -56,3 +56,31 @@ export const fetchScoreDistribution = () =>
 
 export const fetchZipPerformance = () =>
   api.get('/reports/zip-performance').then((r) => r.data);
+
+// Grants
+export const fetchGrantBoard = () =>
+  api.get('/grants/board').then((r) => r.data);
+
+export const fetchGrants = (params: Record<string, string | number>) =>
+  api.get('/grants', { params }).then((r) => r.data);
+
+export const fetchGrant = (id: string) =>
+  api.get(`/grants/${id}`).then((r) => r.data);
+
+export const createGrant = (data: { business_id: string; total_project_cost?: number; acquisition_cost?: number; project_description?: string }) =>
+  api.post('/grants', data).then((r) => r.data);
+
+export const updateGrant = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/grants/${id}`, data).then((r) => r.data);
+
+export const transitionGrantStage = (grantId: string, newStage: string) =>
+  api.patch(`/grants/${grantId}/stage`, { new_stage: newStage }).then((r) => r.data);
+
+export const fetchGrantDocuments = (grantId: string) =>
+  api.get(`/grants/${grantId}/documents`).then((r) => r.data);
+
+export const updateGrantDocument = (grantId: string, docId: string, data: Record<string, unknown>) =>
+  api.patch(`/grants/${grantId}/documents/${docId}`, data).then((r) => r.data);
+
+export const fetchGrantFinancials = (grantId: string) =>
+  api.get(`/grants/financials/${grantId}`).then((r) => r.data);

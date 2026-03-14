@@ -1,7 +1,9 @@
 import structlog
+
 from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
+
 
 class CraigslistClient(BaseAPIClient):
     """Craigslist Chicago services scraper."""
@@ -22,8 +24,9 @@ class CraigslistClient(BaseAPIClient):
 
             # Count listings mentioning the business
             import re
+
             listings = re.findall(r'class="result-title[^"]*"[^>]*>([^<]+)', text)
-            matching = [l for l in listings if name.lower() in l.lower()]
+            matching = [item for item in listings if name.lower() in item.lower()]
 
             return {
                 "craigslist_listing_count": len(matching),

@@ -1,7 +1,9 @@
 import structlog
+
 from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
+
 
 class ThumbtackClient(BaseAPIClient):
     """Thumbtack business scraper."""
@@ -21,18 +23,26 @@ class ThumbtackClient(BaseAPIClient):
             response.raise_for_status()
             text = response.text
 
-            import re
             import json
+            import re
 
             # Try to extract structured data from page
-            script_match = re.search(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', text, re.DOTALL)
+            script_match = re.search(
+                r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>',
+                text,
+                re.DOTALL,
+            )
             if script_match:
                 try:
                     ld_json = json.loads(script_match.group(1))
                     return {
                         "thumbtack_name": ld_json.get("name"),
-                        "thumbtack_rating": ld_json.get("aggregateRating", {}).get("ratingValue"),
-                        "thumbtack_review_count": ld_json.get("aggregateRating", {}).get("reviewCount"),
+                        "thumbtack_rating": ld_json.get("aggregateRating", {}).get(
+                            "ratingValue"
+                        ),
+                        "thumbtack_review_count": ld_json.get(
+                            "aggregateRating", {}
+                        ).get("reviewCount"),
                         "thumbtack_hires": None,  # Not in LD+JSON, needs deeper parsing
                     }
                 except json.JSONDecodeError:

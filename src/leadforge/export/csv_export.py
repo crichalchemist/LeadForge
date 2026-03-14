@@ -1,6 +1,7 @@
 import csv
 from pathlib import Path
-from sqlalchemy import select, desc
+
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from leadforge.db.models.business import Business, NicheType
@@ -40,24 +41,39 @@ async def export_leads_csv(
     output_path = Path(output_path)
     with output_path.open("w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            "name", "address", "zip_code", "phone", "niche",
-            "google_place_id", "license_status",
-            "digital_deficit_score", "composite_score", "price_tier",
-        ])
+        writer.writerow(
+            [
+                "name",
+                "address",
+                "zip_code",
+                "phone",
+                "niche",
+                "google_place_id",
+                "license_status",
+                "digital_deficit_score",
+                "composite_score",
+                "price_tier",
+            ]
+        )
 
         for business, score in rows:
-            writer.writerow([
-                business.name,
-                business.address or "",
-                business.zip_code,
-                business.phone or "",
-                business.niche.value if business.niche else "",
-                business.google_place_id or "",
-                business.license_status.value if business.license_status else "",
-                f"{score.digital_deficit_score:.1f}" if score.digital_deficit_score else "",
-                f"{score.composite_acquisition_score:.1f}" if score.composite_acquisition_score else "",
-                score.price_tier or "",
-            ])
+            writer.writerow(
+                [
+                    business.name,
+                    business.address or "",
+                    business.zip_code,
+                    business.phone or "",
+                    business.niche.value if business.niche else "",
+                    business.google_place_id or "",
+                    business.license_status.value if business.license_status else "",
+                    f"{score.digital_deficit_score:.1f}"
+                    if score.digital_deficit_score
+                    else "",
+                    f"{score.composite_acquisition_score:.1f}"
+                    if score.composite_acquisition_score
+                    else "",
+                    score.price_tier or "",
+                ]
+            )
 
     return len(rows)

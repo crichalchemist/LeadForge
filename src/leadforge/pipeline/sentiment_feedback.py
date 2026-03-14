@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from leadforge.db.models.lead_score import LeadScore
-from leadforge.db.models.outreach_record import OutreachRecord, CallDisposition
+from leadforge.db.models.outreach_record import CallDisposition, OutreachRecord
 
 logger = structlog.get_logger()
 
@@ -31,12 +31,16 @@ async def apply_sentiment_feedback(
     )
     lead_score = result.scalar_one_or_none()
     if not lead_score or lead_score.composite_acquisition_score is None:
-        logger.warning("no_lead_score_for_feedback", business_id=str(outreach.business_id))
+        logger.warning(
+            "no_lead_score_for_feedback", business_id=str(outreach.business_id)
+        )
         return None
 
     # Idempotency: skip if sentiment feedback already applied
     if lead_score.sentiment_adjustment is not None:
-        logger.info("sentiment_feedback_already_applied", business_id=str(outreach.business_id))
+        logger.info(
+            "sentiment_feedback_already_applied", business_id=str(outreach.business_id)
+        )
         return None
 
     multiplier = _compute_multiplier(outreach)
@@ -62,7 +66,8 @@ def _compute_multiplier(outreach: OutreachRecord) -> float | None:
     """Determine the sentiment multiplier based on call outcome."""
     # No-answer path: 2+ unanswered attempts
     if (
-        outreach.call_disposition in (CallDisposition.NO_ANSWER, CallDisposition.VOICEMAIL)
+        outreach.call_disposition
+        in (CallDisposition.NO_ANSWER, CallDisposition.VOICEMAIL)
         and outreach.call_attempts >= 2
     ):
         return 0.90

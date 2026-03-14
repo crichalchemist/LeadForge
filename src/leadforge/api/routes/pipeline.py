@@ -18,12 +18,40 @@ router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 VALID_TRANSITIONS: dict[PipelineStage, set[PipelineStage]] = {
     PipelineStage.SCORED: {PipelineStage.QUEUED, PipelineStage.DISQUALIFIED},
     PipelineStage.QUEUED: {PipelineStage.CONTACTED, PipelineStage.DISQUALIFIED},
-    PipelineStage.CONTACTED: {PipelineStage.VOICEMAIL, PipelineStage.ENGAGED, PipelineStage.DISQUALIFIED, PipelineStage.NURTURE},
-    PipelineStage.VOICEMAIL: {PipelineStage.CONTACTED, PipelineStage.ENGAGED, PipelineStage.DISQUALIFIED, PipelineStage.NURTURE},
-    PipelineStage.ENGAGED: {PipelineStage.MEETING_SCHEDULED, PipelineStage.LOST, PipelineStage.DISQUALIFIED, PipelineStage.NURTURE},
-    PipelineStage.MEETING_SCHEDULED: {PipelineStage.PROPOSAL_SENT, PipelineStage.LOST, PipelineStage.DISQUALIFIED, PipelineStage.NURTURE},
-    PipelineStage.PROPOSAL_SENT: {PipelineStage.NEGOTIATING, PipelineStage.LOST, PipelineStage.DISQUALIFIED},
-    PipelineStage.NEGOTIATING: {PipelineStage.WON, PipelineStage.LOST, PipelineStage.DISQUALIFIED},
+    PipelineStage.CONTACTED: {
+        PipelineStage.VOICEMAIL,
+        PipelineStage.ENGAGED,
+        PipelineStage.DISQUALIFIED,
+        PipelineStage.NURTURE,
+    },
+    PipelineStage.VOICEMAIL: {
+        PipelineStage.CONTACTED,
+        PipelineStage.ENGAGED,
+        PipelineStage.DISQUALIFIED,
+        PipelineStage.NURTURE,
+    },
+    PipelineStage.ENGAGED: {
+        PipelineStage.MEETING_SCHEDULED,
+        PipelineStage.LOST,
+        PipelineStage.DISQUALIFIED,
+        PipelineStage.NURTURE,
+    },
+    PipelineStage.MEETING_SCHEDULED: {
+        PipelineStage.PROPOSAL_SENT,
+        PipelineStage.LOST,
+        PipelineStage.DISQUALIFIED,
+        PipelineStage.NURTURE,
+    },
+    PipelineStage.PROPOSAL_SENT: {
+        PipelineStage.NEGOTIATING,
+        PipelineStage.LOST,
+        PipelineStage.DISQUALIFIED,
+    },
+    PipelineStage.NEGOTIATING: {
+        PipelineStage.WON,
+        PipelineStage.LOST,
+        PipelineStage.DISQUALIFIED,
+    },
     PipelineStage.WON: set(),
     PipelineStage.LOST: {PipelineStage.NURTURE},
     PipelineStage.DISQUALIFIED: set(),
@@ -39,9 +67,8 @@ class PipelineStageCount(dict):
 async def get_pipeline_board(session: AsyncSession = Depends(get_db)):
     """Get pipeline board with counts and lead previews per stage."""
     # Stage counts
-    count_q = (
-        select(OutreachRecord.status, func.count(OutreachRecord.id))
-        .group_by(OutreachRecord.status)
+    count_q = select(OutreachRecord.status, func.count(OutreachRecord.id)).group_by(
+        OutreachRecord.status
     )
     counts = dict((await session.execute(count_q)).all())
 
@@ -67,16 +94,20 @@ async def get_pipeline_board(session: AsyncSession = Depends(get_db)):
                 "zip_code": row[2],
                 "niche": row[3].value if row[3] else None,
                 "call_attempts": row[0].call_attempts,
-                "last_contact": row[0].last_contact_date.isoformat() if row[0].last_contact_date else None,
+                "last_contact": row[0].last_contact_date.isoformat()
+                if row[0].last_contact_date
+                else None,
             }
             for row in results
         ]
 
-        columns.append({
-            "stage": stage.value,
-            "count": count,
-            "cards": cards,
-        })
+        columns.append(
+            {
+                "stage": stage.value,
+                "count": count,
+                "cards": cards,
+            }
+        )
 
     return {"columns": columns}
 
@@ -109,7 +140,7 @@ async def transition_stage(
         raise HTTPException(
             status_code=422,
             detail=f"Cannot transition from {current_stage.value} to {new_stage.value}. "
-                   f"Allowed: {[s.value for s in allowed]}",
+            f"Allowed: {[s.value for s in allowed]}",
         )
 
     outreach.status = new_stage
@@ -120,4 +151,8 @@ async def transition_stage(
         from_stage=current_stage.value,
         to_stage=new_stage.value,
     )
-    return {"status": "ok", "outreach_id": str(outreach_id), "new_stage": new_stage.value}
+    return {
+        "status": "ok",
+        "outreach_id": str(outreach_id),
+        "new_stage": new_stage.value,
+    }

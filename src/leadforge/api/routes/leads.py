@@ -6,7 +6,11 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from leadforge.api.deps import get_db
-from leadforge.api.schemas.lead_score import RankedLead, RankedLeadsResponse, ScoreBreakdown
+from leadforge.api.schemas.lead_score import (
+    RankedLead,
+    RankedLeadsResponse,
+    ScoreBreakdown,
+)
 from leadforge.db.models.business import Business, NicheType
 from leadforge.db.models.lead_score import LeadScore
 from leadforge.db.models.outreach_record import OutreachRecord
@@ -32,23 +36,23 @@ async def get_ranked_leads(
             LeadScore.composite_acquisition_score,
             LeadScore.price_tier,
             func.row_number()
-            .over(partition_by=LeadScore.business_id, order_by=LeadScore.score_version.desc())
+            .over(
+                partition_by=LeadScore.business_id,
+                order_by=LeadScore.score_version.desc(),
+            )
             .label("rn"),
         )
     ).subquery()
     latest = select(latest_score).where(latest_score.c.rn == 1).subquery()
 
-    query = (
-        select(
-            Business.id,
-            Business.name,
-            Business.zip_code,
-            Business.niche,
-            latest.c.composite_acquisition_score,
-            latest.c.price_tier,
-        )
-        .outerjoin(latest, Business.id == latest.c.business_id)
-    )
+    query = select(
+        Business.id,
+        Business.name,
+        Business.zip_code,
+        Business.niche,
+        latest.c.composite_acquisition_score,
+        latest.c.price_tier,
+    ).outerjoin(latest, Business.id == latest.c.business_id)
 
     if zip_code:
         query = query.where(Business.zip_code == zip_code)
@@ -81,12 +85,16 @@ async def get_ranked_leads(
                 OutreachRecord.business_id,
                 OutreachRecord.status,
                 func.row_number()
-                .over(partition_by=OutreachRecord.business_id, order_by=OutreachRecord.created_at.desc())
+                .over(
+                    partition_by=OutreachRecord.business_id,
+                    order_by=OutreachRecord.created_at.desc(),
+                )
                 .label("rn"),
-            )
-            .where(OutreachRecord.business_id.in_(biz_ids))
+            ).where(OutreachRecord.business_id.in_(biz_ids))
         ).subquery()
-        outreach_q = select(lo_sub.c.business_id, lo_sub.c.status).where(lo_sub.c.rn == 1)
+        outreach_q = select(lo_sub.c.business_id, lo_sub.c.status).where(
+            lo_sub.c.rn == 1
+        )
         outreach_rows = (await session.execute(outreach_q)).all()
         outreach_map = {r[0]: r[1] for r in outreach_rows}
 
@@ -107,7 +115,9 @@ async def get_ranked_leads(
 
 
 @router.get("/{business_id}/score", response_model=list[ScoreBreakdown])
-async def get_score_history(business_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
+async def get_score_history(
+    business_id: uuid.UUID, session: AsyncSession = Depends(get_db)
+):
     """Get all score versions for a business (audit trail)."""
     result = await session.execute(
         select(LeadScore)

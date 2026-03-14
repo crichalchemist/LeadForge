@@ -1,11 +1,11 @@
 import uuid
 
-import pytest
-
 
 class TestOutreachByBusiness:
     async def test_empty_history(self, client, auth_headers, sample_business):
-        resp = await client.get(f"/outreach/by-business/{sample_business.id}", headers=auth_headers)
+        resp = await client.get(
+            f"/outreach/by-business/{sample_business.id}", headers=auth_headers
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["total"] == 0
@@ -33,12 +33,16 @@ class TestGetOutreach:
 
 class TestGetTranscript:
     async def test_transcript(self, client, auth_headers, sample_outreach):
-        resp = await client.get(f"/outreach/{sample_outreach.id}/transcript", headers=auth_headers)
+        resp = await client.get(
+            f"/outreach/{sample_outreach.id}/transcript", headers=auth_headers
+        )
         assert resp.status_code == 200
         assert "transcript" in resp.json()
 
     async def test_not_found(self, client, auth_headers):
-        resp = await client.get(f"/outreach/{uuid.uuid4()}/transcript", headers=auth_headers)
+        resp = await client.get(
+            f"/outreach/{uuid.uuid4()}/transcript", headers=auth_headers
+        )
         assert resp.status_code == 404
 
 

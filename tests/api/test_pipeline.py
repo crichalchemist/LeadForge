@@ -1,7 +1,5 @@
 import uuid
 
-import pytest
-
 
 class TestPipelineBoard:
     async def test_empty_board(self, client, auth_headers):

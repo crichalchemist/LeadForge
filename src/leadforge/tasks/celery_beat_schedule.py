@@ -11,4 +11,9 @@ CELERY_BEAT_SCHEDULE = {
         ),
         "options": {"queue": "recalibration"},
     },
+    "refresh-nof-corridors-weekly": {
+        "task": "leadforge.tasks.corridor_refresh_tasks.refresh_nof_corridors",
+        "schedule": crontab(minute=0, hour=3, day_of_week=0),  # Sunday 3am
+        "options": {"queue": "default"},
+    },
 }

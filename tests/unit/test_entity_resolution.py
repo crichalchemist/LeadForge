@@ -1,10 +1,11 @@
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, patch
-from leadforge.llm.entity_resolution import resolve_entities, merge_records
+
+from leadforge.llm.entity_resolution import merge_records, resolve_entities
 
 
 class TestEntityResolution:
-
     @pytest.mark.asyncio
     async def test_matching_records(self):
         mock_client = AsyncMock()
@@ -12,8 +13,18 @@ class TestEntityResolution:
             return_value='{"is_match": true, "confidence": 0.95, "reason": "Same name and address"}'
         )
 
-        record_a = {"name": "John's Barbershop", "address": "123 Main St", "zip_code": "60619", "phone": "773-555-1234"}
-        record_b = {"name": "Johns Barber Shop", "address": "123 Main Street", "zip_code": "60619", "phone": "773-555-1234"}
+        record_a = {
+            "name": "John's Barbershop",
+            "address": "123 Main St",
+            "zip_code": "60619",
+            "phone": "773-555-1234",
+        }
+        record_b = {
+            "name": "Johns Barber Shop",
+            "address": "123 Main Street",
+            "zip_code": "60619",
+            "phone": "773-555-1234",
+        }
 
         result = await resolve_entities(record_a, record_b, client=mock_client)
         assert result["is_match"] is True
@@ -26,8 +37,18 @@ class TestEntityResolution:
             return_value='{"is_match": false, "confidence": 0.2, "reason": "Different businesses"}'
         )
 
-        record_a = {"name": "John's Barbershop", "address": "123 Main St", "zip_code": "60619", "phone": "773-555-1234"}
-        record_b = {"name": "Fresh Cuts Salon", "address": "456 Oak Ave", "zip_code": "60619", "phone": "773-555-9999"}
+        record_a = {
+            "name": "John's Barbershop",
+            "address": "123 Main St",
+            "zip_code": "60619",
+            "phone": "773-555-1234",
+        }
+        record_b = {
+            "name": "Fresh Cuts Salon",
+            "address": "456 Oak Ave",
+            "zip_code": "60619",
+            "phone": "773-555-9999",
+        }
 
         result = await resolve_entities(record_a, record_b, client=mock_client)
         assert result["is_match"] is False
@@ -43,7 +64,11 @@ class TestEntityResolution:
 
     def test_merge_records_prefers_primary(self):
         primary = {"name": "John's Barbershop", "phone": "773-555-1234", "email": None}
-        secondary = {"name": "Johns Barber Shop", "phone": "773-555-9999", "email": "john@barber.com"}
+        secondary = {
+            "name": "Johns Barber Shop",
+            "phone": "773-555-9999",
+            "email": "john@barber.com",
+        }
 
         merged = merge_records(primary, secondary)
         assert merged["name"] == "John's Barbershop"  # Primary wins

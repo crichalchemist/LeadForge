@@ -1,7 +1,9 @@
 import structlog
+
 from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
+
 
 class ILSOSClient(BaseAPIClient):
     """Illinois Secretary of State business entity lookup."""
@@ -26,7 +28,9 @@ class ILSOSClient(BaseAPIClient):
             return {
                 "entity_name": business_name,
                 "entity_status": self._extract_field(text, "Status"),
-                "incorporation_date": self._extract_field(text, "Date of Incorporation"),
+                "incorporation_date": self._extract_field(
+                    text, "Date of Incorporation"
+                ),
                 "registered_agent": self._extract_field(text, "Agent Name"),
             }
         except Exception as e:
@@ -37,6 +41,7 @@ class ILSOSClient(BaseAPIClient):
     def _extract_field(html: str, field_name: str) -> str | None:
         """Simple field extraction from HTML. Returns None if not found."""
         import re
-        pattern = rf'{field_name}\s*:?\s*</?\w+[^>]*>\s*([^<]+)'
+
+        pattern = rf"{field_name}\s*:?\s*</?\w+[^>]*>\s*([^<]+)"
         match = re.search(pattern, html, re.IGNORECASE)
         return match.group(1).strip() if match else None

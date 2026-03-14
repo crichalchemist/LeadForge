@@ -1,7 +1,9 @@
 import structlog
+
 from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
+
 
 class NextdoorClient(BaseAPIClient):
     """Nextdoor business scraper with cookie-based authentication."""
@@ -13,7 +15,9 @@ class NextdoorClient(BaseAPIClient):
     async def search_business(self, name: str, zip_code: str) -> dict | None:
         """Search for a business on Nextdoor. Returns recommendation data or None."""
         if not self.cookies:
-            logger.warning("nextdoor_no_cookies", msg="No cookies available, skipping Nextdoor")
+            logger.warning(
+                "nextdoor_no_cookies", msg="No cookies available, skipping Nextdoor"
+            )
             return None
 
         try:

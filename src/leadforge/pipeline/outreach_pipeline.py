@@ -1,11 +1,11 @@
 import structlog
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from leadforge.db.models.business import Business, NicheType
-from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage
-from leadforge.voice.call_manager import queue_leads_for_outreach, initiate_call
+from leadforge.db.models.outreach_record import OutreachRecord
+from leadforge.voice.call_manager import initiate_call, queue_leads_for_outreach
 from leadforge.voice.retell_client import RetellClient
 
 logger = structlog.get_logger()
@@ -32,7 +32,12 @@ async def run_outreach_pipeline(
     Returns:
         List of OutreachRecords created/processed.
     """
-    logger.info("outreach_pipeline_start", zip_code=zip_code, niche=niche.value, batch_size=batch_size)
+    logger.info(
+        "outreach_pipeline_start",
+        zip_code=zip_code,
+        niche=niche.value,
+        batch_size=batch_size,
+    )
 
     # Step 1: Queue top leads
     queued = await queue_leads_for_outreach(
