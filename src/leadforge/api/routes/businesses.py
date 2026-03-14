@@ -7,7 +7,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from leadforge.api.deps import get_db
+from leadforge.api.deps import get_db, require_admin
+from leadforge.db.models.user import User
 from leadforge.api.schemas.business import (
     BusinessDetail,
     BusinessListItem,
@@ -199,6 +200,7 @@ async def update_business(
     business_id: uuid.UUID,
     update: BusinessUpdate,
     session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
 ):
     result = await session.execute(
         select(Business)

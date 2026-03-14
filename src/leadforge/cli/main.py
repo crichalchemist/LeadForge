@@ -247,5 +247,65 @@ def call_status(
     asyncio.run(_run())
 
 
+@app.command(name="create-user")
+def create_user(
+    email: str = typer.Option(..., "--email", help="User email address"),
+    name: str = typer.Option(..., "--name", help="User full name"),
+    role: str = typer.Option("admin", "--role", help="User role: admin or viewer"),
+):
+    """Create a new CRM user."""
+    import getpass
+
+    from leadforge.auth.security import hash_password
+    from leadforge.db.models.user import User, UserRole
+
+    # Validate email
+    if "@" not in email:
+        typer.echo("Error: Invalid email address")
+        raise typer.Exit(1)
+
+    # Validate role
+    try:
+        user_role = UserRole(role)
+    except ValueError:
+        typer.echo(f"Error: Invalid role '{role}'. Must be 'admin' or 'viewer'")
+        raise typer.Exit(1)
+
+    # Prompt for password
+    password = getpass.getpass("Password (min 12 chars): ")
+    if len(password) < 12:
+        typer.echo("Error: Password must be at least 12 characters")
+        raise typer.Exit(1)
+
+    password_confirm = getpass.getpass("Confirm password: ")
+    if password != password_confirm:
+        typer.echo("Error: Passwords do not match")
+        raise typer.Exit(1)
+
+    async def _run():
+        from sqlalchemy import select
+
+        from leadforge.db.session import async_session
+
+        async with async_session() as session:
+            # Check for duplicate email
+            result = await session.execute(select(User).where(User.email == email))
+            if result.scalar_one_or_none():
+                typer.echo(f"Error: User with email '{email}' already exists")
+                raise typer.Exit(1)
+
+            user = User(
+                email=email,
+                password_hash=hash_password(password),
+                full_name=name,
+                role=user_role,
+            )
+            session.add(user)
+            await session.commit()
+            typer.echo(f"Created user {email} (role: {role})")
+
+    asyncio.run(_run())
+
+
 if __name__ == "__main__":
     app()

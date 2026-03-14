@@ -23,8 +23,12 @@ class Settings(BaseSettings):
     RETELL_FROM_NUMBER: str = ""  # E.164 number purchased/imported in Retell dashboard
 
     # API
-    API_KEY: str = ""
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+
+    # JWT Auth
+    JWT_SECRET_KEY: str = ""
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     # Anthropic (Azure Foundry)
     ANTHROPIC_FOUNDRY_RESOURCE: str = ""

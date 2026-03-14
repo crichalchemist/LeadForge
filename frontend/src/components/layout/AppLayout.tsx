@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import type { ReactNode } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: '□' },
@@ -10,6 +11,8 @@ const NAV_ITEMS = [
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const { user, logout } = useAuth();
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -36,6 +39,24 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </NavLink>
           ))}
         </nav>
+
+        {/* User info + logout */}
+        {user && (
+          <div className="border-t border-gray-700 px-4 py-3">
+            <p className="text-sm font-medium text-white truncate">{user.full_name}</p>
+            <div className="flex items-center justify-between mt-1">
+              <span className="inline-block rounded bg-gray-700 px-1.5 py-0.5 text-xs text-gray-300">
+                {user.role}
+              </span>
+              <button
+                onClick={logout}
+                className="text-xs text-gray-500 hover:text-white transition-colors"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        )}
       </aside>
 
       {/* Main content */}

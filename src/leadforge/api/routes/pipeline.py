@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from leadforge.api.deps import get_db
+from leadforge.api.deps import get_db, require_admin
+from leadforge.db.models.user import User
 from leadforge.api.schemas.outreach import StageTransition
 from leadforge.db.models.business import Business
 from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage
@@ -117,6 +118,7 @@ async def transition_stage(
     outreach_id: uuid.UUID,
     body: StageTransition,
     session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
 ):
     """Transition an outreach record to a new pipeline stage.
 

@@ -7,14 +7,16 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["API_KEY"] = "test-api-key"
+os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-unit-tests-only-0123456789abcdef"
 
 from leadforge.api.app import app
 from leadforge.api.deps import get_db
+from leadforge.auth.security import create_access_token, hash_password
 from leadforge.db.models.base import Base
 from leadforge.db.models.business import Business, LicenseStatus, NicheType
 from leadforge.db.models.lead_score import LeadScore
 from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage
+from leadforge.db.models.user import User, UserRole
 
 
 def _create_tables_without_postgis(conn):
@@ -81,8 +83,56 @@ async def client(db_session: AsyncSession):
 
 
 @pytest_asyncio.fixture
-async def auth_headers():
-    return {"X-API-Key": "test-api-key"}
+async def admin_user(db_session: AsyncSession) -> User:
+    """Create an admin test user."""
+    user = User(
+        id=uuid.uuid4(),
+        email="admin@test.com",
+        password_hash=hash_password("testpassword12"),
+        full_name="Test Admin",
+        role=UserRole.ADMIN,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
+
+
+@pytest_asyncio.fixture
+async def viewer_user(db_session: AsyncSession) -> User:
+    """Create a viewer test user."""
+    user = User(
+        id=uuid.uuid4(),
+        email="viewer@test.com",
+        password_hash=hash_password("testpassword12"),
+        full_name="Test Viewer",
+        role=UserRole.VIEWER,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
+
+
+@pytest_asyncio.fixture
+async def auth_headers(admin_user: User) -> dict[str, str]:
+    """Auth headers with admin JWT token."""
+    token = create_access_token(str(admin_user.id), admin_user.role.value)
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture
+async def admin_headers(admin_user: User) -> dict[str, str]:
+    """Auth headers with admin JWT token."""
+    token = create_access_token(str(admin_user.id), admin_user.role.value)
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture
+async def viewer_headers(viewer_user: User) -> dict[str, str]:
+    """Auth headers with viewer JWT token."""
+    token = create_access_token(str(viewer_user.id), viewer_user.role.value)
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest_asyncio.fixture

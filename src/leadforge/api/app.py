@@ -2,8 +2,9 @@ import structlog
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from leadforge.api.deps import verify_api_key
+from leadforge.api.deps import get_current_user
 from leadforge.api.routes import (
+    auth,
     businesses,
     grants,
     health,
@@ -32,11 +33,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Public routes (webhooks, health)
+# Public routes (webhooks, health, auth)
 app.include_router(health.router)
 app.include_router(webhook_router)
+app.include_router(auth.router)
 
-# Protected routes (require API key when configured)
+# Protected routes (require valid JWT)
 protected = [
     businesses.router,
     grants.router,
@@ -46,4 +48,4 @@ protected = [
     reports.router,
 ]
 for r in protected:
-    app.include_router(r, dependencies=[Depends(verify_api_key)])
+    app.include_router(r, dependencies=[Depends(get_current_user)])

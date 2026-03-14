@@ -1,3 +1,11 @@
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'admin' | 'viewer';
+  is_active: boolean;
+}
+
 export interface Business {
   id: string;
   name: string;

@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from leadforge.api.deps import get_db
+from leadforge.api.deps import get_db, require_admin
+from leadforge.db.models.user import User
 from leadforge.api.schemas.outreach import (
     OutreachDetail,
     OutreachListResponse,
@@ -69,6 +70,7 @@ async def update_outreach(
     outreach_id: uuid.UUID,
     update: OutreachUpdate,
     session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
 ):
     """Update notes or assignment for an outreach record."""
     result = await session.execute(

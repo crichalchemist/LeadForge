@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by JWT-based authentication (see `docs/superpowers/specs/2026-03-14-auth-login-design.md`)
 
 ## Date
 

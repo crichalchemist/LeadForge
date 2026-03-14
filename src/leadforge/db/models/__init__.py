@@ -12,6 +12,7 @@ from leadforge.db.models.outreach_record import (
     OutreachRecord,
     PipelineStage,
 )
+from leadforge.db.models.user import User, UserRole
 
 __all__ = [
     "Base",
@@ -31,4 +32,6 @@ __all__ = [
     "NOFStage",
     "GrantDocument",
     "DocumentType",
+    "User",
+    "UserRole",
 ]

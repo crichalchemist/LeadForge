@@ -7,7 +7,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from leadforge.api.deps import get_db
+from leadforge.api.deps import get_db, require_admin
+from leadforge.db.models.user import User
 from leadforge.api.schemas.grant import (
     GrantApplicationCreate,
     GrantApplicationResponse,
@@ -203,6 +204,7 @@ async def list_grants(
 async def create_grant(
     body: GrantApplicationCreate,
     session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
 ):
     """Create a new grant application."""
     # Verify business exists
@@ -231,6 +233,7 @@ async def update_grant(
     grant_id: uuid.UUID,
     body: GrantApplicationUpdate,
     session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
 ):
     """Partially update a grant application."""
     result = await session.execute(
@@ -255,6 +258,7 @@ async def transition_grant_stage(
     grant_id: uuid.UUID,
     body: GrantStageTransition,
     session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
 ):
     """Transition a grant application to a new stage."""
     result = await session.execute(
@@ -321,6 +325,7 @@ async def update_grant_document(
     doc_id: uuid.UUID,
     body: GrantDocumentUpdate,
     session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
 ):
     """Update a grant document status."""
     result = await session.execute(
