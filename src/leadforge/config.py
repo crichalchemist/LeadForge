@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     SOCRATA_APP_TOKEN: str = ""
     GOOGLE_PLACES_API_KEY: str = ""
+    GOOGLE_PLACES_API_SECRET: str = ""
 
     # Rate limiting
     SOCRATA_PAGE_SIZE: int = 1000
