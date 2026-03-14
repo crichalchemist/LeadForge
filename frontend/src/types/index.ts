@@ -180,3 +180,115 @@ export const STAGE_COLORS: Record<string, string> = {
   disqualified: 'bg-red-50',
   nurture: 'bg-amber-100',
 };
+
+// NOF Grant types
+export interface GrantApplication {
+  id: string;
+  business_id: string;
+  status: string;
+  applied_date: string | null;
+  finalist_date: string | null;
+  cal_issued_date: string | null;
+  completion_date: string | null;
+  alumnus_date: string | null;
+  total_project_cost: number | null;
+  base_grant_amount: number | null;
+  acquisition_cost: number | null;
+  acquisition_coverage_pct: number | null;
+  taf_amount: number | null;
+  owner_contribution: number | null;
+  financing_amount: number | null;
+  financing_verified: boolean;
+  corridor_name: string | null;
+  corridor_type: string | null;
+  is_priority_corridor: boolean;
+  gc_bid_amount: number | null;
+  project_description: string | null;
+  exterior_work_pct: number | null;
+  has_site_control: boolean;
+  site_control_type: string | null;
+  assigned_to: string | null;
+  ta_provider: string | null;
+  notes: string | null;
+  lost_reason: string | null;
+  created_at: string;
+  updated_at: string;
+  documents?: GrantDocument[];
+}
+
+export interface GrantDocument {
+  id: string;
+  grant_application_id: string;
+  document_type: string;
+  is_mandatory: boolean;
+  status: string;
+  notes: string | null;
+  received_date: string | null;
+  reviewed_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GrantFinancials {
+  total_project_cost: number;
+  acquisition_cost: number;
+  base_grant: number;
+  taf_eligible: number;
+  owner_contribution: number;
+  owner_min_financing: number;
+  exterior_work_minimum: number;
+}
+
+export interface GrantBoardColumn {
+  stage: string;
+  count: number;
+  cards: GrantBoardCard[];
+}
+
+export interface GrantBoardCard {
+  grant_id: string;
+  business_id: string;
+  business_name: string;
+  corridor_name: string | null;
+  estimated_grant: number | null;
+  days_in_stage: number;
+}
+
+export const NOF_STAGES = [
+  'eligibility_assessed', 'intake', 'applied', 'pipeline',
+  'finalist', 'stage_1_legal', 'stage_2_docs', 'stage_3_financing',
+  'stage_3_construction', 'stage_4_closing', 'stage_5_complete',
+  'alumnus', 'removed',
+] as const;
+
+export const NOF_STAGE_LABELS: Record<string, string> = {
+  eligibility_assessed: 'Eligibility',
+  intake: 'Intake',
+  applied: 'Applied',
+  pipeline: 'Pipeline',
+  finalist: 'Finalist',
+  stage_1_legal: 'Legal',
+  stage_2_docs: 'Documents',
+  stage_3_financing: 'Financing',
+  stage_3_construction: 'Construction',
+  stage_4_closing: 'Closing',
+  stage_5_complete: 'Complete',
+  alumnus: 'Alumnus',
+  removed: 'Removed',
+};
+
+export const NOF_STAGE_COLORS: Record<string, string> = {
+  eligibility_assessed: 'bg-blue-100',
+  intake: 'bg-blue-200',
+  applied: 'bg-yellow-100',
+  pipeline: 'bg-yellow-200',
+  finalist: 'bg-purple-100',
+  stage_1_legal: 'bg-indigo-100',
+  stage_2_docs: 'bg-indigo-200',
+  stage_3_financing: 'bg-cyan-100',
+  stage_3_construction: 'bg-cyan-200',
+  stage_4_closing: 'bg-orange-100',
+  stage_5_complete: 'bg-green-100',
+  alumnus: 'bg-green-200',
+  removed: 'bg-red-100',
+};

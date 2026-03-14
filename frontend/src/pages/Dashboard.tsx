@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchFunnel, fetchZipPerformance } from '../api/client';
-import type { FunnelStage, ZipPerformance } from '../types';
+import { fetchFunnel, fetchZipPerformance, fetchGrantBoard } from '../api/client';
+import type { FunnelStage, ZipPerformance, GrantBoardColumn } from '../types';
 
 export default function Dashboard() {
   const { data: funnel } = useQuery<{ stages: FunnelStage[]; total: number }>({
@@ -11,6 +11,21 @@ export default function Dashboard() {
     queryKey: ['zipPerformance'],
     queryFn: fetchZipPerformance,
   });
+  const { data: grantBoard } = useQuery<{ columns: GrantBoardColumn[] }>({
+    queryKey: ['grantBoard'],
+    queryFn: fetchGrantBoard,
+  });
+
+  const terminalStages = new Set(['alumnus', 'removed']);
+  const activeGrants = (grantBoard?.columns ?? [])
+    .filter((c) => !terminalStages.has(c.stage))
+    .reduce((sum, c) => sum + c.cards.length, 0);
+  const pipelineValue = (grantBoard?.columns ?? [])
+    .filter((c) => !terminalStages.has(c.stage))
+    .flatMap((c) => c.cards)
+    .reduce((sum, card) => sum + (card.estimated_grant ?? 0), 0);
+  const completedGrants = (grantBoard?.columns ?? [])
+    .find((c) => c.stage === 'alumnus')?.cards.length ?? 0;
 
   const totalLeads = funnel?.total ?? 0;
   const wonCount = funnel?.stages.find((s) => s.stage === 'won')?.count ?? 0;
@@ -26,6 +41,14 @@ export default function Dashboard() {
         <KpiCard label="In Pipeline" value={totalLeads - wonCount} />
         <KpiCard label="Engaged" value={engagedCount} />
         <KpiCard label="Won" value={wonCount} color="text-green-600" />
+      </div>
+
+      {/* NOF Grant KPIs */}
+      <h2 className="text-lg font-semibold mt-8 mb-4">NOF Grants</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <KpiCard label="Active Grants" value={activeGrants} />
+        <KpiCard label="Pipeline Value" value={`$${(pipelineValue / 1000).toFixed(0)}K`} />
+        <KpiCard label="Completed" value={completedGrants} color="text-green-600" />
       </div>
 
       {/* Funnel Overview */}
@@ -86,7 +109,7 @@ export default function Dashboard() {
   );
 }
 
-function KpiCard({ label, value, color = 'text-gray-900' }: { label: string; value: number; color?: string }) {
+function KpiCard({ label, value, color = 'text-gray-900' }: { label: string; value: string | number; color?: string }) {
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <p className="text-sm text-gray-500">{label}</p>
