@@ -46,3 +46,4 @@ To maintain organization across the 4-phase build:
 | 016 | API auth: API key for MVP, upgrade path to OAuth2/OIDC | Accepted | 2026-03-14 |
 | 017 | Recalibration: 90-day full re-enrichment, score versioning for audit trail | Accepted | 2026-03-14 |
 | 018 | Pipeline transitions: valid transition enforcement in backend, optimistic updates in frontend | Accepted | 2026-03-14 |
+| 019 | Retell API v2 alignment: parameter names, webhook structure, signature verification | Accepted | 2026-03-14 |

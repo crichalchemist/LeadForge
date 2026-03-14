@@ -111,8 +111,12 @@ async def initiate_call(
         outreach_brief=brief,
     )
 
-    # Initiate call via Retell
-    call_result = await retell.initiate_call(agent_id, business.phone)
+    # Initiate call via Retell with metadata for traceability
+    call_result = await retell.initiate_call(
+        agent_id=agent_id,
+        to_number=business.phone,
+        metadata={"business_id": str(business.id), "outreach_id": str(outreach.id)},
+    )
     if not call_result:
         logger.error("call_initiation_failed", business=business.name)
         return False

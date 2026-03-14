@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     SOCRATA_PAGE_SIZE: int = 1000
     GOOGLE_PLACES_MAX_CONCURRENT: int = 5
 
+    # Retell AI
+    RETELL_API_KEY: str = ""
+    RETELL_FROM_NUMBER: str = ""  # E.164 number purchased/imported in Retell dashboard
+
     # API
     API_KEY: str = ""
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
