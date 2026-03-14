@@ -61,7 +61,7 @@ class OutreachRecord(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     # Pipeline status
     status: Mapped[PipelineStage] = mapped_column(
-        SAEnum(PipelineStage), default=PipelineStage.SCORED
+        SAEnum(PipelineStage, values_callable=lambda e: [x.value for x in e]), default=PipelineStage.SCORED
     )
 
     # Retell integration
@@ -84,14 +84,14 @@ class OutreachRecord(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         Float, nullable=True
     )  # -1 to 1
     call_disposition: Mapped[Optional[CallDisposition]] = mapped_column(
-        SAEnum(CallDisposition), nullable=True
+        SAEnum(CallDisposition, values_callable=lambda e: [x.value for x in e]), nullable=True
     )
     call_attempts: Mapped[int] = mapped_column(Integer, default=0)
 
     # Meeting
     meeting_scheduled: Mapped[bool] = mapped_column(Boolean, default=False)
     meeting_type: Mapped[Optional[MeetingType]] = mapped_column(
-        SAEnum(MeetingType), nullable=True
+        SAEnum(MeetingType, values_callable=lambda e: [x.value for x in e]), nullable=True
     )
     meeting_datetime: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True

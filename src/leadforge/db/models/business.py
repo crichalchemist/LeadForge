@@ -53,12 +53,12 @@ class Business(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     owner_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    niche: Mapped[NicheType] = mapped_column(SAEnum(NicheType), index=True)
+    niche: Mapped[NicheType] = mapped_column(SAEnum(NicheType, values_callable=lambda e: [x.value for x in e]), index=True)
 
     # License/registration
     license_number: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     license_status: Mapped[Optional[LicenseStatus]] = mapped_column(
-        SAEnum(LicenseStatus), nullable=True
+        SAEnum(LicenseStatus, values_callable=lambda e: [x.value for x in e]), nullable=True
     )
     license_issue_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     incorporation_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)

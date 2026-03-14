@@ -82,7 +82,7 @@ def upgrade() -> None:
     op.create_index('ix_businesses_google_place_id', 'businesses', ['google_place_id'], unique=True)
 
     # Create spatial index for location
-    op.execute("CREATE INDEX idx_businesses_location ON businesses USING GIST (location)")
+    op.execute("CREATE INDEX IF NOT EXISTS idx_businesses_location ON businesses USING GIST (location)")
 
     # Create digital_presences table
     op.create_table(

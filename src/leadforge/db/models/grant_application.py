@@ -41,7 +41,7 @@ class GrantApplication(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     # Status
     status: Mapped[NOFStage] = mapped_column(
-        SAEnum(NOFStage), default=NOFStage.ELIGIBILITY_ASSESSED
+        SAEnum(NOFStage, values_callable=lambda e: [x.value for x in e]), default=NOFStage.ELIGIBILITY_ASSESSED
     )
 
     # Dates

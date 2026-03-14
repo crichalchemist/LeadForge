@@ -19,7 +19,7 @@ class NOFCorridor(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "nof_corridors"
 
     corridor_name: Mapped[str] = mapped_column(String(255))
-    corridor_type: Mapped[CorridorType] = mapped_column(SAEnum(CorridorType))
+    corridor_type: Mapped[CorridorType] = mapped_column(SAEnum(CorridorType, values_callable=lambda e: [x.value for x in e]))
 
     # PostGIS geometry
     geometry: Mapped[Optional[str]] = mapped_column(
