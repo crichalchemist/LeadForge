@@ -22,6 +22,9 @@ class LeadScore(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     # Composite
     composite_acquisition_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
+    # NOF Grant eligibility
+    nof_eligibility_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
     # Price tier (1, 2, or 3)
     price_tier: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 

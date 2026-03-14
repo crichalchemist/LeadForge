@@ -24,5 +24,8 @@ class Settings(BaseSettings):
     # Recalibration
     RECALIBRATION_SCORE_CHANGE_THRESHOLD: float = 0.10
 
+    # NOF Grant Integration
+    NOF_ELIGIBILITY_THRESHOLD: float = 50.0
+
 
 settings = Settings()

@@ -74,3 +74,4 @@ class Business(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     digital_presence: Mapped[Optional["DigitalPresence"]] = relationship(back_populates="business", uselist=False, cascade="all, delete-orphan")
     lead_scores: Mapped[list["LeadScore"]] = relationship(back_populates="business", cascade="all, delete-orphan")
     outreach_records: Mapped[list["OutreachRecord"]] = relationship(back_populates="business", cascade="all, delete-orphan")
+    grant_applications: Mapped[list["GrantApplication"]] = relationship(back_populates="business", cascade="all, delete-orphan")
