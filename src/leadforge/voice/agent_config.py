@@ -34,7 +34,9 @@ def build_agent_prompt(
     outreach_brief: dict,
 ) -> str:
     """Build the voice agent system prompt from business data and outreach brief."""
-    talking_points = "\n".join(f"- {tp}" for tp in outreach_brief.get("talking_points", []))
+    talking_points = "\n".join(
+        f"- {tp}" for tp in outreach_brief.get("talking_points", [])
+    )
 
     objection_responses = ""
     for objection, response in outreach_brief.get("objection_responses", {}).items():

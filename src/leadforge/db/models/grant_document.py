@@ -1,10 +1,18 @@
-import uuid
+from __future__ import annotations
+
 import enum
-from typing import Optional
+import uuid
 from datetime import date
-from sqlalchemy import String, Boolean, Text, Date, ForeignKey, Enum as SAEnum
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import Boolean, Date, ForeignKey, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from leadforge.db.models.base import Base, UUIDPrimaryKeyMixin, TimestampMixin
+
+from leadforge.db.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    from leadforge.db.models.grant_application import GrantApplication
 
 
 class DocumentType(str, enum.Enum):
@@ -27,12 +35,16 @@ class DocumentType(str, enum.Enum):
 class GrantDocument(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "grant_documents"
 
-    grant_application_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("grant_applications.id", ondelete="CASCADE"), index=True)
+    grant_application_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("grant_applications.id", ondelete="CASCADE"), index=True
+    )
 
     # Document info
     document_type: Mapped[DocumentType] = mapped_column(SAEnum(DocumentType))
     is_mandatory: Mapped[bool] = mapped_column(Boolean, default=False)
-    status: Mapped[str] = mapped_column(String(20), default="missing")  # missing, requested, received, approved, rejected
+    status: Mapped[str] = mapped_column(
+        String(20), default="missing"
+    )  # missing, requested, received, approved, rejected
 
     # Tracking
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -40,4 +52,6 @@ class GrantDocument(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     reviewed_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Relationship
-    grant_application: Mapped["GrantApplication"] = relationship(back_populates="documents")
+    grant_application: Mapped["GrantApplication"] = relationship(
+        back_populates="documents"
+    )

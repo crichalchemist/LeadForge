@@ -1,6 +1,6 @@
 from leadforge.db.models.business import Business
-from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.db.models.competitive_context import CompetitiveContext
+from leadforge.db.models.digital_presence import DigitalPresence
 
 
 def compute_competitive_pressure(
@@ -29,7 +29,10 @@ def compute_competitive_pressure(
         # Business digital deficit score — higher means WORSE digital presence
         # If this business's deficit > avg, competitors are doing better
         business_deficit = dp.google_review_count or 0  # Proxy for digital strength
-        if context.avg_digital_score is not None and business_deficit < context.avg_digital_score:
+        if (
+            context.avg_digital_score is not None
+            and business_deficit < context.avg_digital_score
+        ):
             score += 25
 
     # Competitors running paid ads (>=2): +15

@@ -1,13 +1,12 @@
-import pytest
 from unittest.mock import MagicMock
-from leadforge.scoring.competitive_pressure import compute_competitive_pressure
+
 from leadforge.db.models.business import Business
-from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.db.models.competitive_context import CompetitiveContext
+from leadforge.db.models.digital_presence import DigitalPresence
+from leadforge.scoring.competitive_pressure import compute_competitive_pressure
 
 
 class TestCompetitivePressureScoring:
-
     def _make_context(self, **kwargs) -> MagicMock:
         ctx = MagicMock(spec=CompetitiveContext)
         defaults = {

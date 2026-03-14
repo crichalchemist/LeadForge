@@ -1,5 +1,6 @@
-import ssl
 import socket
+import ssl
+
 import structlog
 
 logger = structlog.get_logger()

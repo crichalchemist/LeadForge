@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine
+
 from leadforge.config import settings
 
 _engine_kwargs = {

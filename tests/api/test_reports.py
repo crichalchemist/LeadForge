@@ -1,6 +1,3 @@
-import pytest
-
-
 class TestFunnel:
     async def test_empty_funnel(self, client, auth_headers):
         resp = await client.get("/reports/funnel", headers=auth_headers)

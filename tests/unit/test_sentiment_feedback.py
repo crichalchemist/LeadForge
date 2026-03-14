@@ -1,8 +1,16 @@
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
-from leadforge.db.models.outreach_record import OutreachRecord, CallDisposition, PipelineStage
+
 from leadforge.db.models.lead_score import LeadScore
-from leadforge.pipeline.sentiment_feedback import apply_sentiment_feedback, _compute_multiplier
+from leadforge.db.models.outreach_record import (
+    CallDisposition,
+    OutreachRecord,
+)
+from leadforge.pipeline.sentiment_feedback import (
+    _compute_multiplier,
+    apply_sentiment_feedback,
+)
 
 
 class TestComputeMultiplier:
@@ -85,7 +93,6 @@ class TestComputeMultiplier:
 
 @pytest.mark.asyncio
 class TestApplySentimentFeedback:
-
     async def test_applies_positive_multiplier(self):
         lead_score = MagicMock(spec=LeadScore)
         lead_score.composite_acquisition_score = 50.0
@@ -105,7 +112,9 @@ class TestApplySentimentFeedback:
 
         result = await apply_sentiment_feedback(session, outreach)
         assert result == 1.15
-        assert lead_score.composite_acquisition_score == pytest.approx(57.5)  # 50 * 1.15
+        assert lead_score.composite_acquisition_score == pytest.approx(
+            57.5
+        )  # 50 * 1.15
 
     async def test_caps_at_100(self):
         lead_score = MagicMock(spec=LeadScore)

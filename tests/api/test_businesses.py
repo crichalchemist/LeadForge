@@ -1,7 +1,5 @@
 import uuid
 
-import pytest
-
 
 class TestListBusinesses:
     async def test_list_empty(self, client, auth_headers):
@@ -53,7 +51,9 @@ class TestListBusinesses:
 
 class TestGetBusiness:
     async def test_get_detail(self, client, auth_headers, sample_business):
-        resp = await client.get(f"/businesses/{sample_business.id}", headers=auth_headers)
+        resp = await client.get(
+            f"/businesses/{sample_business.id}", headers=auth_headers
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Test Barbershop"

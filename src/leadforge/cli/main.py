@@ -1,11 +1,14 @@
 import asyncio
 from typing import Optional
-import typer
+
 import structlog
+import typer
 
 from leadforge.db.models.business import NicheType
 
-app = typer.Typer(name="leadforge", help="Lead generation pipeline for hyper-local small businesses")
+app = typer.Typer(
+    name="leadforge", help="Lead generation pipeline for hyper-local small businesses"
+)
 logger = structlog.get_logger()
 
 
@@ -23,7 +26,9 @@ def _get_niche(niche_str: str) -> NicheType:
 def pipeline(
     zip_code: str = typer.Option(..., "--zip", help="Chicago zip code to target"),
     niche: str = typer.Option(..., "--niche", help="Business niche to target"),
-    limit: Optional[int] = typer.Option(None, "--limit", help="Max businesses to discover"),
+    limit: Optional[int] = typer.Option(
+        None, "--limit", help="Max businesses to discover"
+    ),
 ):
     """Run the discovery pipeline: Socrata → Google Places → Score → Persist."""
     niche_enum = _get_niche(niche)
@@ -47,16 +52,23 @@ def pipeline(
 def export(
     zip_code: Optional[str] = typer.Option(None, "--zip", help="Filter by zip code"),
     niche: Optional[str] = typer.Option(None, "--niche", help="Filter by niche"),
-    min_score: Optional[float] = typer.Option(None, "--min-score", help="Minimum composite score"),
-    output: str = typer.Option("leads.csv", "--output", "-o", help="Output CSV file path"),
+    min_score: Optional[float] = typer.Option(
+        None, "--min-score", help="Minimum composite score"
+    ),
+    output: str = typer.Option(
+        "leads.csv", "--output", "-o", help="Output CSV file path"
+    ),
 ):
     """Export scored leads to CSV."""
+
     async def _run():
         from leadforge.db.session import async_session
         from leadforge.export.csv_export import export_leads_csv
 
         async with async_session() as session:
-            count = await export_leads_csv(session, output, zip_code=zip_code, niche=niche, min_score=min_score)
+            count = await export_leads_csv(
+                session, output, zip_code=zip_code, niche=niche, min_score=min_score
+            )
             typer.echo(f"Exported {count} leads to {output}")
 
     asyncio.run(_run())
@@ -73,8 +85,9 @@ def enrich(
     async def _run():
         from sqlalchemy import select
         from sqlalchemy.orm import selectinload
-        from leadforge.db.session import async_session
+
         from leadforge.db.models.business import Business
+        from leadforge.db.session import async_session
         from leadforge.pipeline.enrichment import enrich_business
 
         async with async_session() as session:
@@ -85,7 +98,9 @@ def enrich(
             )
             businesses = result.scalars().all()
 
-            typer.echo(f"Enriching {len(businesses)} businesses in {zip_code} ({niche})...")
+            typer.echo(
+                f"Enriching {len(businesses)} businesses in {zip_code} ({niche})..."
+            )
 
             enriched_count = 0
             for business in businesses:
@@ -93,7 +108,9 @@ def enrich(
                     await enrich_business(session, business)
                     enriched_count += 1
                 except Exception as e:
-                    logger.error("enrichment_failed", business=business.name, error=str(e))
+                    logger.error(
+                        "enrichment_failed", business=business.name, error=str(e)
+                    )
 
             await session.commit()
             typer.echo(f"Enriched {enriched_count}/{len(businesses)} businesses")
@@ -137,7 +154,9 @@ def context(
             typer.echo(f"Computing competitive context for {zip_code} ({niche})...")
             context = await compute_competitive_context(session, zip_code, niche_enum)
             await session.commit()
-            typer.echo(f"Context computed: {context.total_competitors} competitors, saturation={context.saturation_index:.2f}")
+            typer.echo(
+                f"Context computed: {context.total_competitors} competitors, saturation={context.saturation_index:.2f}"
+            )
 
     asyncio.run(_run())
 
@@ -147,8 +166,12 @@ def outreach(
     zip_code: str = typer.Option(..., "--zip", help="Chicago zip code to target"),
     niche: str = typer.Option(..., "--niche", help="Business niche to target"),
     batch_size: int = typer.Option(10, "--batch-size", help="Max leads to process"),
-    min_score: float = typer.Option(30.0, "--min-score", help="Minimum composite score"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Generate briefs without calling"),
+    min_score: float = typer.Option(
+        30.0, "--min-score", help="Minimum composite score"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Generate briefs without calling"
+    ),
 ):
     """Run outreach pipeline: select leads → queue → brief → call."""
     niche_enum = _get_niche(niche)
@@ -162,8 +185,12 @@ def outreach(
             if dry_run:
                 typer.echo("(DRY RUN - no calls will be made)")
             records = await run_outreach_pipeline(
-                session, zip_code, niche_enum,
-                batch_size=batch_size, min_score=min_score, dry_run=dry_run,
+                session,
+                zip_code,
+                niche_enum,
+                batch_size=batch_size,
+                min_score=min_score,
+                dry_run=dry_run,
             )
             typer.echo(f"Processed {len(records)} outreach records")
             for rec in records[:10]:
@@ -174,25 +201,33 @@ def outreach(
 
 @app.command(name="call-status")
 def call_status(
-    call_id: Optional[str] = typer.Option(None, "--call-id", help="Retell call ID to check"),
+    call_id: Optional[str] = typer.Option(
+        None, "--call-id", help="Retell call ID to check"
+    ),
     zip_code: Optional[str] = typer.Option(None, "--zip", help="Filter by zip code"),
 ):
     """Check status of outreach calls."""
+
     async def _run():
         from sqlalchemy import select
         from sqlalchemy.orm import selectinload
-        from leadforge.db.session import async_session
-        from leadforge.db.models.outreach_record import OutreachRecord
+
         from leadforge.db.models.business import Business
+        from leadforge.db.models.outreach_record import OutreachRecord
+        from leadforge.db.session import async_session
 
         async with async_session() as session:
-            query = select(OutreachRecord).options(selectinload(OutreachRecord.business))
+            query = select(OutreachRecord).options(
+                selectinload(OutreachRecord.business)
+            )
             if call_id:
                 query = query.where(OutreachRecord.retell_call_id == call_id)
             if zip_code:
                 query = query.join(Business).where(Business.zip_code == zip_code)
 
-            result = await session.execute(query.order_by(OutreachRecord.created_at.desc()).limit(20))
+            result = await session.execute(
+                query.order_by(OutreachRecord.created_at.desc()).limit(20)
+            )
             records = result.scalars().all()
 
             if not records:

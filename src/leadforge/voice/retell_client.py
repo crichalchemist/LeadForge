@@ -1,7 +1,9 @@
-import hmac
 import hashlib
-import structlog
+import hmac
+
 import httpx
+import structlog
+
 from leadforge.config import settings
 
 logger = structlog.get_logger()
@@ -89,7 +91,9 @@ class RetellClient:
 
         caller = from_number or self.from_number
         if not caller:
-            logger.error("retell_no_from_number", msg="RETELL_FROM_NUMBER not configured")
+            logger.error(
+                "retell_no_from_number", msg="RETELL_FROM_NUMBER not configured"
+            )
             return None
 
         try:
@@ -109,7 +113,9 @@ class RetellClient:
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            logger.error("retell_initiate_call_failed", error=str(e), to_number=to_number)
+            logger.error(
+                "retell_initiate_call_failed", error=str(e), to_number=to_number
+            )
             return None
 
     async def get_call(self, call_id: str) -> dict | None:

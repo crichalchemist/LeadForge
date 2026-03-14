@@ -14,31 +14,39 @@ def recalibrate_all_businesses(self):
     """Quarterly recalibration: re-enrich, recompute contexts, and rescore all active businesses."""
 
     async def _run() -> dict:
-        from sqlalchemy import select, func
+        from sqlalchemy import select
         from sqlalchemy.orm import selectinload
 
-        from leadforge.db.session import async_session
         from leadforge.db.models.business import Business
+        from leadforge.db.models.competitive_context import CompetitiveContext
         from leadforge.db.models.lead_score import LeadScore
         from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage
-        from leadforge.db.models.competitive_context import CompetitiveContext
+        from leadforge.db.session import async_session
         from leadforge.pipeline.enrichment import enrich_business
         from leadforge.scoring.competitive_context import compute_competitive_context
         from leadforge.scoring.composite import compute_composite_score
 
         threshold = settings.RECALIBRATION_SCORE_CHANGE_THRESHOLD
 
-        stats = {"total": 0, "enriched": 0, "rescored": 0, "errors": 0, "significant_changes": 0}
+        stats = {
+            "total": 0,
+            "enriched": 0,
+            "rescored": 0,
+            "errors": 0,
+            "significant_changes": 0,
+        }
 
         async with async_session() as session:
             # Subquery: business IDs that are disqualified or lost
             excluded_subq = (
                 select(OutreachRecord.business_id)
                 .where(
-                    OutreachRecord.status.in_([
-                        PipelineStage.LOST,
-                        PipelineStage.DISQUALIFIED,
-                    ])
+                    OutreachRecord.status.in_(
+                        [
+                            PipelineStage.LOST,
+                            PipelineStage.DISQUALIFIED,
+                        ]
+                    )
                 )
                 .distinct()
                 .scalar_subquery()
@@ -89,7 +97,11 @@ def recalibrate_all_businesses(self):
                         (s.score_version for s in business.lead_scores), default=0
                     )
                     latest_score = next(
-                        (s for s in business.lead_scores if s.score_version == current_version),
+                        (
+                            s
+                            for s in business.lead_scores
+                            if s.score_version == current_version
+                        ),
                         None,
                     )
 
@@ -102,14 +114,19 @@ def recalibrate_all_businesses(self):
                         digital_deficit_score=scores["digital_deficit_score"],
                         viability_score=scores["viability_score"],
                         competitive_pressure_score=scores["competitive_pressure_score"],
-                        composite_acquisition_score=scores["composite_acquisition_score"],
+                        composite_acquisition_score=scores[
+                            "composite_acquisition_score"
+                        ],
                         price_tier=scores["price_tier"],
                     )
                     session.add(new_score)
                     stats["rescored"] += 1
 
                     # Step 6: Log significant changes
-                    if latest_score and latest_score.composite_acquisition_score is not None:
+                    if (
+                        latest_score
+                        and latest_score.composite_acquisition_score is not None
+                    ):
                         old_cas = latest_score.composite_acquisition_score
                         new_cas = scores["composite_acquisition_score"]
                         if old_cas > 0:

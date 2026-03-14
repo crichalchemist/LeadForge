@@ -1,12 +1,13 @@
 import uuid
+
 import structlog
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from leadforge.db.models.business import Business, NicheType
+from leadforge.db.models.competitive_context import CompetitiveContext
 from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.db.models.lead_score import LeadScore
-from leadforge.db.models.competitive_context import CompetitiveContext
 from leadforge.scrapers.census import CensusClient
 
 logger = structlog.get_logger()
@@ -30,9 +31,9 @@ async def compute_competitive_context(
 
     # Average digital deficit score
     avg_score_result = await session.execute(
-        select(func.avg(LeadScore.digital_deficit_score)).join(
-            Business, LeadScore.business_id == Business.id
-        ).where(
+        select(func.avg(LeadScore.digital_deficit_score))
+        .join(Business, LeadScore.business_id == Business.id)
+        .where(
             Business.zip_code == zip_code,
             Business.niche == niche,
         )
@@ -41,9 +42,9 @@ async def compute_competitive_context(
 
     # Average rating
     avg_rating_result = await session.execute(
-        select(func.avg(DigitalPresence.google_avg_rating)).join(
-            Business, DigitalPresence.business_id == Business.id
-        ).where(
+        select(func.avg(DigitalPresence.google_avg_rating))
+        .join(Business, DigitalPresence.business_id == Business.id)
+        .where(
             Business.zip_code == zip_code,
             Business.niche == niche,
         )
@@ -52,12 +53,13 @@ async def compute_competitive_context(
 
     # Count businesses with active ads
     ads_count_result = await session.execute(
-        select(func.count(DigitalPresence.id)).join(
-            Business, DigitalPresence.business_id == Business.id
-        ).where(
+        select(func.count(DigitalPresence.id))
+        .join(Business, DigitalPresence.business_id == Business.id)
+        .where(
             Business.zip_code == zip_code,
             Business.niche == niche,
-            (DigitalPresence.has_google_ads == True) | (DigitalPresence.has_meta_ads == True),
+            DigitalPresence.has_google_ads.is_(True)
+            | DigitalPresence.has_meta_ads.is_(True),
         )
     )
     ads_count = ads_count_result.scalar() or 0
@@ -89,9 +91,16 @@ async def compute_competitive_context(
         async with CensusClient() as census:
             demographics = await census.get_zip_demographics(zip_code)
             if demographics:
-                ctx.median_household_income = demographics.get("median_household_income")
+                ctx.median_household_income = demographics.get(
+                    "median_household_income"
+                )
                 ctx.population_density = demographics.get("population_density")
 
     await session.flush()
-    logger.info("competitive_context_computed", zip_code=zip_code, niche=niche.value, competitors=competitor_count)
+    logger.info(
+        "competitive_context_computed",
+        zip_code=zip_code,
+        niche=niche.value,
+        competitors=competitor_count,
+    )
     return ctx

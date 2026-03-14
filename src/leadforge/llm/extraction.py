@@ -1,5 +1,7 @@
 import json
+
 import structlog
+
 from leadforge.llm.client import VLLMClient
 
 logger = structlog.get_logger()
@@ -46,7 +48,9 @@ NICHE_MEDIAN_REVENUE: dict[str, float] = {
 }
 
 
-async def extract_website_data(html_content: str, client: VLLMClient | None = None) -> dict:
+async def extract_website_data(
+    html_content: str, client: VLLMClient | None = None
+) -> dict:
     """Extract structured business data from website HTML using LLM."""
     # Truncate HTML to avoid token limits
     truncated = html_content[:4000] if len(html_content) > 4000 else html_content

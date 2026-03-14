@@ -1,4 +1,5 @@
 from celery import Celery
+
 from leadforge.config import settings
 from leadforge.tasks.celery_beat_schedule import CELERY_BEAT_SCHEDULE
 

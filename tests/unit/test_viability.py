@@ -1,13 +1,12 @@
-import pytest
-from unittest.mock import MagicMock
 from datetime import date, timedelta
-from leadforge.scoring.viability import compute_viability
+from unittest.mock import MagicMock
+
 from leadforge.db.models.business import Business, LicenseStatus
 from leadforge.db.models.digital_presence import DigitalPresence
+from leadforge.scoring.viability import compute_viability
 
 
 class TestViabilityScoring:
-
     def _make_business(self, **kwargs) -> MagicMock:
         biz = MagicMock(spec=Business)
         defaults = {
@@ -41,12 +40,16 @@ class TestViabilityScoring:
         assert compute_viability(biz, dp) == 0.0
 
     def test_three_years_operation_adds_20(self):
-        biz = self._make_business(incorporation_date=date.today() - timedelta(days=4*365))
+        biz = self._make_business(
+            incorporation_date=date.today() - timedelta(days=4 * 365)
+        )
         dp = self._make_dp()
         assert compute_viability(biz, dp) >= 20.0
 
     def test_seven_years_adds_additional_10(self):
-        biz = self._make_business(incorporation_date=date.today() - timedelta(days=8*365))
+        biz = self._make_business(
+            incorporation_date=date.today() - timedelta(days=8 * 365)
+        )
         dp = self._make_dp()
         assert compute_viability(biz, dp) >= 30.0
 
@@ -78,7 +81,7 @@ class TestViabilityScoring:
 
     def test_score_capped_at_100(self):
         biz = self._make_business(
-            incorporation_date=date.today() - timedelta(days=10*365),
+            incorporation_date=date.today() - timedelta(days=10 * 365),
             license_status=LicenseStatus.ACTIVE,
             total_customer_ugc=100,
             nextdoor_recommendations=10,

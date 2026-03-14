@@ -1,15 +1,13 @@
-import pytest
-import uuid
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
+import pytest
 
 # Set test environment variables BEFORE any leadforge imports
 os.environ["GOOGLE_PLACES_API_KEY"] = "test_key_123"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from leadforge.db.models.digital_presence import DigitalPresence
-from leadforge.db.models.business import Business, NicheType, LicenseStatus
-from leadforge.db.models.lead_score import LeadScore
 
 
 @pytest.fixture
@@ -68,9 +66,7 @@ def google_find_place_response():
                 "place_id": "ChIJ_sample_place_id_123",
                 "name": "John's Barbershop",
                 "formatted_address": "123 E 75th St, Chicago, IL 60619",
-                "geometry": {
-                    "location": {"lat": 41.7580, "lng": -87.6055}
-                },
+                "geometry": {"location": {"lat": 41.7580, "lng": -87.6055}},
             }
         ],
         "status": "OK",
@@ -89,9 +85,7 @@ def google_place_details_response():
             "website": "http://johnsbarbershop.com",
             "rating": 4.5,
             "user_ratings_total": 47,
-            "geometry": {
-                "location": {"lat": 41.7580, "lng": -87.6055}
-            },
+            "geometry": {"location": {"lat": 41.7580, "lng": -87.6055}},
             "business_status": "OPERATIONAL",
         },
         "status": "OK",

@@ -1,11 +1,10 @@
 import os
 import uuid
 
-import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["API_KEY"] = "test-api-key"
@@ -13,16 +12,15 @@ os.environ["API_KEY"] = "test-api-key"
 from leadforge.api.app import app
 from leadforge.api.deps import get_db
 from leadforge.db.models.base import Base
-from leadforge.db.models.business import Business, NicheType, LicenseStatus
-from leadforge.db.models.digital_presence import DigitalPresence
+from leadforge.db.models.business import Business, LicenseStatus, NicheType
 from leadforge.db.models.lead_score import LeadScore
 from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage
 
 
 def _create_tables_without_postgis(conn):
     """Create all tables but swap PostGIS Geometry columns to String for SQLite."""
-    from sqlalchemy import String as SAString
     from geoalchemy2 import Geometry
+    from sqlalchemy import String as SAString
 
     # Temporarily swap Geometry columns to String
     swapped = []
@@ -58,7 +56,9 @@ async def db_session():
     async with engine.begin() as conn:
         await conn.run_sync(_create_tables_without_postgis)
 
-    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    session_factory = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     async with session_factory() as session:
         yield session
@@ -69,6 +69,7 @@ async def db_session():
 @pytest_asyncio.fixture
 async def client(db_session: AsyncSession):
     """HTTP test client with DB session override."""
+
     async def override_get_db():
         yield db_session
 
@@ -103,7 +104,9 @@ async def sample_business(db_session: AsyncSession) -> Business:
 
 
 @pytest_asyncio.fixture
-async def sample_business_with_score(db_session: AsyncSession, sample_business: Business) -> tuple[Business, LeadScore]:
+async def sample_business_with_score(
+    db_session: AsyncSession, sample_business: Business
+) -> tuple[Business, LeadScore]:
     """Insert a business with a lead score."""
     score = LeadScore(
         id=uuid.uuid4(),
@@ -121,7 +124,9 @@ async def sample_business_with_score(db_session: AsyncSession, sample_business: 
 
 
 @pytest_asyncio.fixture
-async def sample_outreach(db_session: AsyncSession, sample_business: Business) -> OutreachRecord:
+async def sample_outreach(
+    db_session: AsyncSession, sample_business: Business
+) -> OutreachRecord:
     """Insert a sample outreach record."""
     outreach = OutreachRecord(
         id=uuid.uuid4(),

@@ -1,9 +1,7 @@
-import pytest
 from leadforge.voice.call_manager import is_business_line
 
 
 class TestIsBusinessLine:
-
     def test_valid_10_digit(self):
         assert is_business_line("(773) 555-1234") is True
 

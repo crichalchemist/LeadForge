@@ -1,12 +1,17 @@
 from leadforge.db.models.base import Base
-from leadforge.db.models.business import Business, NicheType, LicenseStatus
-from leadforge.db.models.digital_presence import DigitalPresence
-from leadforge.db.models.lead_score import LeadScore
+from leadforge.db.models.business import Business, LicenseStatus, NicheType
 from leadforge.db.models.competitive_context import CompetitiveContext
-from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage, CallDisposition, MeetingType
-from leadforge.db.models.nof_corridor import NOFCorridor, CorridorType
+from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.db.models.grant_application import GrantApplication, NOFStage
-from leadforge.db.models.grant_document import GrantDocument, DocumentType
+from leadforge.db.models.grant_document import DocumentType, GrantDocument
+from leadforge.db.models.lead_score import LeadScore
+from leadforge.db.models.nof_corridor import CorridorType, NOFCorridor
+from leadforge.db.models.outreach_record import (
+    CallDisposition,
+    MeetingType,
+    OutreachRecord,
+    PipelineStage,
+)
 
 __all__ = [
     "Base",

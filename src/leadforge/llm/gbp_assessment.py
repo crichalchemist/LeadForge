@@ -1,7 +1,9 @@
 import json
+
 import structlog
-from leadforge.llm.claude_client import ClaudeClient
+
 from leadforge.db.models.digital_presence import DigitalPresence
+from leadforge.llm.claude_client import ClaudeClient
 
 logger = structlog.get_logger()
 
@@ -20,7 +22,9 @@ Respond with ONLY a JSON object:
 """
 
 
-async def assess_gbp(dp: DigitalPresence, has_phone: bool = False, client: ClaudeClient | None = None) -> dict:
+async def assess_gbp(
+    dp: DigitalPresence, has_phone: bool = False, client: ClaudeClient | None = None
+) -> dict:
     """Assess Google Business Profile completeness using Claude."""
     prompt = GBP_ASSESSMENT_PROMPT.format(
         has_gbp=dp.has_google_business_profile,
@@ -37,12 +41,20 @@ async def assess_gbp(dp: DigitalPresence, has_phone: bool = False, client: Claud
     try:
         response = await client.complete(prompt, max_tokens=500)
         if not response:
-            return {"completeness_score": 0.0, "missing_elements": ["Assessment unavailable"], "recommendations": []}
+            return {
+                "completeness_score": 0.0,
+                "missing_elements": ["Assessment unavailable"],
+                "recommendations": [],
+            }
 
         return json.loads(response.strip())
     except (json.JSONDecodeError, Exception) as e:
         logger.warning("gbp_assessment_failed", error=str(e))
-        return {"completeness_score": 0.0, "missing_elements": ["Assessment failed"], "recommendations": []}
+        return {
+            "completeness_score": 0.0,
+            "missing_elements": ["Assessment failed"],
+            "recommendations": [],
+        }
     finally:
         if own_client:
             await client.close()

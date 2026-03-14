@@ -1,10 +1,13 @@
 import enum
-from typing import Optional
 from datetime import datetime
-from sqlalchemy import String, DateTime, Enum as SAEnum
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import Optional
+
 from geoalchemy2 import Geometry
-from leadforge.db.models.base import Base, UUIDPrimaryKeyMixin, TimestampMixin
+from sqlalchemy import DateTime, String
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.orm import Mapped, mapped_column
+
+from leadforge.db.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class CorridorType(str, enum.Enum):
@@ -19,8 +22,14 @@ class NOFCorridor(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     corridor_type: Mapped[CorridorType] = mapped_column(SAEnum(CorridorType))
 
     # PostGIS geometry
-    geometry: Mapped[Optional[str]] = mapped_column(Geometry("MULTILINESTRING", srid=4326), nullable=True)
+    geometry: Mapped[Optional[str]] = mapped_column(
+        Geometry("MULTILINESTRING", srid=4326), nullable=True
+    )
 
     # Source tracking
-    source_updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    fetched_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    source_updated_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    fetched_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )

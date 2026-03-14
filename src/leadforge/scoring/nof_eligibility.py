@@ -3,11 +3,12 @@
 Scores businesses for eligibility for the Neighborhood Opportunity Fund (NOF) grant
 based on corridor location, business characteristics, and operational metrics.
 """
+
 from datetime import date
+
 import structlog
 
-from leadforge.db.models.business import NicheType, LicenseStatus
-
+from leadforge.db.models.business import LicenseStatus, NicheType
 
 logger = structlog.get_logger(__name__)
 
@@ -66,17 +67,25 @@ def compute_nof_eligibility(
 
     # Hard gate: Not on any corridor
     if corridor_info is None:
-        logger.info("nof_eligibility_hard_gate", reason="not_on_corridor", niche=niche.value)
+        logger.info(
+            "nof_eligibility_hard_gate", reason="not_on_corridor", niche=niche.value
+        )
         return 0.0
 
     # Hard gate: Mobile-only businesses ineligible
     if niche == NicheType.MOBILE_MECHANICS:
-        logger.info("nof_eligibility_hard_gate", reason="mobile_only_business", niche=niche.value)
+        logger.info(
+            "nof_eligibility_hard_gate",
+            reason="mobile_only_business",
+            niche=niche.value,
+        )
         return 0.0
 
     # Hard gate: Revoked license
     if license_status == LicenseStatus.REVOKED:
-        logger.info("nof_eligibility_hard_gate", reason="revoked_license", niche=niche.value)
+        logger.info(
+            "nof_eligibility_hard_gate", reason="revoked_license", niche=niche.value
+        )
         return 0.0
 
     # Corridor scoring

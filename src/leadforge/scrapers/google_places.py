@@ -1,6 +1,7 @@
 import structlog
-from leadforge.scrapers.base import BaseAPIClient
+
 from leadforge.config import settings
+from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
 
@@ -10,6 +11,7 @@ logger = structlog.get_logger()
 # Atmosphere fields ($0.005): reviews, rating, user_ratings_total
 FIND_PLACE_FIELDS = "place_id,name,formatted_address,geometry"
 DETAIL_FIELDS = "place_id,name,formatted_address,geometry/location,formatted_phone_number,website,rating,user_ratings_total,business_status,opening_hours,reviews"
+
 
 class GooglePlacesClient(BaseAPIClient):
     """Client for Google Places API."""

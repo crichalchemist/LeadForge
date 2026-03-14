@@ -1,16 +1,18 @@
 import structlog
 from anthropic import AsyncAnthropic
+
 from leadforge.config import settings
 
 logger = structlog.get_logger()
 
-CLAUDE_MODEL = getattr(settings, 'CLAUDE_MODEL', 'claude-sonnet-4-5-20250514')
+CLAUDE_MODEL = getattr(settings, "CLAUDE_MODEL", "claude-sonnet-4-5-20250514")
+
 
 class ClaudeClient:
     """Async wrapper for Anthropic Claude API."""
 
     def __init__(self, api_key: str | None = None):
-        self.api_key = api_key or getattr(settings, 'ANTHROPIC_API_KEY', '')
+        self.api_key = api_key or getattr(settings, "ANTHROPIC_API_KEY", "")
         self._client: AsyncAnthropic | None = None
 
     def _get_client(self) -> AsyncAnthropic:
@@ -18,7 +20,9 @@ class ClaudeClient:
             self._client = AsyncAnthropic(api_key=self.api_key)
         return self._client
 
-    async def complete(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.3) -> str | None:
+    async def complete(
+        self, prompt: str, max_tokens: int = 1000, temperature: float = 0.3
+    ) -> str | None:
         """Generate completion via Claude API."""
         try:
             client = self._get_client()

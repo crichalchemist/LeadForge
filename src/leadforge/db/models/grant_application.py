@@ -1,10 +1,19 @@
-import uuid
+from __future__ import annotations
+
 import enum
-from typing import Optional
+import uuid
 from datetime import date
-from sqlalchemy import String, Float, Boolean, Text, Date, ForeignKey, Enum as SAEnum
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import Boolean, Date, Float, ForeignKey, String, Text
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from leadforge.db.models.base import Base, UUIDPrimaryKeyMixin, TimestampMixin
+
+from leadforge.db.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    from leadforge.db.models.business import Business
+    from leadforge.db.models.grant_document import GrantDocument
 
 
 class NOFStage(str, enum.Enum):
@@ -26,10 +35,14 @@ class NOFStage(str, enum.Enum):
 class GrantApplication(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "grant_applications"
 
-    business_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("businesses.id", ondelete="CASCADE"), index=True)
+    business_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("businesses.id", ondelete="CASCADE"), index=True
+    )
 
     # Status
-    status: Mapped[NOFStage] = mapped_column(SAEnum(NOFStage), default=NOFStage.ELIGIBILITY_ASSESSED)
+    status: Mapped[NOFStage] = mapped_column(
+        SAEnum(NOFStage), default=NOFStage.ELIGIBILITY_ASSESSED
+    )
 
     # Dates
     applied_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
@@ -42,7 +55,9 @@ class GrantApplication(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     total_project_cost: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     base_grant_amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     acquisition_cost: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    acquisition_coverage_pct: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    acquisition_coverage_pct: Mapped[Optional[float]] = mapped_column(
+        Float, nullable=True
+    )
     taf_amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     owner_contribution: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     financing_amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
@@ -58,7 +73,9 @@ class GrantApplication(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     project_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     exterior_work_pct: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     has_site_control: Mapped[bool] = mapped_column(Boolean, default=False)
-    site_control_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # DEED, LEASE, PURCHASE_AGREEMENT
+    site_control_type: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True
+    )  # DEED, LEASE, PURCHASE_AGREEMENT
 
     # Tracking
     assigned_to: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
@@ -68,4 +85,6 @@ class GrantApplication(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     # Relationships
     business: Mapped["Business"] = relationship(back_populates="grant_applications")
-    documents: Mapped[list["GrantDocument"]] = relationship(back_populates="grant_application", cascade="all, delete-orphan")
+    documents: Mapped[list["GrantDocument"]] = relationship(
+        back_populates="grant_application", cascade="all, delete-orphan"
+    )

@@ -24,8 +24,9 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 async def get_conversion_funnel(session: AsyncSession = Depends(get_db)):
     """Get pipeline funnel with counts per stage."""
     result = await session.execute(
-        select(OutreachRecord.status, func.count(OutreachRecord.id))
-        .group_by(OutreachRecord.status)
+        select(OutreachRecord.status, func.count(OutreachRecord.id)).group_by(
+            OutreachRecord.status
+        )
     )
     stage_counts = dict(result.all())
 
@@ -47,7 +48,10 @@ async def get_score_distribution(session: AsyncSession = Depends(get_db)):
         select(
             LeadScore.composite_acquisition_score,
             func.row_number()
-            .over(partition_by=LeadScore.business_id, order_by=LeadScore.score_version.desc())
+            .over(
+                partition_by=LeadScore.business_id,
+                order_by=LeadScore.score_version.desc(),
+            )
             .label("rn"),
         )
     ).subquery()
@@ -62,8 +66,14 @@ async def get_score_distribution(session: AsyncSession = Depends(get_db)):
     # Build 10 buckets of width 10 (0-10, 10-20, ..., 90-100)
     buckets = []
     for i in range(0, 100, 10):
-        count = sum(1 for s in scores if i <= s < i + 10) if i < 90 else sum(1 for s in scores if i <= s <= 100)
-        buckets.append(ScoreBucket(range_min=float(i), range_max=float(i + 10), count=count))
+        count = (
+            sum(1 for s in scores if i <= s < i + 10)
+            if i < 90
+            else sum(1 for s in scores if i <= s <= 100)
+        )
+        buckets.append(
+            ScoreBucket(range_min=float(i), range_max=float(i + 10), count=count)
+        )
 
     mean_val = statistics.mean(scores) if scores else None
     median_val = statistics.median(scores) if scores else None
@@ -85,7 +95,10 @@ async def get_zip_performance(session: AsyncSession = Depends(get_db)):
             LeadScore.business_id,
             LeadScore.composite_acquisition_score,
             func.row_number()
-            .over(partition_by=LeadScore.business_id, order_by=LeadScore.score_version.desc())
+            .over(
+                partition_by=LeadScore.business_id,
+                order_by=LeadScore.score_version.desc(),
+            )
             .label("rn"),
         )
     ).subquery()
@@ -97,7 +110,10 @@ async def get_zip_performance(session: AsyncSession = Depends(get_db)):
             OutreachRecord.business_id,
             OutreachRecord.status,
             func.row_number()
-            .over(partition_by=OutreachRecord.business_id, order_by=OutreachRecord.created_at.desc())
+            .over(
+                partition_by=OutreachRecord.business_id,
+                order_by=OutreachRecord.created_at.desc(),
+            )
             .label("rn"),
         )
     ).subquery()
@@ -108,23 +124,42 @@ async def get_zip_performance(session: AsyncSession = Depends(get_db)):
             Business.zip_code,
             func.count(Business.id).label("total_leads"),
             func.avg(latest.c.composite_acquisition_score).label("avg_score"),
-            func.sum(case(
-                (lo.c.status.in_([
-                    PipelineStage.CONTACTED, PipelineStage.VOICEMAIL,
-                    PipelineStage.ENGAGED, PipelineStage.MEETING_SCHEDULED,
-                    PipelineStage.PROPOSAL_SENT, PipelineStage.NEGOTIATING,
-                    PipelineStage.WON,
-                ]), 1),
-                else_=0,
-            )).label("contacted"),
-            func.sum(case(
-                (lo.c.status.in_([
-                    PipelineStage.ENGAGED, PipelineStage.MEETING_SCHEDULED,
-                    PipelineStage.PROPOSAL_SENT, PipelineStage.NEGOTIATING,
-                    PipelineStage.WON,
-                ]), 1),
-                else_=0,
-            )).label("engaged"),
+            func.sum(
+                case(
+                    (
+                        lo.c.status.in_(
+                            [
+                                PipelineStage.CONTACTED,
+                                PipelineStage.VOICEMAIL,
+                                PipelineStage.ENGAGED,
+                                PipelineStage.MEETING_SCHEDULED,
+                                PipelineStage.PROPOSAL_SENT,
+                                PipelineStage.NEGOTIATING,
+                                PipelineStage.WON,
+                            ]
+                        ),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ).label("contacted"),
+            func.sum(
+                case(
+                    (
+                        lo.c.status.in_(
+                            [
+                                PipelineStage.ENGAGED,
+                                PipelineStage.MEETING_SCHEDULED,
+                                PipelineStage.PROPOSAL_SENT,
+                                PipelineStage.NEGOTIATING,
+                                PipelineStage.WON,
+                            ]
+                        ),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ).label("engaged"),
             func.sum(case((lo.c.status == PipelineStage.WON, 1), else_=0)).label("won"),
         )
         .outerjoin(latest, Business.id == latest.c.business_id)

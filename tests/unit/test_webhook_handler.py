@@ -1,6 +1,8 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
+
 from leadforge.api.app import app
 
 
@@ -51,11 +53,13 @@ def retell_voicemail_payload():
 
 @pytest.mark.asyncio
 class TestCallCompleteWebhook:
-
     async def test_missing_call_id(self):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.post("/webhooks/retell/call-complete", json={"event": "call_ended", "call": {}})
+            resp = await client.post(
+                "/webhooks/retell/call-complete",
+                json={"event": "call_ended", "call": {}},
+            )
             assert resp.status_code == 400
 
     async def test_unknown_call_id(self, retell_call_ended_payload):
@@ -70,11 +74,15 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        app.dependency_overrides[__import__('leadforge.api.deps', fromlist=['get_db']).get_db] = mock_get_db
+        app.dependency_overrides[
+            __import__("leadforge.api.deps", fromlist=["get_db"]).get_db
+        ] = mock_get_db
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.post("/webhooks/retell/call-complete", json=retell_call_ended_payload)
+            resp = await client.post(
+                "/webhooks/retell/call-complete", json=retell_call_ended_payload
+            )
             assert resp.status_code == 200
             assert resp.json()["status"] == "ignored"
 
@@ -82,8 +90,12 @@ class TestCallCompleteWebhook:
 
     async def test_call_ended_processing(self, retell_call_ended_payload):
         """call_ended sets transcript and disposition but not sentiment."""
-        from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage, CallDisposition
         from leadforge.api.deps import get_db
+        from leadforge.db.models.outreach_record import (
+            CallDisposition,
+            OutreachRecord,
+            PipelineStage,
+        )
 
         mock_outreach = MagicMock(spec=OutreachRecord)
         mock_outreach.id = "outreach-123"
@@ -102,12 +114,18 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        with patch("leadforge.voice.webhook_handler._dispatch_sentiment_task") as mock_dispatch:
+        with patch(
+            "leadforge.voice.webhook_handler._dispatch_sentiment_task"
+        ) as mock_dispatch:
             app.dependency_overrides[get_db] = mock_get_db
 
             transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/webhooks/retell/call-complete", json=retell_call_ended_payload)
+            async with AsyncClient(
+                transport=transport, base_url="http://test"
+            ) as client:
+                resp = await client.post(
+                    "/webhooks/retell/call-complete", json=retell_call_ended_payload
+                )
 
             assert resp.status_code == 200
             assert resp.json()["status"] == "ok"
@@ -121,8 +139,12 @@ class TestCallCompleteWebhook:
 
     async def test_call_analyzed_processing(self, retell_call_analyzed_payload):
         """call_analyzed sets sentiment and upgrades to ENGAGED."""
-        from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage, CallDisposition
         from leadforge.api.deps import get_db
+        from leadforge.db.models.outreach_record import (
+            CallDisposition,
+            OutreachRecord,
+            PipelineStage,
+        )
 
         mock_outreach = MagicMock(spec=OutreachRecord)
         mock_outreach.id = "outreach-789"
@@ -141,12 +163,18 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        with patch("leadforge.voice.webhook_handler._dispatch_sentiment_task") as mock_dispatch:
+        with patch(
+            "leadforge.voice.webhook_handler._dispatch_sentiment_task"
+        ) as mock_dispatch:
             app.dependency_overrides[get_db] = mock_get_db
 
             transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/webhooks/retell/call-complete", json=retell_call_analyzed_payload)
+            async with AsyncClient(
+                transport=transport, base_url="http://test"
+            ) as client:
+                resp = await client.post(
+                    "/webhooks/retell/call-complete", json=retell_call_analyzed_payload
+                )
 
             assert resp.status_code == 200
             assert mock_outreach.call_sentiment_score == 0.7  # "Positive"
@@ -157,8 +185,12 @@ class TestCallCompleteWebhook:
         app.dependency_overrides.clear()
 
     async def test_voicemail_processing(self, retell_voicemail_payload):
-        from leadforge.db.models.outreach_record import OutreachRecord, PipelineStage, CallDisposition
         from leadforge.api.deps import get_db
+        from leadforge.db.models.outreach_record import (
+            CallDisposition,
+            OutreachRecord,
+            PipelineStage,
+        )
 
         mock_outreach = MagicMock(spec=OutreachRecord)
         mock_outreach.id = "outreach-456"
@@ -176,12 +208,18 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        with patch("leadforge.voice.webhook_handler._dispatch_sentiment_task") as mock_dispatch:
+        with patch(
+            "leadforge.voice.webhook_handler._dispatch_sentiment_task"
+        ) as mock_dispatch:
             app.dependency_overrides[get_db] = mock_get_db
 
             transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="http://test") as client:
-                resp = await client.post("/webhooks/retell/call-complete", json=retell_voicemail_payload)
+            async with AsyncClient(
+                transport=transport, base_url="http://test"
+            ) as client:
+                resp = await client.post(
+                    "/webhooks/retell/call-complete", json=retell_voicemail_payload
+                )
 
             assert resp.status_code == 200
             assert mock_outreach.call_disposition == CallDisposition.VOICEMAIL
@@ -194,7 +232,6 @@ class TestCallCompleteWebhook:
 
 @pytest.mark.asyncio
 class TestCallEventWebhook:
-
     async def test_call_event_returns_ok(self):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -208,7 +245,6 @@ class TestCallEventWebhook:
 
 @pytest.mark.asyncio
 class TestHealthCheck:
-
     async def test_health_endpoint(self):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:

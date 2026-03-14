@@ -1,5 +1,7 @@
 import json
+
 import structlog
+
 from leadforge.llm.claude_client import ClaudeClient
 
 logger = structlog.get_logger()
@@ -22,7 +24,9 @@ Analyze and respond with ONLY a JSON object:
 """
 
 
-async def analyze_sentiment(transcript: str, client: ClaudeClient | None = None) -> dict:
+async def analyze_sentiment(
+    transcript: str, client: ClaudeClient | None = None
+) -> dict:
     """Analyze call transcript sentiment using Claude.
 
     Returns sentiment score (-1 to 1), label, objections, interest signals,

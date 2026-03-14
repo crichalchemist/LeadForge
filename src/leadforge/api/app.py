@@ -29,6 +29,12 @@ app.include_router(health.router)
 app.include_router(webhook_router)
 
 # Protected routes (require API key when configured)
-protected = [businesses.router, leads.router, outreach.router, pipeline.router, reports.router]
+protected = [
+    businesses.router,
+    leads.router,
+    outreach.router,
+    pipeline.router,
+    reports.router,
+]
 for r in protected:
     app.include_router(r, dependencies=[Depends(verify_api_key)])

@@ -1,9 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import Any
+from abc import ABC
+
 import httpx
 import structlog
 
 logger = structlog.get_logger()
+
 
 class BaseAPIClient(ABC):
     """Base class for API clients using httpx."""

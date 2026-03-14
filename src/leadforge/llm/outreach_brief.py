@@ -1,8 +1,10 @@
 import json
+
 import structlog
-from leadforge.llm.claude_client import ClaudeClient
+
 from leadforge.db.models.business import Business
 from leadforge.db.models.digital_presence import DigitalPresence
+from leadforge.llm.claude_client import ClaudeClient
 
 logger = structlog.get_logger()
 
@@ -75,7 +77,9 @@ async def generate_outreach_brief(
 def _fallback_brief(business: Business) -> dict:
     """Generate a minimal fallback brief when Claude is unavailable."""
     return {
-        "talking_points": [f"We noticed {business.name} could benefit from increased online visibility"],
+        "talking_points": [
+            f"We noticed {business.name} could benefit from increased online visibility"
+        ],
         "observations": ["Limited digital presence compared to competitors"],
         "pitch_angle": "Help increase local visibility and customer discovery",
         "opening_line": f"Hi, I'm calling about {business.name}",

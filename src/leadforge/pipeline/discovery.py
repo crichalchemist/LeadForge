@@ -1,14 +1,15 @@
 import uuid
+
 import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from leadforge.db.models.business import Business, NicheType, LicenseStatus
+from leadforge.db.models.business import Business, LicenseStatus, NicheType
 from leadforge.db.models.digital_presence import DigitalPresence
 from leadforge.db.models.lead_score import LeadScore
-from leadforge.scrapers.socrata import SocrataClient
-from leadforge.scrapers.google_places import GooglePlacesClient
 from leadforge.scoring.digital_deficit import compute_digital_deficit
+from leadforge.scrapers.google_places import GooglePlacesClient
+from leadforge.scrapers.socrata import SocrataClient
 
 logger = structlog.get_logger()
 
@@ -46,7 +47,11 @@ async def run_discovery(
                 if business:
                     persisted.append(business)
             except Exception as e:
-                logger.error("business_enrichment_failed", name=biz_data.get("name"), error=str(e))
+                logger.error(
+                    "business_enrichment_failed",
+                    name=biz_data.get("name"),
+                    error=str(e),
+                )
                 continue
 
     await session.commit()
@@ -123,6 +128,7 @@ async def _enrich_and_persist(
     lng = enrichment.get("longitude")
     if lat and lng:
         from geoalchemy2.elements import WKTElement
+
         business.location = WKTElement(f"POINT({lng} {lat})", srid=4326)
 
     session.add(business)
@@ -133,7 +139,9 @@ async def _enrich_and_persist(
         business_id=business.id,
         has_website=enrichment.get("has_website", False),
         website_url=enrichment.get("website"),
-        has_google_business_profile=enrichment.get("has_google_business_profile", False),
+        has_google_business_profile=enrichment.get(
+            "has_google_business_profile", False
+        ),
         google_review_count=enrichment.get("google_review_count", 0),
         google_avg_rating=enrichment.get("google_avg_rating"),
     )

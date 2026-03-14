@@ -1,11 +1,15 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from leadforge.api.deps import get_db
-from leadforge.api.schemas.outreach import OutreachDetail, OutreachListResponse, OutreachUpdate
+from leadforge.api.schemas.outreach import (
+    OutreachDetail,
+    OutreachListResponse,
+    OutreachUpdate,
+)
 from leadforge.db.models.outreach_record import OutreachRecord
 
 router = APIRouter(prefix="/outreach", tags=["outreach"])
@@ -24,7 +28,9 @@ async def get_outreach_history(
     )
     records = result.scalars().all()
     count_result = await session.execute(
-        select(func.count(OutreachRecord.id)).where(OutreachRecord.business_id == business_id)
+        select(func.count(OutreachRecord.id)).where(
+            OutreachRecord.business_id == business_id
+        )
     )
     total = count_result.scalar() or 0
     return OutreachListResponse(items=records, total=total)
@@ -43,11 +49,14 @@ async def get_outreach(outreach_id: uuid.UUID, session: AsyncSession = Depends(g
 
 
 @router.get("/{outreach_id}/transcript")
-async def get_transcript(outreach_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
+async def get_transcript(
+    outreach_id: uuid.UUID, session: AsyncSession = Depends(get_db)
+):
     """Get the call transcript for an outreach record."""
     result = await session.execute(
-        select(OutreachRecord.call_transcript, OutreachRecord.retell_call_id)
-        .where(OutreachRecord.id == outreach_id)
+        select(OutreachRecord.call_transcript, OutreachRecord.retell_call_id).where(
+            OutreachRecord.id == outreach_id
+        )
     )
     row = result.one_or_none()
     if not row:

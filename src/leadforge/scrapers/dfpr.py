@@ -1,7 +1,9 @@
 import structlog
+
 from leadforge.scrapers.base import BaseAPIClient
 
 logger = structlog.get_logger()
+
 
 class DFPRClient(BaseAPIClient):
     """Illinois DFPR professional license lookup."""
@@ -9,7 +11,12 @@ class DFPRClient(BaseAPIClient):
     def __init__(self):
         super().__init__(base_url="https://online-dfpr.micropact.com")
 
-    async def lookup_license(self, license_number: str | None = None, last_name: str | None = None, license_type: str = "barber") -> dict | None:
+    async def lookup_license(
+        self,
+        license_number: str | None = None,
+        last_name: str | None = None,
+        license_type: str = "barber",
+    ) -> dict | None:
         """Look up professional license status. Returns license info or None."""
         if not license_number and not last_name:
             return None
@@ -40,5 +47,7 @@ class DFPRClient(BaseAPIClient):
                 "name": result.get("name"),
             }
         except Exception as e:
-            logger.warning("dfpr_lookup_failed", error=str(e), license_number=license_number)
+            logger.warning(
+                "dfpr_lookup_failed", error=str(e), license_number=license_number
+            )
             return None

@@ -5,8 +5,8 @@ from sqlalchemy.orm import selectinload
 
 from leadforge.db.models.business import Business, NicheType
 from leadforge.db.models.lead_score import LeadScore
-from leadforge.scoring.composite import compute_composite_score
 from leadforge.scoring.competitive_context import compute_competitive_context
+from leadforge.scoring.composite import compute_composite_score
 
 logger = structlog.get_logger()
 
@@ -37,18 +37,25 @@ async def run_scoring_pipeline(
         scores = compute_composite_score(business, business.digital_presence, context)
 
         # Find or create the latest score record
-        current_version = max((s.score_version for s in business.lead_scores), default=0)
+        current_version = max(
+            (s.score_version for s in business.lead_scores), default=0
+        )
 
         # Check if score has changed significantly
         latest_score = next(
             (s for s in business.lead_scores if s.score_version == current_version),
-            None
+            None,
         )
 
-        if latest_score and latest_score.composite_acquisition_score == scores["composite_acquisition_score"]:
+        if (
+            latest_score
+            and latest_score.composite_acquisition_score
+            == scores["composite_acquisition_score"]
+        ):
             continue  # No change, skip
 
         import uuid
+
         new_score = LeadScore(
             id=uuid.uuid4(),
             business_id=business.id,
@@ -63,5 +70,10 @@ async def run_scoring_pipeline(
         scored_count += 1
 
     await session.commit()
-    logger.info("scoring_pipeline_complete", zip_code=zip_code, niche=niche.value, scored=scored_count)
+    logger.info(
+        "scoring_pipeline_complete",
+        zip_code=zip_code,
+        niche=niche.value,
+        scored=scored_count,
+    )
     return scored_count

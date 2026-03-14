@@ -4,15 +4,16 @@ NOF Corridor Data Pipeline
 Fetches corridor GeoJSON from Chicago Data Portal (Socrata API) and provides
 spatial eligibility queries for the NOF grant program.
 """
+
 import json
 from datetime import datetime, timezone
+
 import httpx
 import structlog
-from sqlalchemy import delete, func, text
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
-from leadforge.db.models.nof_corridor import NOFCorridor, CorridorType
+from leadforge.db.models.nof_corridor import CorridorType, NOFCorridor
 
 logger = structlog.get_logger(__name__)
 
@@ -43,8 +44,7 @@ def fetch_corridor_geojson(app_token: str = "") -> dict:
         geojson = response.json()
 
     logger.info(
-        "fetched_corridor_geojson",
-        feature_count=len(geojson.get("features", []))
+        "fetched_corridor_geojson", feature_count=len(geojson.get("features", []))
     )
 
     return geojson
@@ -97,7 +97,7 @@ async def upsert_corridors(session: AsyncSession, features: list[dict]) -> int:
             corridor_type=corridor_type,
             geometry=func.ST_GeomFromGeoJSON(json.dumps(geometry)),
             source_updated_at=None,  # Could parse from properties if available
-            fetched_at=datetime.now(timezone.utc)
+            fetched_at=datetime.now(timezone.utc),
         )
         corridors.append(corridor)
 
@@ -112,9 +112,7 @@ async def upsert_corridors(session: AsyncSession, features: list[dict]) -> int:
 
 
 async def check_corridor_eligibility(
-    session: AsyncSession,
-    latitude: float,
-    longitude: float
+    session: AsyncSession, latitude: float, longitude: float
 ) -> dict | None:
     """
     Check if a point is eligible for NOF grant (within 50m of any corridor).
@@ -138,7 +136,7 @@ async def check_corridor_eligibility(
             func.ST_DWithin(
                 func.ST_GeogFromText(func.ST_AsText(NOFCorridor.geometry)),
                 point_geog,
-                50  # 50 meters
+                50,  # 50 meters
             )
         )
         .order_by(
@@ -157,17 +155,15 @@ async def check_corridor_eligibility(
             corridor_name=corridor.corridor_name,
             corridor_type=corridor.corridor_type.value,
             latitude=latitude,
-            longitude=longitude
+            longitude=longitude,
         )
         return {
             "corridor_name": corridor.corridor_name,
             "corridor_type": corridor.corridor_type.value,
-            "is_priority": corridor.corridor_type == CorridorType.PRIORITY
+            "is_priority": corridor.corridor_type == CorridorType.PRIORITY,
         }
 
     logger.info(
-        "corridor_eligibility_not_found",
-        latitude=latitude,
-        longitude=longitude
+        "corridor_eligibility_not_found", latitude=latitude, longitude=longitude
     )
     return None
