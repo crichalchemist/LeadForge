@@ -71,17 +71,17 @@ services:
       - ./src:/app/src
 
   vllm:
-    image: vllm/vllm-openai:latest-cpu
+    image: vllm/vllm-openai-cpu:latest
     ports:
       - "8001:8000"
+    ipc: host
+    shm_size: "4g"
     environment:
       - VLLM_CPU_KVCACHE_SPACE=4
     command: >
       --model Qwen/Qwen2.5-3B-Instruct
-      --device cpu
       --dtype float32
       --max-model-len 4096
-      --cpu-offload-gb 0
     volumes:
       - vllm-cache:/root/.cache/huggingface
     healthcheck:
@@ -93,7 +93,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 12g
+          memory: 20g
           cpus: "6"
 
   frontend:
