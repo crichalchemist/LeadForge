@@ -96,13 +96,15 @@ export interface PipelineItem {
 export interface OutreachRecord {
   id: string;
   business_id: string;
-  call_id: string;
+  call_id: string | null;
   status: string;
   duration: number;
   transcript: string | null;
   disposition: string | null;
   sentiment_score: number | null;
-  called_at: string;
+  called_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface GrantApplication {

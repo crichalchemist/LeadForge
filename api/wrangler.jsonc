@@ -27,6 +27,9 @@
   "kv_namespaces": [
     { "binding": "COOKIE_STORE", "id": "placeholder-kv-id" }
   ],
+  "vars": {
+    "RETELL_WEBHOOK_SECRET": ""
+  },
   "env": {
     "staging": { "name": "leadforge-api-staging" },
     "production": { "name": "leadforge-api" }
