@@ -84,7 +84,8 @@ CREATE TABLE IF NOT EXISTS outreach_records (
   disposition TEXT,
   sentiment_score REAL,
   called_at TEXT,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_outreach_business ON outreach_records(business_id);
