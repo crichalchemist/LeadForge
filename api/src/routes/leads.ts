@@ -54,11 +54,12 @@ router.get('/', requireAuth, async (c) => {
 
   // Count
   const fromClause = 'lead_scores ls JOIN businesses b ON ls.business_id = b.id';
-  const countResult = await db
-    .prepare(
-      `SELECT COUNT(*) as count FROM ${fromClause} ${where}`
-    )
-    .first<{ count: number }>();
+  const countStmt = db.prepare(
+    `SELECT COUNT(*) as count FROM ${fromClause} ${where}`
+  );
+  const countResult = bindings.length > 0
+    ? await countStmt.bind(...bindings).first<{ count: number }>()
+    : await countStmt.first<{ count: number }>();
   const total = countResult?.count ?? 0;
 
   // Data
@@ -121,12 +122,11 @@ router.post('/calculate/:businessId', requireAuth, async (c) => {
   const id = generateId();
   const now = new Date().toISOString();
 
-  // Upsert: delete existing score for this business, then insert
-  await db
+  // Upsert: delete existing score for this business, then insert (atomic batch)
+  const deleteStmt = db
     .prepare('DELETE FROM lead_scores WHERE business_id = ?')
-    .bind(businessId)
-    .run();
-  await db
+    .bind(businessId);
+  const insertStmt = db
     .prepare(
       `INSERT INTO lead_scores (id, business_id, score_version, digital_deficit_score, viability_score, competitive_pressure_score, composite_acquisition_score, price_tier, calculated_at)
        VALUES (?, ?, 'v1', ?, ?, ?, ?, ?, ?)`
@@ -140,8 +140,8 @@ router.post('/calculate/:businessId', requireAuth, async (c) => {
       scores.composite_acquisition_score,
       scores.price_tier,
       now
-    )
-    .run();
+    );
+  await db.batch([deleteStmt, insertStmt]);
 
   return c.json(
     { id, business_id: businessId, ...scores, calculated_at: now },

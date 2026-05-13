@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS lead_scores (
 
 CREATE INDEX IF NOT EXISTS idx_lead_scores_business ON lead_scores(business_id);
 CREATE INDEX IF NOT EXISTS idx_lead_scores_composite ON lead_scores(composite_acquisition_score DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_lead_scores_business_unique ON lead_scores(business_id);
 
 CREATE TABLE IF NOT EXISTS competitive_contexts (
   id TEXT PRIMARY KEY,
