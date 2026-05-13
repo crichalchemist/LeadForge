@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { requireAuth, requireAdmin } from '../middleware/auth';
 import { generateId } from '../lib/jwt';
-import { paginatedList, getById } from '../db/queries';
+import { getById } from '../db/queries';
 import { Bindings, JwtPayload, OutreachRecord } from '../types';
 
 type Env = {
@@ -23,28 +23,39 @@ const createOutreachSchema = z.object({
 // GET /api/outreach
 router.get('/', requireAuth, async (c) => {
   const db = c.env.DB;
-  const page = parseInt(c.req.query('page') ?? '1');
-  const perPage = Math.min(parseInt(c.req.query('per_page') ?? '50'), 200);
+  const pageRaw = parseInt(c.req.query('page') ?? '1');
+  const perPageRaw = parseInt(c.req.query('per_page') ?? '50');
+  if (isNaN(pageRaw) || pageRaw < 1) return c.json({ error: 'Invalid page' }, 400);
+  if (isNaN(perPageRaw) || perPageRaw < 1) return c.json({ error: 'Invalid per_page' }, 400);
+  const page = pageRaw;
+  const perPage = Math.min(perPageRaw, 200);
+  const offset = (page - 1) * perPage;
   const businessId = c.req.query('business_id');
   const status = c.req.query('status');
 
   const conditions: string[] = [];
   const bindings: unknown[] = [];
 
-  if (businessId) { conditions.push('outreach_records.business_id = ?'); bindings.push(businessId); }
-  if (status) { conditions.push('outreach_records.status = ?'); bindings.push(status); }
+  if (businessId) { conditions.push('o.business_id = ?'); bindings.push(businessId); }
+  if (status) { conditions.push('o.status = ?'); bindings.push(status); }
 
-  const where = conditions.length > 0 ? conditions.join(' AND ') : undefined;
+  const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+  const fromJoin = 'outreach_records o JOIN businesses b ON b.id = o.business_id';
 
-  const result = await paginatedList<OutreachRecord>(
-    db, 'outreach_records', 'outreach_records.*, b.name as business_name',
-    {
-      page, perPage, where,
-      orderBy: 'outreach_records.created_at DESC',
-    }
-  );
+  // Count
+  const countStmt = db.prepare(`SELECT COUNT(*) as count FROM ${fromJoin} ${where}`);
+  const countResult = bindings.length > 0
+    ? await countStmt.bind(...bindings).first<{ count: number }>()
+    : await countStmt.first<{ count: number }>();
+  const total = countResult?.count ?? 0;
 
-  return c.json(result);
+  // Data
+  const data = await db
+    .prepare(`SELECT o.*, b.name as business_name FROM ${fromJoin} ${where} ORDER BY o.created_at DESC LIMIT ? OFFSET ?`)
+    .bind(...bindings, perPage, offset)
+    .all();
+
+  return c.json({ data: data.results ?? [], total, page, perPage });
 });
 
 // GET /api/outreach/:id
@@ -111,12 +122,13 @@ router.patch('/:id', requireAuth, requireAdmin, zValidator('json', z.object({
   return c.json(updated);
 });
 
-// Retell AI webhook handler — public (no auth, HMAC verified)
+// Retell AI webhook handler — public (no auth, HMAC verified against raw body)
 router.post('/webhook/retell', async (c) => {
   const db = c.env.DB;
-  const body = await c.req.json();
+  const rawBody = await c.req.text();
+  const body = JSON.parse(rawBody);
 
-  // Validate Retell HMAC signature
+  // Validate Retell HMAC signature against raw request body
   const signature = c.req.header('X-Retell-Signature');
   const secret: string | undefined = (c.env as any).RETELL_WEBHOOK_SECRET;
   if (secret && signature) {
@@ -124,9 +136,8 @@ router.post('/webhook/retell', async (c) => {
     const key = await crypto.subtle.importKey(
       'raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
     );
-    const bodyText = JSON.stringify(body);
     const sigBytes = hexToBytes(signature);
-    const valid = await crypto.subtle.verify('HMAC', key, sigBytes, encoder.encode(bodyText));
+    const valid = await crypto.subtle.verify('HMAC', key, sigBytes, encoder.encode(rawBody));
     if (!valid) return c.json({ error: 'Invalid signature' }, 401);
   }
 
