@@ -1,0 +1,27 @@
+{
+  "name": "leadforge-api",
+  "version": "1.0.0",
+  "description": "LeadForge Cloudflare Workers API",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hono/zod-validator": "^0.8.0",
+    "hono": "^4.12.18",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260511.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6",
+    "wrangler": "^4.90.1"
+  }
+}

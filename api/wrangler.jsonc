@@ -1,0 +1,34 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "leadforge-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "leadforge-db", "database_id": "placeholder-db-id" }
+  ],
+  "ai": { "binding": "AI" },
+  "queues": {
+    "producers": [
+      { "binding": "ENRICHMENT_QUEUE", "queue": "leadforge-enrichment" },
+      { "binding": "OUTREACH_QUEUE", "queue": "leadforge-outreach" },
+      { "binding": "SENTIMENT_QUEUE", "queue": "leadforge-sentiment" },
+      { "binding": "RECALIBRATION_QUEUE", "queue": "leadforge-recalibration" }
+    ]
+  },
+  "triggers": {
+    "crons": [
+      "0 6 * * *",
+      "30 6 * * *",
+      "0 7 * * 1",
+      "0 8 * * *"
+    ]
+  },
+  "kv_namespaces": [
+    { "binding": "COOKIE_STORE", "id": "placeholder-kv-id" }
+  ],
+  "env": {
+    "staging": { "name": "leadforge-api-staging" },
+    "production": { "name": "leadforge-api" }
+  }
+}
