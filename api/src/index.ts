@@ -4,7 +4,10 @@ import { Bindings } from './types';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app.use('/api/*', cors({ origin: '*', credentials: true }));
+app.use('/api/*', cors({
+  origin: (origin) => origin || '*',
+  credentials: true,
+}));
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 export default app;
