@@ -5,7 +5,7 @@
   "compatibility_date": "2026-05-13",
   "compatibility_flags": ["nodejs_compat"],
   "d1_databases": [
-    { "binding": "DB", "database_name": "leadforge-db", "database_id": "placeholder-db-id" }
+    { "binding": "DB", "database_name": "leadforge-db", "database_id": "1e6961e4-8e03-42bf-a466-a02cfc89cd05" }
   ],
   "ai": { "binding": "AI" },
   "queues": {
