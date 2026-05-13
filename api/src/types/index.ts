@@ -56,6 +56,33 @@ export interface LeadScore {
   calculated_at: string;
 }
 
+export interface DigitalPresence {
+  id: string;
+  business_id: string;
+  has_website: number | null;
+  website_url: string | null;
+  google_review_count: number | null;
+  google_avg_rating: number | null;
+  yelp_review_count: number | null;
+  yelp_rating: number | null;
+  website_quality_score: number | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CompetitiveContext {
+  id: string;
+  zip_code: string;
+  niche: string;
+  business_density: number | null;
+  avg_rating: number | null;
+  total_reviews: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PipelineItem {
   id: string;
   business_id: string;
