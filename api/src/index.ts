@@ -6,6 +6,7 @@ import businessRoutes from './routes/businesses';
 import leadRoutes from './routes/leads';
 import pipelineRoutes from './routes/pipeline';
 import outreachRoutes from './routes/outreach';
+import grantRoutes from './routes/grants';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -20,5 +21,6 @@ app.route('/api/businesses', businessRoutes);
 app.route('/api/leads', leadRoutes);
 app.route('/api/pipeline', pipelineRoutes);
 app.route('/api/outreach', outreachRoutes);
+app.route('/api/grants', grantRoutes);
 
 export default app;
