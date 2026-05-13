@@ -4,9 +4,9 @@ import { zValidator } from '@hono/zod-validator';
 import { requireAuth, requireAdmin } from '../middleware/auth';
 import { generateId } from '../lib/jwt';
 import { paginatedList, getById, deleteById } from '../db/queries';
-import { Bindings, Business } from '../types';
+import { Bindings, Business, JwtPayload } from '../types';
 
-const router = new Hono<{ Bindings: Bindings; Variables: { user: { sub: string; email: string; role: string } } }>();
+const router = new Hono<{ Bindings: Bindings; Variables: { user: JwtPayload } }>();
 
 const createBusinessSchema = z.object({
   name: z.string().min(1),
@@ -27,8 +27,12 @@ const updateBusinessSchema = createBusinessSchema.partial();
 // GET /api/businesses
 router.get('/', requireAuth, async (c) => {
   const db = c.env.DB;
-  const page = parseInt(c.req.query('page') ?? '1');
-  const perPage = Math.min(parseInt(c.req.query('per_page') ?? '50'), 200);
+  const pageRaw = parseInt(c.req.query('page') ?? '1');
+  const perPageRaw = parseInt(c.req.query('per_page') ?? '50');
+  if (isNaN(pageRaw) || pageRaw < 1) return c.json({ error: 'Invalid page' }, 400);
+  if (isNaN(perPageRaw) || perPageRaw < 1) return c.json({ error: 'Invalid per_page' }, 400);
+  const page = pageRaw;
+  const perPage = Math.min(perPageRaw, 200);
   const niche = c.req.query('niche');
   const zip = c.req.query('zip_code');
   const inCorridor = c.req.query('in_corridor');
@@ -54,8 +58,7 @@ router.get('/', requireAuth, async (c) => {
 // GET /api/businesses/:id
 router.get('/:id', requireAuth, async (c) => {
   const db = c.env.DB;
-  const id = c.req.param('id');
-  if (!id) return c.json({ error: 'Invalid business ID' }, 400);
+  const id = c.req.param('id')!;
   const business = await getById<Business>(db, 'businesses', id);
   if (!business) return c.json({ error: 'Business not found' }, 404);
   return c.json(business);
@@ -84,8 +87,7 @@ router.post('/', requireAuth, requireAdmin, zValidator('json', createBusinessSch
 // PATCH /api/businesses/:id
 router.patch('/:id', requireAuth, requireAdmin, zValidator('json', updateBusinessSchema), async (c) => {
   const db = c.env.DB;
-  const id = c.req.param('id');
-  if (!id) return c.json({ error: 'Invalid business ID' }, 400);
+  const id = c.req.param('id')!;
   const data = c.req.valid('json');
 
   const existing = await getById<Business>(db, 'businesses', id);
@@ -113,8 +115,7 @@ router.patch('/:id', requireAuth, requireAdmin, zValidator('json', updateBusines
 // DELETE /api/businesses/:id
 router.delete('/:id', requireAuth, requireAdmin, async (c) => {
   const db = c.env.DB;
-  const id = c.req.param('id');
-  if (!id) return c.json({ error: 'Invalid business ID' }, 400);
+  const id = c.req.param('id')!;
   const deleted = await deleteById(db, 'businesses', id);
   if (!deleted) return c.json({ error: 'Business not found' }, 404);
   return c.json({ deleted: true });
