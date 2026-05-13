@@ -6,6 +6,7 @@ export interface Bindings {
   OUTREACH_QUEUE: Queue<any>;
   SENTIMENT_QUEUE: Queue<any>;
   RECALIBRATION_QUEUE: Queue<any>;
+  JWT_SECRET?: string;
 }
 
 export interface JwtPayload {

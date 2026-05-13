@@ -5,7 +5,7 @@ import { Bindings, JwtPayload } from '../types';
 type AuthEnv = { Bindings: Bindings; Variables: { user: JwtPayload } };
 
 export async function requireAuth(c: Context<AuthEnv>, next: Next) {
-  const JWT_SECRET = (c.env as any).JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
+  const JWT_SECRET = c.env.JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
 
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

@@ -20,7 +20,7 @@ const signupSchema = z.object({
 
 // POST /api/auth/login
 router.post('/login', zValidator('json', loginSchema), async (c) => {
-  const JWT_SECRET = (c.env as any).JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
+  const JWT_SECRET = c.env.JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
   const { email, password } = c.req.valid('json');
   const db = c.env.DB;
 
@@ -55,7 +55,7 @@ router.post('/login', zValidator('json', loginSchema), async (c) => {
 
 // POST /api/auth/refresh
 router.post('/refresh', zValidator('json', z.object({ refresh_token: z.string() })), async (c) => {
-  const JWT_SECRET = (c.env as any).JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
+  const JWT_SECRET = c.env.JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
   const { refresh_token } = c.req.valid('json');
   const payload = await verifyToken(refresh_token, JWT_SECRET);
   if (!payload) {
@@ -73,7 +73,7 @@ router.post('/refresh', zValidator('json', z.object({ refresh_token: z.string() 
 
 // POST /api/auth/signup
 router.post('/signup', zValidator('json', signupSchema), async (c) => {
-  const JWT_SECRET = (c.env as any).JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
+  const JWT_SECRET = c.env.JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
   const { email, password, name } = c.req.valid('json');
   const db = c.env.DB;
 
