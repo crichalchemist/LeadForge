@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS competitive_contexts (
   business_density INTEGER DEFAULT 0,
   avg_rating REAL,
   total_reviews INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(zip_code, niche)
 );
