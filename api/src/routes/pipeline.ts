@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { requireAuth, requireAdmin } from '../middleware/auth';
 import { generateId } from '../lib/jwt';
-import { paginatedList, getById, deleteById } from '../db/queries';
+import { getById, deleteById } from '../db/queries';
 import { Bindings, JwtPayload, PipelineItem } from '../types';
 
 type Env = {
@@ -104,7 +104,7 @@ router.post('/', requireAuth, requireAdmin, zValidator('json', createPipelineSch
 });
 
 // PATCH /api/pipeline/:id — move stage (drag & drop)
-router.patch('/:id', requireAuth, zValidator('json', updatePipelineSchema), async (c) => {
+router.patch('/:id', requireAuth, requireAdmin, zValidator('json', updatePipelineSchema), async (c) => {
   const db = c.env.DB;
   const id = c.req.param('id')!;
   const data = c.req.valid('json');
