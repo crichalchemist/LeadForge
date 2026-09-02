@@ -9,7 +9,7 @@ import outreachRoutes from './routes/outreach';
 import grantRoutes from './routes/grants';
 import reportRoutes from './routes/reports';
 
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 
 app.use('/api/*', cors({
   origin: (origin) => origin || '*',
