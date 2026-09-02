@@ -1,181 +1,55 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { zValidator } from '@hono/zod-validator';
 import { requireAuth, requireAdmin } from '../middleware/auth';
-import { generateId } from '../lib/jwt';
-import { getById } from '../db/queries';
-import { Bindings, JwtPayload, OutreachRecord } from '../types';
+import { jsonBody } from '../lib/validate';
+import { nowIso, withBooleans, OUTREACH_BOOLS } from '../db/serialize';
+import type { AppEnv, OutreachRecordRow } from '../types';
 
-type Env = {
-  Bindings: Bindings;
-  Variables: { user: JwtPayload };
-};
+const router = new Hono<AppEnv>();
+const serialize = (row: OutreachRecordRow) => withBooleans<Pick<OutreachRecordRow, keyof OutreachRecordRow>>(row, OUTREACH_BOOLS);
 
-const router = new Hono<Env>();
-
-const createOutreachSchema = z.object({
-  business_id: z.string(),
-  call_id: z.string().optional().nullable(),
-  status: z.string().default('pending'),
-  disposition: z.string().optional().nullable(),
+// =py routes/outreach.get_outreach_history
+router.get('/by-business/:business_id', requireAuth, async (c) => {
+  const rows = await c.env.DB.prepare('SELECT * FROM outreach_records WHERE business_id = ? ORDER BY created_at DESC')
+    .bind(c.req.param('business_id')).all<OutreachRecordRow>();
+  const items = (rows.results ?? []).map(serialize);
+  return c.json({ items, total: items.length });
 });
 
-// GET /api/outreach
-router.get('/', requireAuth, async (c) => {
-  const db = c.env.DB;
-  const pageRaw = parseInt(c.req.query('page') ?? '1');
-  const perPageRaw = parseInt(c.req.query('per_page') ?? '50');
-  if (isNaN(pageRaw) || pageRaw < 1) return c.json({ error: 'Invalid page' }, 400);
-  if (isNaN(perPageRaw) || perPageRaw < 1) return c.json({ error: 'Invalid per_page' }, 400);
-  const page = pageRaw;
-  const perPage = Math.min(perPageRaw, 200);
-  const offset = (page - 1) * perPage;
-  const businessId = c.req.query('business_id');
-  const status = c.req.query('status');
-
-  const conditions: string[] = [];
-  const bindings: unknown[] = [];
-
-  if (businessId) { conditions.push('o.business_id = ?'); bindings.push(businessId); }
-  if (status) { conditions.push('o.status = ?'); bindings.push(status); }
-
-  const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
-  const fromJoin = 'outreach_records o JOIN businesses b ON b.id = o.business_id';
-
-  // Count
-  const countStmt = db.prepare(`SELECT COUNT(*) as count FROM ${fromJoin} ${where}`);
-  const countResult = bindings.length > 0
-    ? await countStmt.bind(...bindings).first<{ count: number }>()
-    : await countStmt.first<{ count: number }>();
-  const total = countResult?.count ?? 0;
-
-  // Data
-  const data = await db
-    .prepare(`SELECT o.*, b.name as business_name FROM ${fromJoin} ${where} ORDER BY o.created_at DESC LIMIT ? OFFSET ?`)
-    .bind(...bindings, perPage, offset)
-    .all();
-
-  return c.json({ data: data.results ?? [], total, page, perPage });
-});
-
-// GET /api/outreach/:id
+// =py routes/outreach.get_outreach
 router.get('/:id', requireAuth, async (c) => {
-  const db = c.env.DB;
-  const id = c.req.param('id')!;
-  const record = await db.prepare(`
-    SELECT o.*, b.name as business_name, b.phone, b.niche
-    FROM outreach_records o
-    JOIN businesses b ON b.id = o.business_id
-    WHERE o.id = ?
-  `).bind(id).first();
-
-  if (!record) return c.json({ error: 'Outreach record not found' }, 404);
-  return c.json(record);
+  const row = await c.env.DB.prepare('SELECT * FROM outreach_records WHERE id = ?').bind(c.req.param('id')).first<OutreachRecordRow>();
+  if (!row) return c.json({ detail: 'Outreach record not found' }, 404);
+  return c.json(serialize(row));
 });
 
-// POST /api/outreach
-router.post('/', requireAuth, requireAdmin, zValidator('json', createOutreachSchema), async (c) => {
-  const db = c.env.DB;
-  const { business_id, call_id, status, disposition } = c.req.valid('json');
-  const id = generateId();
-
-  await db.prepare(`
-    INSERT INTO outreach_records (id, business_id, call_id, status, disposition)
-    VALUES (?, ?, ?, ?, ?)
-  `).bind(id, business_id, call_id ?? null, status, disposition ?? null).run();
-
-  const created = await getById(db, 'outreach_records', id);
-  return c.json(created, 201);
+// =py routes/outreach.get_transcript
+router.get('/:id/transcript', requireAuth, async (c) => {
+  const row = await c.env.DB.prepare('SELECT call_transcript, retell_call_id FROM outreach_records WHERE id = ?')
+    .bind(c.req.param('id')).first<{ call_transcript: string | null; retell_call_id: string | null }>();
+  if (!row) return c.json({ detail: 'Outreach record not found' }, 404);
+  return c.json({ transcript: row.call_transcript, retell_call_id: row.retell_call_id });
 });
 
-// PATCH /api/outreach/:id — update call result
-router.patch('/:id', requireAuth, requireAdmin, zValidator('json', z.object({
-  status: z.string().optional(),
-  duration: z.number().optional(),
-  transcript: z.string().optional().nullable(),
-  disposition: z.string().optional().nullable(),
-  sentiment_score: z.number().optional().nullable(),
-})), async (c) => {
+// =py routes/outreach.update_outreach
+router.patch('/:id', requireAuth, requireAdmin, jsonBody(z.object({ notes: z.string().nullable().optional(), assigned_to: z.string().nullable().optional() })), async (c) => {
+  const id = c.req.param('id');
+  const body = c.req.valid('json');
   const db = c.env.DB;
-  const id = c.req.param('id')!;
-  const data = c.req.valid('json');
+  const existing = await db.prepare('SELECT id FROM outreach_records WHERE id = ?').bind(id).first();
+  if (!existing) return c.json({ detail: 'Outreach record not found' }, 404);
 
-  const existing = await getById<OutreachRecord>(db, 'outreach_records', id);
-  if (!existing) return c.json({ error: 'Outreach record not found' }, 404);
-
-  const fields: string[] = [];
-  const values: unknown[] = [];
-
-  for (const [key, value] of Object.entries(data)) {
-    if (value !== undefined) {
-      fields.push(`${key} = ?`);
-      values.push(value ?? null);
-    }
+  const sets: string[] = [];
+  const binds: unknown[] = [];
+  for (const key of ['notes', 'assigned_to'] as const) {
+    if (body[key] !== undefined) { sets.push(`${key} = ?`); binds.push(body[key]); }
   }
-
-  if (fields.length === 0) return c.json(existing);
-
-  values.push(id);
-  await db.prepare(`UPDATE outreach_records SET ${fields.join(', ')} WHERE id = ?`).bind(...values).run();
-
-  const updated = await getById(db, 'outreach_records', id);
-  return c.json(updated);
+  if (sets.length) {
+    sets.push('updated_at = ?'); binds.push(nowIso());
+    await db.prepare(`UPDATE outreach_records SET ${sets.join(', ')} WHERE id = ?`).bind(...binds, id).run();
+  }
+  const row = await db.prepare('SELECT * FROM outreach_records WHERE id = ?').bind(id).first<OutreachRecordRow>();
+  return c.json(serialize(row!));
 });
-
-// Retell AI webhook handler — public (no auth, HMAC verified against raw body)
-router.post('/webhook/retell', async (c) => {
-  const db = c.env.DB;
-  const rawBody = await c.req.text();
-  const body = JSON.parse(rawBody);
-
-  // Validate Retell HMAC signature against raw request body
-  const signature = c.req.header('X-Retell-Signature');
-  const secret: string | undefined = (c.env as any).RETELL_WEBHOOK_SECRET;
-  if (secret && signature) {
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
-    );
-    const sigBytes = hexToBytes(signature);
-    const valid = await crypto.subtle.verify('HMAC', key, sigBytes, encoder.encode(rawBody));
-    if (!valid) return c.json({ error: 'Invalid signature' }, 401);
-  }
-
-  // Retell sends call completion events
-  const { call_id, call_status, transcript, disposition, sentiment_score } = body;
-
-  if (call_id) {
-    await db.prepare(`
-      UPDATE outreach_records
-      SET status = ?, transcript = ?, disposition = ?, sentiment_score = ?,
-          called_at = datetime('now')
-      WHERE call_id = ?
-    `).bind(call_status ?? 'completed', transcript ?? null, disposition ?? null,
-           sentiment_score ?? null, call_id).run();
-
-    // Queue sentiment analysis if we have transcript data
-    if (transcript && sentiment_score === undefined) {
-      try {
-        await c.env.SENTIMENT_QUEUE.send({
-          type: 'analyze_sentiment',
-          call_id,
-          transcript: transcript.slice(0, 10000),
-        });
-      } catch (e) {
-        console.error('Failed to queue sentiment analysis:', e);
-      }
-    }
-  }
-
-  return c.json({ received: true });
-});
-
-function hexToBytes(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-  }
-  return bytes;
-}
 
 export default router;

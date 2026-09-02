@@ -6,6 +6,7 @@ import businessRoutes from './routes/businesses';
 import leadRoutes from './routes/leads';
 import pipelineRoutes from './routes/pipeline';
 import outreachRoutes from './routes/outreach';
+import webhookRoutes from './routes/webhooks';
 import grantRoutes from './routes/grants';
 import reportRoutes from './routes/reports';
 
@@ -22,6 +23,7 @@ app.route('/api/businesses', businessRoutes);
 app.route('/api/leads', leadRoutes);
 app.route('/api/pipeline', pipelineRoutes);
 app.route('/api/outreach', outreachRoutes);
+app.route('/api/webhooks/retell', webhookRoutes);
 app.route('/api/grants', grantRoutes);
 app.route('/api/reports', reportRoutes);
 
