@@ -13,7 +13,7 @@ type Env = {
 
 const router = new Hono<Env>();
 
-const PIPELINE_STAGES = ['discovered', 'contacted', 'qualified', 'negotiating', 'committed', 'closed', 'lost'] as const;
+export const PIPELINE_STAGES = ['discovered', 'contacted', 'qualified', 'negotiating', 'committed', 'closed', 'lost'] as const;
 
 const createPipelineSchema = z.object({
   business_id: z.string(),
