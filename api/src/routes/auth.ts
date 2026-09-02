@@ -41,7 +41,7 @@ router.post('/login', jsonBody(loginSchema), async (c) => {
   const refresh = await signToken({ sub: user.id, role: user.role, type: 'refresh' }, secret, REFRESH_TOKEN_EXPIRE_DAYS * 86400);
 
   setCookie(c, 'refresh_token', refresh, {
-    httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: REFRESH_TOKEN_EXPIRE_DAYS * 86400,
+    httpOnly: true, secure: true, sameSite: 'None', path: '/', maxAge: REFRESH_TOKEN_EXPIRE_DAYS * 86400,
   });
   return c.json({ access_token: access, token_type: 'bearer', user: publicUser(user) });
 });
@@ -67,7 +67,7 @@ router.post('/refresh', async (c) => {
 
 // =py routes/auth.logout
 router.post('/logout', (c) => {
-  deleteCookie(c, 'refresh_token', { path: '/', httpOnly: true, secure: true, sameSite: 'Lax' });
+  deleteCookie(c, 'refresh_token', { path: '/', httpOnly: true, secure: true, sameSite: 'None' });
   return c.json({ status: 'ok' });
 });
 

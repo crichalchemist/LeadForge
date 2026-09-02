@@ -30,6 +30,6 @@
   "vars": { "CORS_ORIGINS": "http://localhost:5173" },
   "env": {
     "staging": { "name": "leadforge-api-staging" },
-    "production": { "name": "leadforge-api" }
+    "production": { "name": "leadforge-api", "vars": { "CORS_ORIGINS": "https://leadforge-frontend-80u.pages.dev" } }
   }
 }

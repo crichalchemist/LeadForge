@@ -18,6 +18,15 @@ describe('auth', () => {
     expect(res.headers.get('set-cookie')).toContain('refresh_token=');
   });
 
+  it('refresh cookie is sent cross-site from the Pages origin (SameSite=None; Secure)', async () => {
+    await adminUser();
+    const res = await api('POST', '/auth/login', { json: { email: 'admin@test.com', password: 'testpassword12' } });
+    const cookie = res.headers.get('set-cookie') ?? '';
+    expect(cookie).toMatch(/SameSite=None/i);
+    expect(cookie).toMatch(/Secure/);
+    expect(cookie).toMatch(/HttpOnly/i);
+  });
+
   it('test_login_wrong_password', async () => {
     await adminUser();
     const res = await api('POST', '/auth/login', { json: { email: 'admin@test.com', password: 'wrongpassword1' } });
