@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { accessToken, adminUser, api, createBusiness, createOutreach, resetDb } from './helpers';
+import { accessToken, adminUser, api, createBusiness, createOutreach, resetDb, viewerUser } from './helpers';
 
 let token: string;
 beforeEach(async () => { await resetDb(); token = await accessToken(await adminUser()); });
@@ -56,5 +56,12 @@ describe('TestUpdateOutreach', () => {
     const data = await res.json() as any;
     expect(data.notes).toBe('Follow up next week');
     expect(data.assigned_to).toBe('john@example.com');
+  });
+
+  it('rejects viewers', async () => {
+    const id = await createOutreach(await createBusiness());
+    const viewer = await accessToken(await viewerUser());
+    const res = await api('PATCH', `/outreach/${id}`, { token: viewer, json: { notes: 'nope' } });
+    expect(res.status).toBe(403);
   });
 });

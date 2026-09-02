@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - Every route mounts under `/api`. Error bodies are `{ "detail": string }`. Status codes: 401 unauthenticated, 403 viewer on a write, 404 missing row, 400 invalid enum value in a stage transition, 422 invalid transition or request validation failure.
-- Pagination shape is `{ items, total, page, page_size }`. Query params are `page` (default 1, min 1) and `page_size` (default 20, min 1, max 100).
+- Pagination shape is `{ items, total, page, page_size }`. Query params are `page` (default 1, min 1) and `page_size` (default 20, min 1, max 100). `GET /grants` is the one exception and returns a bare array (Python parity).
 - Booleans are stored as INTEGER 0/1 and serialized to JSON `true`/`false`. Timestamps are ISO-8601 UTC strings ending in `Z`. Dates are `YYYY-MM-DD`. IDs are `crypto.randomUUID()` strings.
 - Never interpolate request data into SQL. Table names, column lists and ORDER BY fragments are literals from code; every value goes through `.bind()`.
 - The main Hono app is constructed with `{ strict: false }` so `/api/grants` and `/api/grants/` both match.

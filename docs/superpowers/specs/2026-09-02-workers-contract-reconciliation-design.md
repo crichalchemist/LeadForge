@@ -38,11 +38,11 @@ One table per SQLAlchemy model, same table and column names, plus the two pre-co
 
 Dropped from the current Workers schema: `pipeline_items` (pipeline state lives on `outreach_records.status`), `scoring_weights` (unused). `digital_presence` is renamed `digital_presences` to match the model.
 
-Schema ships as `api/migrations/0001_initial.sql` and is applied with `wrangler d1 migrations apply`. The old `api/src/db/schema.sql` is removed.
+Schema ships as `api/migrations/0001_initial.sql` and is applied with `wrangler d1 migrations apply`. The old `api/src/db/schema.sql` is removed. The remote `leadforge-db` predates this migration and was created from the old `schema.sql`; drop its tables or recreate the database before the first remote apply.
 
 ## HTTP contract
 
-Every route mounts under `/api`. Paths, query parameters, status codes and JSON shapes match the Python routes exactly. Pagination is `{ items, total, page, page_size }`. Errors are `{ detail: string }` with FastAPI's status codes (401 unauthenticated, 403 non-admin on writes, 404 missing, 400 invalid enum value, 422 invalid stage transition or validation failure).
+Every route mounts under `/api`. Paths, query parameters, status codes and JSON shapes match the Python routes exactly. Pagination is `{ items, total, page, page_size }`. Exception: `GET /grants` returns a bare array, as the Python route does. Errors are `{ detail: string }` with FastAPI's status codes (401 unauthenticated, 403 non-admin on writes, 404 missing, 400 invalid enum value, 422 invalid stage transition or validation failure).
 
 Endpoints removed because neither Python nor the frontend has them: `POST /businesses`, `DELETE /businesses/:id`, `GET /leads`, `GET /leads/:id`, `POST /leads/calculate/:businessId`, `DELETE /leads/:id`, `GET /pipeline`, `GET /pipeline/:id`, `POST /pipeline`, `PATCH /pipeline/:id`, `DELETE /pipeline/:id`, `GET /outreach`, `POST /outreach`, `GET /grants/board/summary`, `POST /grants/financial-calculator`, `POST /grants/:id/documents`, `GET /reports/corridor`.
 
@@ -52,7 +52,7 @@ Endpoints removed because neither Python nor the frontend has them: `POST /busin
 - **JWT** payload is `{ sub, role, type, iat, exp }` with `type` in `access` | `refresh`, matching Python. HS256 via Web Crypto. `email` is no longer in the payload.
 - **Auth middleware** verifies the token, requires `type === 'access'`, and loads the user row to check `is_active`, as Python's `get_current_user` does.
 - **`POST /auth/signup`** is kept as the only way to create users on Workers (Python uses a CLI). It requires an admin token and accepts `role`. The first admin is inserted with `wrangler d1 execute` using a hash from `api/scripts/hash-password.mjs`.
-- **Retell webhook** lives at `/api/webhooks/retell/call-complete` and `/api/webhooks/retell/call-event`. Signature is HMAC-SHA256 hex over the raw body keyed by the `RETELL_API_KEY` secret, as in Python. The `RETELL_WEBHOOK_SECRET` var is removed. After a `call_ended` with a transcript, the handler enqueues `{ outreach_id }` on `SENTIMENT_QUEUE` in place of the Celery task.
+- **Retell webhook** lives at `/api/webhooks/retell/call-complete` and `/api/webhooks/retell/call-event`. Signature is HMAC-SHA256 hex over the raw body keyed by the `RETELL_API_KEY` secret, as in Python. The `RETELL_WEBHOOK_SECRET` var is removed. After a `call_ended` with a transcript, the handler enqueues `{ outreach_id }` on `SENTIMENT_QUEUE` in place of the Celery task. As in Python, verification is skipped when the `x-retell-signature` header is absent; this is an inherited weakness, pinned by a test, to be tightened once Retell's header behavior is confirmed in production.
 - **`lib/scoring.ts`** is left in place but unreferenced. Its formulas diverge from `src/leadforge/scoring/` and are re-ported in the Phase 3 scoring task, not here.
 
 ## Testing

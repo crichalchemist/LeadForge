@@ -27,6 +27,7 @@
   "kv_namespaces": [
     { "binding": "COOKIE_STORE", "id": "placeholder-kv-id" }
   ],
+  "vars": { "CORS_ORIGINS": "http://localhost:5173" },
   "env": {
     "staging": { "name": "leadforge-api-staging" },
     "production": { "name": "leadforge-api" }

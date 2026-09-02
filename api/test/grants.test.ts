@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { env } from 'cloudflare:workers';
-import { accessToken, adminUser, api, createBusiness, resetDb } from './helpers';
+import { accessToken, adminUser, api, createBusiness, resetDb, viewerUser } from './helpers';
 
 let token: string;
 let biz: string;
@@ -110,5 +110,11 @@ describe('grants', () => {
 
   it('test_grant_auth_required', async () => {
     expect((await api('GET', '/grants/')).status).toBe(401);
+  });
+
+  it('rejects viewers', async () => {
+    const viewer = await accessToken(await viewerUser());
+    const res = await api('POST', '/grants', { token: viewer, json: { business_id: biz } });
+    expect(res.status).toBe(403);
   });
 });

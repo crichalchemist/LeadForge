@@ -12,7 +12,19 @@ import reportRoutes from './routes/reports';
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 
-app.use('/api/*', cors({ origin: (origin) => origin || '*', credentials: true }));
+app.use(
+  '/api/*',
+  cors({
+    origin: (origin, c) => {
+      const allowed = (c.env.CORS_ORIGINS || '')
+        .split(',')
+        .map((o: string) => o.trim())
+        .filter(Boolean);
+      return allowed.includes(origin) ? origin : '';
+    },
+    credentials: true,
+  })
+);
 
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
 app.route('/api/auth', authRoutes);

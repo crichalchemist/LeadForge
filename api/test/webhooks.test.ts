@@ -81,6 +81,13 @@ describe('TestCallCompleteWebhook', () => {
     const good = await api('POST', '/webhooks/retell/call-complete', { headers: { 'Content-Type': 'application/json', 'x-retell-signature': await sign(body) }, json: callEnded });
     expect(good.status).toBe(200);
   });
+
+  it('accepts a known call_id with no x-retell-signature header (Python-inherited behavior)', async () => {
+    await createOutreach(await createBusiness(), { retell_call_id: 'call_abc123' });
+    const res = await api('POST', '/webhooks/retell/call-complete', { json: callEnded });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ status: 'ok', call_id: 'call_abc123' });
+  });
 });
 
 describe('TestCallEventWebhook', () => {

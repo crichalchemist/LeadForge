@@ -13,6 +13,7 @@ export default defineConfig({
             TEST_MIGRATIONS: migrations,
             JWT_SECRET: 'test-secret-key-for-unit-tests-only-0123456789abcdef',
             RETELL_API_KEY: 'test-retell-key',
+            CORS_ORIGINS: 'http://localhost:5173',
           },
         },
       };

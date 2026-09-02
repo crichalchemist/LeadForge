@@ -12,7 +12,7 @@ LeadForge discovers under-digitized Chicago small businesses from public data, s
 |---|---|---|
 | Location | `src/leadforge/` | `api/` |
 | Stack | FastAPI, SQLAlchemy 2 async, PostgreSQL+PostGIS, Celery+Redis, vLLM + Claude (Azure Foundry) | Hono, Zod, D1 (SQLite), Queues, Cron Triggers, Workers AI, KV |
-| Tests | `tests/` (pytest, 158 tests) | vitest configured, no tests written yet |
+| Tests | `tests/` (pytest, 158 tests) | `api/test/` (vitest on `@cloudflare/vitest-plugin`, 90 tests mirroring `tests/api/`) |
 
 The Python code is the behavioral spec. When porting a route, read the matching module under `src/leadforge/api/routes/` and its tests first, and reproduce stage transitions, scoring math, and auth rules exactly. Design and task-by-task plan: `docs/superpowers/specs/2026-05-13-leadforge-cloudflare-migration-design.md` and `docs/superpowers/plans/2026-05-13-leadforge-cloudflare-migration.md`.
 
@@ -49,6 +49,7 @@ npm run build          # wrangler deploy --dry-run
 npm test               # vitest
 npx wrangler d1 migrations apply leadforge-db --local   # apply migrations locally; drop --local for remote
 npx wrangler secret put JWT_SECRET
+npx wrangler secret put RETELL_API_KEY   # HMAC key for the Retell webhook
 npx wrangler deploy    # env: staging | production via --env
 ```
 
@@ -65,13 +66,13 @@ npm run build          # tsc -b && vite build
 
 **Route prefixes differ between backends.** The frontend axios client uses `baseURL: '/api'`. The Vite dev proxy forwards `/api/*` to `localhost:8000` and strips the `/api` prefix because FastAPI mounts routers at the root. The Workers app mounts everything under `/api/*`. When the frontend is pointed at Workers, the prefix must not be stripped.
 
-**Auth.** Both backends issue HS256 JWTs with `sub`, `email`, `role` (`admin` | `viewer`). Access tokens 60 min, refresh tokens 30 days in an HTTP-only cookie. Public routes: health, login/refresh, and the Retell webhook. Every other route requires a token, and writes require `admin`. In Workers, `requireAuth` sets `user` on the Hono context and `requireAdmin` reads it, so `requireAdmin` must be chained after `requireAuth`. `JWT_SECRET` falls back to a dev string when unset; set it as a wrangler secret before any real deploy.
+**Auth.** Both backends issue HS256 JWTs with `sub`, `role` (`admin` | `viewer`), and `type` (`access` | `refresh`) in the payload — no `email`. Access tokens 60 min, refresh tokens 30 days in an HTTP-only cookie. Public routes: health, login/refresh, and the Retell webhook. Every other route requires a token, and writes require `admin`. In Workers, `requireAuth` sets `user` on the Hono context and `requireAdmin` reads it, so `requireAdmin` must be chained after `requireAuth`. `JWT_SECRET` is required: auth routes and middleware return 500 `{ detail: 'JWT_SECRET not configured' }` when it is unset. Set it with `wrangler secret put JWT_SECRET` before deploying.
 
 D1 queries are inline in each route. Table names, column lists and ORDER BY fragments are literals from code; every value from a request goes through `.bind()`. The `LATEST_SCORE_JOIN` and `LATEST_OUTREACH_JOIN` fragments in `routes/businesses.ts` are the one place that picks the current score and stage per business.
 
 **No spatial queries on D1.** NOF corridor membership was computed once against PostGIS with a 50 m `ST_DWithin` buffer (`scripts/precompute_corridors.py`) and stored as `in_nof_corridor` / `nof_corridor_name` on `businesses`. New businesses need a non-PostGIS check at ingest.
 
-**Scoring.** Composite = 0.40 digital deficit + 0.35 viability + 0.25 competitive pressure, capped at 100, plus a price tier (1 to 3) derived from revenue, headcount, and pressure. Python versions are pure functions in `src/leadforge/scoring/` and the TS port lives in `api/src/lib/scoring.ts`. Scores are versioned rows in `lead_scores`, never overwritten. Post-call sentiment adjusts the composite multiplicatively, once per call (ADR 014).
+**Scoring.** Composite = 0.40 digital deficit + 0.35 viability + 0.25 competitive pressure, capped at 100, plus a price tier (1 to 3) derived from revenue, headcount, and pressure. Python versions are pure functions in `src/leadforge/scoring/` and `api/src/lib/scoring.ts` is a frozen, unreferenced placeholder whose formulas diverge from Python; it is re-ported in the Phase 3 scoring task. Scores are versioned rows in `lead_scores`, never overwritten. Post-call sentiment adjusts the composite multiplicatively, once per call (ADR 014).
 
 **Pipeline stages.** Outreach stages and the allowed transitions live in `VALID_TRANSITIONS` in `src/leadforge/api/routes/pipeline.py`. The grant pipeline has 13 stages on `GrantApplication` and is a separate track from outreach (ADR 023). Backends reject invalid transitions; the frontend does optimistic updates.
 
@@ -94,3 +95,4 @@ D1 queries are inline in each route. Table names, column lists and ORDER BY frag
 - `Dockerfile` CMD runs `leadforge.api.main:app`, but the app object is `leadforge.api.app:app`. The README and Makefile use the correct path.
 - `api/wrangler.jsonc` has a placeholder KV id for `COOKIE_STORE` and no queue consumers declared yet.
 - There is no CI workflow or pre-commit config in the repo.
+- The remote D1 database `leadforge-db` was created from the superseded `api/src/db/schema.sql`. `api/migrations/0001_initial.sql` uses bare `CREATE TABLE`, so the first `wrangler d1 migrations apply leadforge-db --remote` fails until the old tables are dropped or the database is recreated. Nothing in it is production data.

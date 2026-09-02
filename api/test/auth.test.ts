@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { env } from 'cloudflare:workers';
+import app from '../src/index';
 import { accessToken, adminUser, api, createBusiness, createUser, refreshToken, resetDb, viewerUser } from './helpers';
 
 beforeEach(resetDb);
@@ -120,5 +121,15 @@ describe('auth', () => {
     expect(res.status).toBe(201);
     const login = await api('POST', '/auth/login', { json: { email: 'new@test.com', password: 'testpassword12' } });
     expect(login.status).toBe(200);
+  });
+
+  it('returns 500 when JWT_SECRET is not configured', async () => {
+    const res = await app.request(
+      '/api/auth/login',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'a@b.c', password: 'x' }) },
+      { ...env, JWT_SECRET: undefined }
+    );
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ detail: 'JWT_SECRET not configured' });
   });
 });

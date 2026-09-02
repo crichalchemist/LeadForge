@@ -10,6 +10,7 @@ export interface Bindings {
   RECALIBRATION_QUEUE: Queue;
   JWT_SECRET?: string;
   RETELL_API_KEY?: string;
+  CORS_ORIGINS?: string;
 }
 
 export interface AuthUser {

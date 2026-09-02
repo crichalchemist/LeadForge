@@ -79,6 +79,7 @@ router.post('/call-complete', async (c) => {
   else if (event === 'call_analyzed') patch = handleCallAnalyzed(call);
   else patch = { ...handleCallEnded(call), ...('call_analysis' in call ? handleCallAnalyzed(call) : {}) };
 
+  // Keys come only from the Patch type assigned in handleCallEnded/handleCallAnalyzed, never from the request body.
   const sets = Object.keys(patch).map((k) => `${k} = ?`);
   if (sets.length) {
     await db.prepare(`UPDATE outreach_records SET ${sets.join(', ')}, updated_at = ? WHERE id = ?`)
