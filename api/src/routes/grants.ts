@@ -1,219 +1,192 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { zValidator } from '@hono/zod-validator';
 import { requireAuth, requireAdmin } from '../middleware/auth';
 import { generateId } from '../lib/jwt';
-import { getById, deleteById } from '../db/queries';
-import { calculateGrantFunding } from '../lib/grants';
-import { Bindings, Business, JwtPayload } from '../types';
+import { jsonBody, queryParams } from '../lib/validate';
+import { computeGrantFinancials } from '../lib/grants';
+import { BOARD_GROUPS, NOF_STAGES, VALID_NOF_TRANSITIONS, type NofStage } from '../lib/stages';
+import { nowIso, withBooleans, DOCUMENT_BOOLS, GRANT_BOOLS } from '../db/serialize';
+import type { AppEnv, GrantApplicationRow, GrantDocumentRow } from '../types';
 
-type Env = {
-  Bindings: Bindings;
-  Variables: { user: JwtPayload };
-};
+const router = new Hono<AppEnv>();
+const serializeGrant = (row: GrantApplicationRow) => withBooleans<Pick<GrantApplicationRow, keyof GrantApplicationRow>>(row, GRANT_BOOLS);
+const serializeDoc = (row: GrantDocumentRow) => withBooleans<Pick<GrantDocumentRow, keyof GrantDocumentRow>>(row, DOCUMENT_BOOLS);
 
-const router = new Hono<Env>();
+async function loadGrant(db: D1Database, id: string) {
+  return db.prepare('SELECT * FROM grant_applications WHERE id = ?').bind(id).first<GrantApplicationRow>();
+}
 
-const GRANT_STAGES = [
-  'identified', 'eligibility_check', 'documents_pending', 'documents_submitted',
-  'under_review', 'additional_info', 'approved', 'funding_disbursed',
-  'declined', 'withdrawn'
-] as const;
-
-const createGrantSchema = z.object({
-  business_id: z.string(),
-  corridor_name: z.string(),
-  amount_requested: z.number().min(0),
-});
-
-const updateGrantSchema = z.object({
-  stage: z.enum(GRANT_STAGES).optional(),
-  amount_approved: z.number().optional().nullable(),
+const listQuery = z.object({
   status: z.string().optional(),
-  amount_requested: z.number().optional(),
+  corridor_name: z.string().optional(),
+  business_id: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  page_size: z.coerce.number().int().min(1).max(100).default(20),
 });
 
-// GET /api/grants
-router.get('/', requireAuth, async (c) => {
-  const db = c.env.DB;
-  const pageRaw = parseInt(c.req.query('page') ?? '1');
-  const perPageRaw = parseInt(c.req.query('per_page') ?? '50');
-  if (isNaN(pageRaw) || pageRaw < 1) return c.json({ error: 'Invalid page' }, 400);
-  if (isNaN(perPageRaw) || perPageRaw < 1) return c.json({ error: 'Invalid per_page' }, 400);
-  const page = pageRaw;
-  const perPage = Math.min(perPageRaw, 200);
-  const offset = (page - 1) * perPage;
-  const businessId = c.req.query('business_id');
-  const corridorName = c.req.query('corridor_name');
-  const stage = c.req.query('stage');
-
-  const conditions: string[] = [];
-  const bindings: unknown[] = [];
-
-  if (businessId) { conditions.push('ga.business_id = ?'); bindings.push(businessId); }
-  if (corridorName) { conditions.push('ga.corridor_name = ?'); bindings.push(corridorName); }
-  if (stage) { conditions.push('ga.stage = ?'); bindings.push(stage); }
-
-  const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
-  const fromJoin = 'grant_applications ga JOIN businesses b ON b.id = ga.business_id';
-
-  // Count
-  const countStmt = db.prepare(`SELECT COUNT(*) as count FROM ${fromJoin} ${where}`);
-  const countResult = bindings.length > 0
-    ? await countStmt.bind(...bindings).first<{ count: number }>()
-    : await countStmt.first<{ count: number }>();
-  const total = countResult?.count ?? 0;
-
-  // Data
-  const data = await db
-    .prepare(`SELECT ga.*, b.name as business_name, b.niche, b.in_nof_corridor FROM ${fromJoin} ${where} ORDER BY ga.created_at DESC LIMIT ? OFFSET ?`)
-    .bind(...bindings, perPage, offset)
-    .all();
-
-  return c.json({ data: data.results ?? [], total, page, perPage });
-});
-
-// GET /api/grants/board/summary — aggregate grant board overview
-router.get('/board/summary', requireAuth, async (c) => {
-  const db = c.env.DB;
-
-  const byStage = await db.prepare(`
-    SELECT stage, COUNT(*) as count, COALESCE(SUM(amount_requested), 0) as total_requested
-    FROM grant_applications WHERE status = 'active'
-    GROUP BY stage ORDER BY CASE stage
-      WHEN 'identified' THEN 1 WHEN 'eligibility_check' THEN 2
-      WHEN 'documents_pending' THEN 3 WHEN 'documents_submitted' THEN 4
-      WHEN 'under_review' THEN 5 WHEN 'additional_info' THEN 6
-      WHEN 'approved' THEN 7 WHEN 'funding_disbursed' THEN 8
-      WHEN 'declined' THEN 9 WHEN 'withdrawn' THEN 10
-      ELSE 99 END
-  `).all();
-
-  const total = await db.prepare(`
-    SELECT COUNT(*) as total, COALESCE(SUM(amount_requested), 0) as total_requested,
-           COALESCE(SUM(amount_approved), 0) as total_approved
-    FROM grant_applications WHERE status = 'active'
-  `).first<{ total: number; total_requested: number; total_approved: number }>();
-
-  return c.json({
-    by_stage: byStage.results ?? [],
-    total: total?.total ?? 0,
-    total_requested: total?.total_requested ?? 0,
-    total_approved: total?.total_approved ?? 0,
-  });
-});
-
-// GET /api/grants/:id
-router.get('/:id', requireAuth, async (c) => {
-  const db = c.env.DB;
-  const id = c.req.param('id')!;
-  const grant = await db.prepare(`
-    SELECT ga.*, b.name as business_name, b.niche, b.address,
-           b.latitude, b.longitude, b.in_nof_corridor
-    FROM grant_applications ga
-    JOIN businesses b ON b.id = ga.business_id
-    WHERE ga.id = ?
-  `).bind(id).first();
-
-  if (!grant) return c.json({ error: 'Grant application not found' }, 404);
-  return c.json(grant);
-});
-
-// POST /api/grants
-router.post('/', requireAuth, requireAdmin, zValidator('json', createGrantSchema), async (c) => {
-  const db = c.env.DB;
-  const { business_id, corridor_name, amount_requested } = c.req.valid('json');
-  const id = generateId();
-
-  await db.prepare(`
-    INSERT INTO grant_applications (id, business_id, corridor_name, amount_requested)
-    VALUES (?, ?, ?, ?)
-  `).bind(id, business_id, corridor_name, amount_requested).run();
-
-  const created = await getById(db, 'grant_applications', id);
-  return c.json(created, 201);
-});
-
-// PATCH /api/grants/:id
-router.patch('/:id', requireAuth, requireAdmin, zValidator('json', updateGrantSchema), async (c) => {
-  const db = c.env.DB;
-  const id = c.req.param('id')!;
-  const data = c.req.valid('json');
-
-  const existing = await getById(db, 'grant_applications', id);
-  if (!existing) return c.json({ error: 'Grant not found' }, 404);
-
-  const fields: string[] = [];
-  const values: unknown[] = [];
-
-  for (const [key, value] of Object.entries(data)) {
-    if (value !== undefined) {
-      fields.push(`${key} = ?`);
-      values.push(value ?? null);
-    }
-  }
-
-  if (fields.length === 0) return c.json(existing);
-
-  values.push(id);
-  await db.prepare(`UPDATE grant_applications SET ${fields.join(', ')}, updated_at = datetime('now') WHERE id = ?`).bind(...values).run();
-
-  const updated = await getById(db, 'grant_applications', id);
-  return c.json(updated);
-});
-
-// POST /api/grants/financial-calculator — estimate grant funding
-router.post('/financial-calculator', requireAuth, zValidator('json', z.object({
+const createBody = z.object({
   business_id: z.string(),
-})), async (c) => {
-  const db = c.env.DB;
-  const { business_id } = c.req.valid('json');
-
-  const business = await getById<Business>(db, 'businesses', business_id);
-  if (!business) return c.json({ error: 'Business not found' }, 404);
-
-  // Get latest score
-  const score = await db.prepare(
-    'SELECT * FROM lead_scores WHERE business_id = ? ORDER BY calculated_at DESC LIMIT 1'
-  ).bind(business_id).first<{ digital_deficit_score: number }>();
-
-  const result = calculateGrantFunding({
-    business_annual_revenue: null,
-    employee_count: null,
-    years_in_business: 3,
-    in_corridor: (business as any).in_nof_corridor === 1,
-    digital_deficit_score: score?.digital_deficit_score ?? 50,
-  });
-
-  return c.json(result);
+  total_project_cost: z.number().nullable().optional(),
+  acquisition_cost: z.number().nullable().optional(),
+  project_description: z.string().nullable().optional(),
 });
 
-// GET /api/grants/:id/documents
-router.get('/:id/documents', requireAuth, async (c) => {
-  const db = c.env.DB;
-  const docs = await db.prepare(
-    'SELECT * FROM grant_documents WHERE grant_application_id = ?'
-  ).bind(c.req.param('id')!).all();
-
-  return c.json(docs.results ?? []);
+const UPDATE_FIELDS = [
+  'total_project_cost', 'base_grant_amount', 'acquisition_cost', 'taf_amount', 'owner_contribution',
+  'financing_amount', 'financing_verified', 'gc_bid_amount', 'project_description', 'exterior_work_pct',
+  'has_site_control', 'site_control_type', 'assigned_to', 'ta_provider', 'notes',
+] as const;
+const num = z.number().nullable().optional();
+const str = z.string().nullable().optional();
+const bool = z.boolean().nullable().optional();
+const updateBody = z.object({
+  total_project_cost: num, base_grant_amount: num, acquisition_cost: num, taf_amount: num, owner_contribution: num,
+  financing_amount: num, financing_verified: bool, gc_bid_amount: num, project_description: str, exterior_work_pct: num,
+  has_site_control: bool, site_control_type: str, assigned_to: str, ta_provider: str, notes: str,
 });
 
-// POST /api/grants/:id/documents
-router.post('/:id/documents', requireAuth, requireAdmin, zValidator('json', z.object({
-  filename: z.string(),
-  file_url: z.string().optional().nullable(),
-})), async (c) => {
+const docUpdateBody = z.object({ status: str, notes: str, received_date: str, reviewed_date: str });
+
+// =py routes/grants.get_grant_board
+router.get('/board', requireAuth, async (c) => {
   const db = c.env.DB;
-  const { filename, file_url } = c.req.valid('json');
+  const counts = await db.prepare('SELECT status, COUNT(*) AS n FROM grant_applications GROUP BY status').all<{ status: string; n: number }>();
+  const countByStage = new Map((counts.results ?? []).map((r) => [r.status, r.n]));
+
+  const cardStmt = db.prepare(`
+    SELECT g.id AS grant_id, g.business_id, b.name AS business_name, g.corridor_name,
+           g.base_grant_amount AS estimated_grant, g.updated_at
+    FROM grant_applications g JOIN businesses b ON b.id = g.business_id
+    WHERE g.status = ? ORDER BY g.updated_at DESC LIMIT 10`);
+  const results = await db.batch<{ grant_id: string; business_id: string; business_name: string; corridor_name: string | null; estimated_grant: number | null; updated_at: string }>(
+    BOARD_GROUPS.map((stage) => cardStmt.bind(stage))
+  );
+  const now = Date.now();
+  const columns = BOARD_GROUPS.map((stage, i) => ({
+    stage,
+    count: countByStage.get(stage) ?? 0,
+    cards: (results[i].results ?? []).map(({ updated_at, ...card }) => ({
+      ...card,
+      days_in_stage: Math.max(0, Math.floor((now - Date.parse(updated_at)) / 86_400_000)),
+    })),
+  }));
+  return c.json({ columns });
+});
+
+// =py routes/grants.get_grant_financials
+router.get('/financials/:grant_id', requireAuth, async (c) => {
+  const grant = await loadGrant(c.env.DB, c.req.param('grant_id')!);
+  if (!grant) return c.json({ detail: 'Grant application not found' }, 404);
+  return c.json(computeGrantFinancials(grant.total_project_cost ?? 0, grant.acquisition_cost ?? 0));
+});
+
+// =py routes/grants.get_grant
+router.get('/:grant_id', requireAuth, async (c) => {
+  const grant = await loadGrant(c.env.DB, c.req.param('grant_id')!);
+  if (!grant) return c.json({ detail: 'Grant application not found' }, 404);
+  return c.json(serializeGrant(grant));
+});
+
+// =py routes/grants.list_grants
+router.get('/', requireAuth, queryParams(listQuery), async (c) => {
+  const q = c.req.valid('query');
+  const where: string[] = [];
+  const binds: unknown[] = [];
+  if (q.status !== undefined) {
+    if (!(NOF_STAGES as readonly string[]).includes(q.status)) return c.json({ detail: `Invalid status: ${q.status}` }, 400);
+    where.push('status = ?'); binds.push(q.status);
+  }
+  if (q.corridor_name) { where.push('corridor_name = ?'); binds.push(q.corridor_name); }
+  if (q.business_id) { where.push('business_id = ?'); binds.push(q.business_id); }
+  const rows = await c.env.DB
+    .prepare(`SELECT * FROM grant_applications ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+    .bind(...binds, q.page_size, (q.page - 1) * q.page_size)
+    .all<GrantApplicationRow>();
+  return c.json((rows.results ?? []).map(serializeGrant));
+});
+
+// =py routes/grants.create_grant
+router.post('/', requireAuth, requireAdmin, jsonBody(createBody), async (c) => {
+  const body = c.req.valid('json');
+  const db = c.env.DB;
+  const biz = await db.prepare('SELECT id FROM businesses WHERE id = ?').bind(body.business_id).first();
+  if (!biz) return c.json({ detail: 'Business not found' }, 404);
+
   const id = generateId();
-  const grantId = c.req.param('id')!;
-
   await db.prepare(
-    'INSERT INTO grant_documents (id, grant_application_id, filename, file_url) VALUES (?, ?, ?, ?)'
-  ).bind(id, grantId, filename, file_url ?? null).run();
+    `INSERT INTO grant_applications (id, business_id, status, total_project_cost, acquisition_cost, project_description)
+     VALUES (?, ?, 'eligibility_assessed', ?, ?, ?)`
+  ).bind(id, body.business_id, body.total_project_cost ?? null, body.acquisition_cost ?? null, body.project_description ?? null).run();
+  console.log('grant_application_created', { grant_id: id });
+  return c.json(serializeGrant((await loadGrant(db, id))!), 201);
+});
 
-  const doc = await getById(db, 'grant_documents', id);
-  return c.json(doc, 201);
+// =py routes/grants.update_grant
+router.patch('/:grant_id', requireAuth, requireAdmin, jsonBody(updateBody), async (c) => {
+  const id = c.req.param('grant_id');
+  const db = c.env.DB;
+  if (!(await loadGrant(db, id))) return c.json({ detail: 'Grant application not found' }, 404);
+
+  const body = c.req.valid('json');
+  const sets: string[] = [];
+  const binds: unknown[] = [];
+  for (const key of UPDATE_FIELDS) {
+    const value = body[key];
+    if (value !== undefined) { sets.push(`${key} = ?`); binds.push(typeof value === 'boolean' ? (value ? 1 : 0) : value); }
+  }
+  if (sets.length) {
+    sets.push('updated_at = ?'); binds.push(nowIso());
+    await db.prepare(`UPDATE grant_applications SET ${sets.join(', ')} WHERE id = ?`).bind(...binds, id).run();
+  }
+  return c.json(serializeGrant((await loadGrant(db, id))!));
+});
+
+// =py routes/grants.transition_grant_stage
+router.patch('/:grant_id/stage', requireAuth, requireAdmin, jsonBody(z.object({ new_stage: z.string() })), async (c) => {
+  const id = c.req.param('grant_id');
+  const { new_stage } = c.req.valid('json');
+  const db = c.env.DB;
+  const grant = await loadGrant(db, id);
+  if (!grant) return c.json({ detail: 'Grant application not found' }, 404);
+  if (!(NOF_STAGES as readonly string[]).includes(new_stage)) return c.json({ detail: `Invalid stage: ${new_stage}` }, 400);
+
+  const allowed = VALID_NOF_TRANSITIONS[grant.status];
+  if (!allowed.includes(new_stage as NofStage)) {
+    return c.json({ detail: `Cannot transition from ${grant.status} to ${new_stage}. Allowed: [${allowed.map((s) => `'${s}'`).join(', ')}]` }, 422);
+  }
+  await db.prepare('UPDATE grant_applications SET status = ?, updated_at = ? WHERE id = ?').bind(new_stage, nowIso(), id).run();
+  return c.json({ status: 'ok', grant_id: id, new_stage });
+});
+
+// =py routes/grants.list_grant_documents
+router.get('/:grant_id/documents', requireAuth, async (c) => {
+  const id = c.req.param('grant_id')!;
+  const db = c.env.DB;
+  if (!(await loadGrant(db, id))) return c.json({ detail: 'Grant application not found' }, 404);
+  const rows = await db.prepare('SELECT * FROM grant_documents WHERE grant_application_id = ?').bind(id).all<GrantDocumentRow>();
+  return c.json((rows.results ?? []).map(serializeDoc));
+});
+
+// =py routes/grants.update_grant_document
+router.patch('/:grant_id/documents/:doc_id', requireAuth, requireAdmin, jsonBody(docUpdateBody), async (c) => {
+  const grantId = c.req.param('grant_id');
+  const docId = c.req.param('doc_id');
+  const db = c.env.DB;
+  const doc = await db.prepare('SELECT * FROM grant_documents WHERE id = ? AND grant_application_id = ?').bind(docId, grantId).first<GrantDocumentRow>();
+  if (!doc) return c.json({ detail: 'Grant document not found' }, 404);
+
+  const body = c.req.valid('json');
+  const sets: string[] = [];
+  const binds: unknown[] = [];
+  for (const key of ['status', 'notes', 'received_date', 'reviewed_date'] as const) {
+    if (body[key] !== undefined) { sets.push(`${key} = ?`); binds.push(body[key]); }
+  }
+  if (sets.length) {
+    sets.push('updated_at = ?'); binds.push(nowIso());
+    await db.prepare(`UPDATE grant_documents SET ${sets.join(', ')} WHERE id = ?`).bind(...binds, docId).run();
+  }
+  const updated = await db.prepare('SELECT * FROM grant_documents WHERE id = ?').bind(docId).first<GrantDocumentRow>();
+  return c.json(serializeDoc(updated!));
 });
 
 export default router;
