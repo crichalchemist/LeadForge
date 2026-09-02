@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { Bindings } from './types';
+import type { Bindings } from './types';
 import authRoutes from './routes/auth';
 import businessRoutes from './routes/businesses';
 import leadRoutes from './routes/leads';
@@ -12,10 +12,7 @@ import reportRoutes from './routes/reports';
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 
-app.use('/api/*', cors({
-  origin: (origin) => origin || '*',
-  credentials: true,
-}));
+app.use('/api/*', cors({ origin: (origin) => origin || '*', credentials: true }));
 
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
 app.route('/api/auth', authRoutes);

@@ -54,3 +54,4 @@ To maintain organization across the 4-phase build:
 | 023 | Dual pipeline CRM: independent GrantApplication and OutreachRecord tracks | Accepted | 2026-03-14 |
 | 024 | Grant financial calculator: pure function modeling NOF grant math | Accepted | 2026-03-14 |
 | 025 | Voice prompt fork: dynamic NOF vs marketing pitch based on eligibility | Accepted | 2026-03-14 |
+| 026 | Workers API mirrors the Python API contract; D1 schema mirrors SQLAlchemy models | Accepted | 2026-09-02 |

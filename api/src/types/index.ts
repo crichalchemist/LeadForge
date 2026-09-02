@@ -100,15 +100,5 @@ export interface GrantDocumentRow {
   created_at: string; updated_at: string;
 }
 
-// TEMPORARY — removed in Task 9 once every route is re-ported.
-export type Business = BusinessRow;
-export type LeadScore = LeadScoreRow;
-export type OutreachRecord = OutreachRecordRow;
-export type GrantApplication = GrantApplicationRow;
-// scoring.ts (frozen) reads facebook_url/instagram_url, which the new schema drops in favor of
-// has_facebook_page/has_instagram; kept optional here so it still compiles until scoring.ts is
-// re-ported (design doc: "left in place but unreferenced... re-ported in the Phase 3 scoring task").
+// Consumed only by lib/scoring.ts (frozen; re-ported in Phase 3).
 export type DigitalPresence = DigitalPresenceRow & { facebook_url?: string | null; instagram_url?: string | null };
-export interface CompetitiveContext { avg_rating: number | null; total_reviews: number | null; business_density: number | null }
-export interface PipelineItem { id: string }
-export interface User { id: string }

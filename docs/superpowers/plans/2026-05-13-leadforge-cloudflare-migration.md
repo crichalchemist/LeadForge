@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Superseded in part (2026-09-02):** the schema and route code in Tasks 1.2, 1.3, 1.5, 1.6, 1.7, 2.1 and 2.2 was replaced by `2026-09-02-workers-contract-reconciliation.md`. Tasks 2.4 onward still apply.
+
 **Goal:** Migrate LeadForge from self-hosted Docker (Python/FastAPI/Celery/PostGIS/vLLM/Redis) to fully serverless Cloudflare Workers (Hono/D1/Queues/Cron/Workers AI). Zero self-managed containers.
 
 **Architecture:** Workers API (Hono + Zod + Web Crypto JWT) handles all HTTP routes. D1 (SQLite) replaces PostgreSQL. Pre-compute corridor geometry into boolean fields so no PostGIS needed at runtime. Workers AI replaces both vLLM (CPU Qwen) and Azure Claude. Queues + Cron replace Celery/Redis. Frontend deploys to Pages.
