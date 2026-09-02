@@ -55,3 +55,4 @@ To maintain organization across the 4-phase build:
 | 024 | Grant financial calculator: pure function modeling NOF grant math | Accepted | 2026-03-14 |
 | 025 | Voice prompt fork: dynamic NOF vs marketing pitch based on eligibility | Accepted | 2026-03-14 |
 | 026 | Workers API mirrors the Python API contract; D1 schema mirrors SQLAlchemy models | Accepted | 2026-09-02 |
+| 027 | Frontend on Cloudflare Pages, cross-origin to the Workers API; refresh cookie SameSite=None | Accepted | 2026-09-02 |

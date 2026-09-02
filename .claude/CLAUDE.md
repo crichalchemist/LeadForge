@@ -12,11 +12,11 @@ LeadForge discovers under-digitized Chicago small businesses from public data, s
 |---|---|---|
 | Location | `src/leadforge/` | `api/` |
 | Stack | FastAPI, SQLAlchemy 2 async, PostgreSQL+PostGIS, Celery+Redis, vLLM + Claude (Azure Foundry) | Hono, Zod, D1 (SQLite), Queues, Cron Triggers, Workers AI, KV |
-| Tests | `tests/` (pytest, 158 tests) | `api/test/` (vitest on `@cloudflare/vitest-plugin`, 96 tests mirroring `tests/api/`) |
+| Tests | `tests/` (pytest, 158 tests) | `api/test/` (vitest on `@cloudflare/vitest-plugin`, 97 tests mirroring `tests/api/`) |
 
 The Python code is the behavioral spec. When porting a route, read the matching module under `src/leadforge/api/routes/` and its tests first, and reproduce stage transitions, scoring math, and auth rules exactly. Design and task-by-task plan: `docs/superpowers/specs/2026-05-13-leadforge-cloudflare-migration-design.md` and `docs/superpowers/plans/2026-05-13-leadforge-cloudflare-migration.md`.
 
-Migration status as of 2026-09-02: the Workers API is re-ported to the Python contract (ADR-026, spec `docs/superpowers/specs/2026-09-02-workers-contract-reconciliation-design.md`) with a vitest suite under `api/test/` mirroring `tests/api/`. Remaining: frontend deploy to Pages (task 2.4), Workers AI client, queue consumers + cron handlers, scrapers, scoring re-port, decommission.
+Migration status as of 2026-09-02: the Workers API is re-ported to the Python contract (ADR-026, spec `docs/superpowers/specs/2026-09-02-workers-contract-reconciliation-design.md`) with a vitest suite under `api/test/` mirroring `tests/api/`, and the frontend is deployed to Pages at https://leadforge-frontend-80u.pages.dev (task 2.4, ADR-027). Remaining: first deploy of the Worker itself (needs a real KV id, secrets, and a recreated remote D1), Workers AI client, queue consumers + cron handlers, scrapers, scoring re-port, decommission.
 
 ## Commands
 
@@ -59,14 +59,15 @@ npx wrangler deploy    # env: staging | production via --env
 cd frontend
 npm install
 npm run dev            # Vite on :5173
-npm run build          # tsc -b && vite build
+npm run build          # tsc -b && vite build; .env.production bakes VITE_API_BASE_URL into dist/
+npx wrangler pages deploy dist --project-name=leadforge-frontend --branch=master   # Pages: https://leadforge-frontend-80u.pages.dev
 ```
 
 ## Architecture notes that span files
 
-**Route prefixes differ between backends.** The frontend axios client uses `baseURL: '/api'`. The Vite dev proxy forwards `/api/*` to `localhost:8000` and strips the `/api` prefix because FastAPI mounts routers at the root. The Workers app mounts everything under `/api/*`. When the frontend is pointed at Workers, the prefix must not be stripped.
+**Route prefixes differ between backends.** The frontend axios client uses `baseURL: '/api'`. The Vite dev proxy forwards `/api/*` to `localhost:8000` and strips the `/api` prefix because FastAPI mounts routers at the root. The Workers app mounts everything under `/api/*`. The production build points at the Worker directly through `VITE_API_BASE_URL` in `frontend/.env.production` (ADR 027); in dev the value is unset and the proxy applies, so the prefix is stripped only for FastAPI.
 
-**Auth.** Both backends issue HS256 JWTs with `sub`, `role` (`admin` | `viewer`), and `type` (`access` | `refresh`) in the payload — no `email`. Access tokens 60 min, refresh tokens 30 days in an HTTP-only cookie. Public routes: health, login/refresh, and the Retell webhook. Every other route requires a token, and writes require `admin`. In Workers, `requireAuth` sets `user` on the Hono context and `requireAdmin` reads it, so `requireAdmin` must be chained after `requireAuth`. `JWT_SECRET` is required: auth routes and middleware return 500 `{ detail: 'JWT_SECRET not configured' }` when it is unset. Set it with `wrangler secret put JWT_SECRET` before deploying.
+**Auth.** Both backends issue HS256 JWTs with `sub`, `role` (`admin` | `viewer`), and `type` (`access` | `refresh`) in the payload — no `email`. Access tokens 60 min, refresh tokens 30 days in an HTTP-only cookie. On Workers the cookie is `SameSite=None; Secure` because the Pages frontend is cross-site (ADR 027), and the production `CORS_ORIGINS` var must list the Pages origin exactly. Public routes: health, login/refresh, and the Retell webhook. Every other route requires a token, and writes require `admin`. In Workers, `requireAuth` sets `user` on the Hono context and `requireAdmin` reads it, so `requireAdmin` must be chained after `requireAuth`. `JWT_SECRET` is required: auth routes and middleware return 500 `{ detail: 'JWT_SECRET not configured' }` when it is unset. Set it with `wrangler secret put JWT_SECRET` before deploying.
 
 D1 queries are inline in each route. Table names, column lists and ORDER BY fragments are literals from code; every value from a request goes through `.bind()`. The `LATEST_SCORE_JOIN` and `LATEST_OUTREACH_JOIN` fragments in `routes/businesses.ts` are the one place that picks the current score and stage per business.
 
@@ -93,6 +94,6 @@ D1 queries are inline in each route. Table names, column lists and ORDER BY frag
 ## Known discrepancies
 
 - `Dockerfile` CMD runs `leadforge.api.main:app`, but the app object is `leadforge.api.app:app`. The README and Makefile use the correct path.
-- `api/wrangler.jsonc` has a placeholder KV id for `COOKIE_STORE` and no queue consumers declared yet.
+- `api/wrangler.jsonc` has a placeholder KV id for `COOKIE_STORE` and no queue consumers declared yet. Its `env.staging` sets no `CORS_ORIGINS`, and named environments do not inherit top-level `vars`, so the staging Worker rejects every cross-origin request until one is set.
 - There is no CI workflow or pre-commit config in the repo.
 - The remote D1 database `leadforge-db` was created from the superseded `api/src/db/schema.sql`. `api/migrations/0001_initial.sql` uses bare `CREATE TABLE`, so the first `wrangler d1 migrations apply leadforge-db --remote` fails until the old tables are dropped or the database is recreated. Nothing in it is production data.
