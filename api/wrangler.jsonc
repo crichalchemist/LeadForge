@@ -25,11 +25,8 @@
     ]
   },
   "kv_namespaces": [
-    { "binding": "COOKIE_STORE", "id": "placeholder-kv-id" }
+    { "binding": "COOKIE_STORE", "id": "eb9c3cb694cf41518eeeb65c61297939" }
   ],
-  "vars": { "CORS_ORIGINS": "http://localhost:5173" },
-  "env": {
-    "staging": { "name": "leadforge-api-staging" },
-    "production": { "name": "leadforge-api", "vars": { "CORS_ORIGINS": "https://leadforge-frontend-80u.pages.dev" } }
-  }
+  // Production values. `wrangler dev` overrides them from .dev.vars.
+  "vars": { "CORS_ORIGINS": "https://leadforge-frontend-80u.pages.dev" }
 }

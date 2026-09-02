@@ -16,7 +16,7 @@ LeadForge discovers under-digitized Chicago small businesses from public data, s
 
 The Python code is the behavioral spec. When porting a route, read the matching module under `src/leadforge/api/routes/` and its tests first, and reproduce stage transitions, scoring math, and auth rules exactly. Design and task-by-task plan: `docs/superpowers/specs/2026-05-13-leadforge-cloudflare-migration-design.md` and `docs/superpowers/plans/2026-05-13-leadforge-cloudflare-migration.md`.
 
-Migration status as of 2026-09-02: the Workers API is re-ported to the Python contract (ADR-026, spec `docs/superpowers/specs/2026-09-02-workers-contract-reconciliation-design.md`) with a vitest suite under `api/test/` mirroring `tests/api/`, and the frontend is deployed to Pages at https://leadforge-frontend-80u.pages.dev (task 2.4, ADR-027). Remaining: first deploy of the Worker itself (needs a real KV id, secrets, and a recreated remote D1), Workers AI client, queue consumers + cron handlers, scrapers, scoring re-port, decommission.
+Migration status as of 2026-09-02: the Workers API is re-ported to the Python contract (ADR-026, spec `docs/superpowers/specs/2026-09-02-workers-contract-reconciliation-design.md`) with a vitest suite under `api/test/` mirroring `tests/api/`, and the frontend is deployed to Pages at https://leadforge-frontend-80u.pages.dev (task 2.4, ADR-027). The Worker is deployed at https://leadforge-api.crichalchemist.workers.dev with the remote D1 migrated and `JWT_SECRET` set; the first admin user still has to be inserted (see `api/scripts/hash-password.mjs`). Remaining: Workers AI client, queue consumers + cron handlers, scrapers, scoring re-port, decommission.
 
 ## Commands
 
@@ -50,8 +50,10 @@ npm test               # vitest
 npx wrangler d1 migrations apply leadforge-db --local   # apply migrations locally; drop --local for remote
 npx wrangler secret put JWT_SECRET
 npx wrangler secret put RETELL_API_KEY   # HMAC key for the Retell webhook
-npx wrangler deploy    # env: staging | production via --env
+npx wrangler deploy    # single production deployment: https://leadforge-api.crichalchemist.workers.dev
 ```
+
+`wrangler.jsonc` holds production values; `api/.dev.vars` overrides `CORS_ORIGINS` to the Vite origin for `wrangler dev`.
 
 ### Frontend (`frontend/`)
 
@@ -94,6 +96,6 @@ D1 queries are inline in each route. Table names, column lists and ORDER BY frag
 ## Known discrepancies
 
 - `Dockerfile` CMD runs `leadforge.api.main:app`, but the app object is `leadforge.api.app:app`. The README and Makefile use the correct path.
-- `api/wrangler.jsonc` has a placeholder KV id for `COOKIE_STORE` and no queue consumers declared yet. Its `env.staging` sets no `CORS_ORIGINS`, and named environments do not inherit top-level `vars`, so the staging Worker rejects every cross-origin request until one is set.
+- `api/wrangler.jsonc` declares four cron triggers and four queue producers, but `src/index.ts` exports no `scheduled` or `queue` handler yet, so each cron firing logs a handler error until task 3.2 lands. `COOKIE_STORE` is bound but unused by any route.
 - There is no CI workflow or pre-commit config in the repo.
-- The remote D1 database `leadforge-db` was created from the superseded `api/src/db/schema.sql`. `api/migrations/0001_initial.sql` uses bare `CREATE TABLE`, so the first `wrangler d1 migrations apply leadforge-db --remote` fails until the old tables are dropped or the database is recreated. Nothing in it is production data.
+- `RETELL_API_KEY` is not set on the deployed Worker, so the Retell webhook accepts unsigned requests until it is.

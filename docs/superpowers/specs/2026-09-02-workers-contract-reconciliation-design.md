@@ -38,7 +38,7 @@ One table per SQLAlchemy model, same table and column names, plus the two pre-co
 
 Dropped from the current Workers schema: `pipeline_items` (pipeline state lives on `outreach_records.status`), `scoring_weights` (unused). `digital_presence` is renamed `digital_presences` to match the model.
 
-Schema ships as `api/migrations/0001_initial.sql` and is applied with `wrangler d1 migrations apply`. The old `api/src/db/schema.sql` is removed. The remote `leadforge-db` predates this migration and was created from the old `schema.sql`; drop its tables or recreate the database before the first remote apply.
+Schema ships as `api/migrations/0001_initial.sql` and is applied with `wrangler d1 migrations apply`. The old `api/src/db/schema.sql` is removed. The remote `leadforge-db` predates this migration and was created from the old `schema.sql`; drop its tables or recreate the database before the first remote apply (done 2026-09-02; the old tables held only seed rows).
 
 ## HTTP contract
 
