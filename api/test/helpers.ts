@@ -1,6 +1,5 @@
 import { env, exports } from 'cloudflare:workers';
 import { signToken } from '../src/lib/jwt';
-// @ts-expect-error until Task 2
 import { hashPassword } from '../src/lib/password';
 
 type Json = Record<string, unknown>;

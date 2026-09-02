@@ -25,12 +25,9 @@ export type AppEnv = { Bindings: Bindings; Variables: { user: AuthUser } };
 export interface JwtPayload {
   sub: string;
   role: 'admin' | 'viewer';
-  // TEMPORARY — optional until Task 2: old routes/auth.ts signs tokens without a `type`.
-  type?: 'access' | 'refresh';
+  type: 'access' | 'refresh';
   iat: number;
   exp: number;
-  // TEMPORARY — old routes/auth.ts reads this; removed in Task 2.
-  email?: string;
 }
 
 export interface UserRow {

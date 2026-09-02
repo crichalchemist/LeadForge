@@ -1,104 +1,90 @@
 import { Hono } from 'hono';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { z } from 'zod';
-import { zValidator } from '@hono/zod-validator';
-import { signToken, verifyToken, generateId, hashPassword, verifyPassword } from '../lib/jwt';
-import { requireAuth } from '../middleware/auth';
-import { Bindings, JwtPayload } from '../types';
+import { requireAuth, requireAdmin } from '../middleware/auth';
+import { generateId, requireSecret, signToken, verifyToken } from '../lib/jwt';
+import { hashPassword, verifyPassword } from '../lib/password';
+import { jsonBody } from '../lib/validate';
+import { nowIso, withBooleans, USER_BOOLS } from '../db/serialize';
+import type { AppEnv, UserRow } from '../types';
 
-const router = new Hono<{ Bindings: Bindings; Variables: { user: JwtPayload } }>();
+const ACCESS_TOKEN_EXPIRE_MINUTES = 60;
+const REFRESH_TOKEN_EXPIRE_DAYS = 30;
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-});
+const router = new Hono<AppEnv>();
 
+const loginSchema = z.object({ email: z.string(), password: z.string() });
 const signupSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
-  name: z.string().min(1),
+  password: z.string().min(12),
+  full_name: z.string().min(1),
+  role: z.enum(['admin', 'viewer']).default('viewer'),
 });
 
-// POST /api/auth/login
-router.post('/login', zValidator('json', loginSchema), async (c) => {
-  const JWT_SECRET = c.env.JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
+function publicUser(row: Pick<UserRow, 'id' | 'email' | 'full_name' | 'role' | 'is_active'>) {
+  return withBooleans({ id: row.id, email: row.email, full_name: row.full_name, role: row.role, is_active: row.is_active }, USER_BOOLS);
+}
+
+// =py routes/auth.login
+router.post('/login', jsonBody(loginSchema), async (c) => {
+  const secret = requireSecret(c);
+  if (secret instanceof Response) return secret;
   const { email, password } = c.req.valid('json');
-  const db = c.env.DB;
 
-  const user = await db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first<any>();
-  if (!user) {
-    return c.json({ error: 'Invalid email or password' }, 401);
-  }
+  const user = await c.env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).first<UserRow>();
+  if (!user || !(await verifyPassword(password, user.password_hash))) return c.json({ detail: 'Invalid credentials' }, 401);
+  if (user.is_active !== 1) return c.json({ detail: 'Invalid credentials' }, 401);
 
-  const valid = await verifyPassword(password, user.id, user.password_hash);
-  if (!valid) {
-    return c.json({ error: 'Invalid email or password' }, 401);
-  }
+  await c.env.DB.prepare('UPDATE users SET last_login_at = ? WHERE id = ?').bind(nowIso(), user.id).run();
 
-  const token = await signToken(
-    { sub: user.id, email: user.email, role: user.role },
-    JWT_SECRET,
-    3600
-  );
+  const access = await signToken({ sub: user.id, role: user.role, type: 'access' }, secret, ACCESS_TOKEN_EXPIRE_MINUTES * 60);
+  const refresh = await signToken({ sub: user.id, role: user.role, type: 'refresh' }, secret, REFRESH_TOKEN_EXPIRE_DAYS * 86400);
 
-  const refreshToken = await signToken(
-    { sub: user.id, email: user.email, role: user.role },
-    JWT_SECRET,
-    30 * 24 * 3600
-  );
-
-  return c.json({
-    access_token: token,
-    refresh_token: refreshToken,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role },
+  setCookie(c, 'refresh_token', refresh, {
+    httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: REFRESH_TOKEN_EXPIRE_DAYS * 86400,
   });
+  return c.json({ access_token: access, token_type: 'bearer', user: publicUser(user) });
 });
 
-// POST /api/auth/refresh
-router.post('/refresh', zValidator('json', z.object({ refresh_token: z.string() })), async (c) => {
-  const JWT_SECRET = c.env.JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
-  const { refresh_token } = c.req.valid('json');
-  const payload = await verifyToken(refresh_token, JWT_SECRET);
-  if (!payload) {
-    return c.json({ error: 'Invalid or expired refresh token' }, 401);
-  }
+// =py routes/auth.refresh
+router.post('/refresh', async (c) => {
+  const secret = requireSecret(c);
+  if (secret instanceof Response) return secret;
+  const cookie = getCookie(c, 'refresh_token');
+  if (!cookie) return c.json({ detail: 'No refresh token' }, 401);
 
-  const token = await signToken(
-    { sub: payload.sub, email: payload.email, role: payload.role },
-    JWT_SECRET,
-    3600
-  );
+  const payload = await verifyToken(cookie, secret);
+  if (!payload) return c.json({ detail: 'Invalid refresh token' }, 401);
+  if (payload.type !== 'refresh') return c.json({ detail: 'Invalid token type' }, 401);
 
-  return c.json({ access_token: token });
+  const user = await c.env.DB.prepare('SELECT id, role, is_active FROM users WHERE id = ?').bind(payload.sub)
+    .first<Pick<UserRow, 'id' | 'role' | 'is_active'>>();
+  if (!user || user.is_active !== 1) return c.json({ detail: 'User not found or inactive' }, 401);
+
+  const access = await signToken({ sub: user.id, role: user.role, type: 'access' }, secret, ACCESS_TOKEN_EXPIRE_MINUTES * 60);
+  return c.json({ access_token: access, token_type: 'bearer' });
 });
 
-// POST /api/auth/signup
-router.post('/signup', zValidator('json', signupSchema), async (c) => {
-  const JWT_SECRET = c.env.JWT_SECRET ?? 'dev-jwt-secret-change-in-production';
-  const { email, password, name } = c.req.valid('json');
-  const db = c.env.DB;
+// =py routes/auth.logout
+router.post('/logout', (c) => {
+  deleteCookie(c, 'refresh_token', { path: '/', httpOnly: true, secure: true, sameSite: 'Lax' });
+  return c.json({ status: 'ok' });
+});
 
-  const existing = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
-  if (existing) {
-    return c.json({ error: 'Email already registered' }, 409);
-  }
+// =py routes/auth.me
+router.get('/me', requireAuth, (c) => c.json(c.get('user')));
+
+// ~signup: Python creates users with a CLI. Admin-only here.
+router.post('/signup', requireAuth, requireAdmin, jsonBody(signupSchema), async (c) => {
+  const { email, password, full_name, role } = c.req.valid('json');
+  const existing = await c.env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
+  if (existing) return c.json({ detail: 'Email already registered' }, 409);
 
   const id = generateId();
-  const passwordHash = await hashPassword(password, id);
-
-  await db.prepare('INSERT INTO users (id, email, password_hash, name, role) VALUES (?, ?, ?, ?, ?)').bind(id, email, passwordHash, name, 'viewer').run();
-
-  return c.json({ id, email, name, role: 'viewer' }, 201);
-});
-
-// GET /api/auth/me
-router.get('/me', requireAuth, async (c) => {
-  const user = c.get('user');
-  const db = c.env.DB;
-
-  const record = await db.prepare('SELECT id, email, name, role, created_at FROM users WHERE id = ?').bind(user.sub).first();
-  if (!record) return c.json({ error: 'User not found' }, 404);
-
-  return c.json(record);
+  await c.env.DB.prepare(
+    'INSERT INTO users (id, email, password_hash, full_name, role, is_active) VALUES (?, ?, ?, ?, ?, 1)'
+  ).bind(id, email, await hashPassword(password), full_name, role).run();
+  return c.json({ id, email, full_name, role, is_active: true }, 201);
 });
 
 export default router;
