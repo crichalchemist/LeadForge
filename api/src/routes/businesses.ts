@@ -91,43 +91,48 @@ const DETAIL_COLUMNS = `id, name, address, zip_code, phone, email, owner_name, n
   license_issue_date, incorporation_date, employee_count_est, estimated_monthly_revenue, google_place_id,
   thumbtack_hires, nextdoor_recommendations, total_customer_ugc, created_at, updated_at`;
 
+type BusinessDetail = Pick<BusinessRow, 'id' | 'name' | 'address' | 'zip_code' | 'phone' | 'email' | 'owner_name' | 'niche' | 'license_number' | 'license_status' | 'license_issue_date' | 'incorporation_date' | 'employee_count_est' | 'estimated_monthly_revenue' | 'google_place_id' | 'thumbtack_hires' | 'nextdoor_recommendations' | 'total_customer_ugc' | 'created_at' | 'updated_at'>;
+
+type DigitalPresenceSummary = Pick<DigitalPresenceRow, 'has_website' | 'website_url' | 'website_quality_score' | 'has_google_business_profile' | 'gbp_completeness_score' | 'google_review_count' | 'google_avg_rating' | 'has_facebook_page' | 'has_instagram' | 'ig_follower_count' | 'has_google_ads' | 'has_meta_ads' | 'yelp_review_count' | 'yelp_rating'>;
+
+type LeadScoreSummary = Pick<LeadScoreRow, 'id' | 'score_version' | 'digital_deficit_score' | 'viability_score' | 'competitive_pressure_score' | 'composite_acquisition_score' | 'price_tier' | 'sentiment_adjustment'>;
+
+type OutreachSummary = Pick<OutreachRecordRow, 'id' | 'status' | 'retell_call_id' | 'first_contact_date' | 'last_contact_date' | 'call_disposition' | 'call_attempts' | 'meeting_scheduled' | 'assigned_to' | 'notes'>;
+
 // =py schemas/business.BusinessDetail (with DigitalPresenceSummary, LeadScoreSummary, OutreachSummary)
 async function loadDetail(db: D1Database, id: string) {
-  const business = await db.prepare(`SELECT ${DETAIL_COLUMNS} FROM businesses WHERE id = ?`).bind(id).first<BusinessRow>();
+  const business = await db.prepare(`SELECT ${DETAIL_COLUMNS} FROM businesses WHERE id = ?`).bind(id).first<BusinessDetail>();
   if (!business) return null;
   const [dp, scores, outreach] = await Promise.all([
     db.prepare(`SELECT has_website, website_url, website_quality_score, has_google_business_profile, gbp_completeness_score,
                        google_review_count, google_avg_rating, has_facebook_page, has_instagram, ig_follower_count,
                        has_google_ads, has_meta_ads, yelp_review_count, yelp_rating
-                FROM digital_presences WHERE business_id = ?`).bind(id).first<DigitalPresenceRow>(),
+                FROM digital_presences WHERE business_id = ?`).bind(id).first<DigitalPresenceSummary>(),
     db.prepare(`SELECT id, score_version, digital_deficit_score, viability_score, competitive_pressure_score,
                        composite_acquisition_score, price_tier, sentiment_adjustment
-                FROM lead_scores WHERE business_id = ? ORDER BY score_version DESC`).bind(id).all<LeadScoreRow>(),
+                FROM lead_scores WHERE business_id = ? ORDER BY score_version DESC`).bind(id).all<LeadScoreSummary>(),
     db.prepare(`SELECT id, status, retell_call_id, first_contact_date, last_contact_date, call_disposition,
                        call_attempts, meeting_scheduled, assigned_to, notes
-                FROM outreach_records WHERE business_id = ? ORDER BY created_at DESC`).bind(id).all<OutreachRecordRow>(),
+                FROM outreach_records WHERE business_id = ? ORDER BY created_at DESC`).bind(id).all<OutreachSummary>(),
   ]);
   return {
     ...business,
-    digital_presence: dp ? withBooleans(dp as unknown as Record<string, unknown>, DIGITAL_PRESENCE_BOOLS) as unknown as DigitalPresenceRow : null,
+    digital_presence: dp ? withBooleans(dp, DIGITAL_PRESENCE_BOOLS) : null,
     lead_scores: scores.results ?? [],
-    outreach_records: (outreach.results ?? []).map((r) => withBooleans(r as unknown as Record<string, unknown>, OUTREACH_BOOLS) as unknown as OutreachRecordRow),
+    outreach_records: (outreach.results ?? []).map((r) => withBooleans(r, OUTREACH_BOOLS)),
   };
 }
 
 // =py routes/businesses.get_business
 router.get('/:id', requireAuth, async (c) => {
-  const id = c.req.param('id');
-  if (!id) return c.json({ detail: 'Business not found' }, 404);
-  const detail = await loadDetail(c.env.DB, id);
+  const detail = await loadDetail(c.env.DB, c.req.param('id')!);
   if (!detail) return c.json({ detail: 'Business not found' }, 404);
   return c.json(detail);
 });
 
 // =py routes/businesses.update_business
 router.patch('/:id', requireAuth, requireAdmin, jsonBody(updateBody), async (c) => {
-  const id = c.req.param('id');
-  if (!id) return c.json({ detail: 'Business not found' }, 404);
+  const id = c.req.param('id')!;
   const db = c.env.DB;
   const exists = await db.prepare('SELECT id FROM businesses WHERE id = ?').bind(id).first();
   if (!exists) return c.json({ detail: 'Business not found' }, 404);
