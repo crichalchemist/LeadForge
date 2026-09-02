@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { requireAuth } from '../middleware/auth';
 import { Bindings, JwtPayload } from '../types';
-import { PIPELINE_STAGES } from './pipeline';
+import { PIPELINE_STAGES } from '../lib/stages';
 
 type Env = {
   Bindings: Bindings;

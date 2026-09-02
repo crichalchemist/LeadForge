@@ -1,145 +1,56 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { zValidator } from '@hono/zod-validator';
 import { requireAuth, requireAdmin } from '../middleware/auth';
-import { generateId } from '../lib/jwt';
-import { getById, deleteById } from '../db/queries';
-import { Bindings, JwtPayload, PipelineItem } from '../types';
+import { jsonBody } from '../lib/validate';
+import { PIPELINE_STAGES, VALID_TRANSITIONS, type PipelineStage } from '../lib/stages';
+import { nowIso } from '../db/serialize';
+import type { AppEnv } from '../types';
 
-type Env = {
-  Bindings: Bindings;
-  Variables: { user: JwtPayload };
-};
+const router = new Hono<AppEnv>();
 
-const router = new Hono<Env>();
+interface Card {
+  outreach_id: string; business_id: string; business_name: string; zip_code: string;
+  niche: string | null; call_attempts: number; last_contact: string | null;
+}
 
-export const PIPELINE_STAGES = ['discovered', 'contacted', 'qualified', 'negotiating', 'committed', 'closed', 'lost'] as const;
-
-const createPipelineSchema = z.object({
-  business_id: z.string(),
-  stage: z.enum(PIPELINE_STAGES).default('discovered'),
-  assigned_to: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
-});
-
-const updatePipelineSchema = z.object({
-  stage: z.enum(PIPELINE_STAGES).optional(),
-  assigned_to: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
-});
-
-// GET /api/pipeline — kanban board view
-router.get('/', requireAuth, async (c) => {
+// =py routes/pipeline.get_pipeline_board
+router.get('/board', requireAuth, async (c) => {
   const db = c.env.DB;
-  const stage = c.req.query('stage');
-  const assignedTo = c.req.query('assigned_to');
+  const counts = await db.prepare('SELECT status, COUNT(*) AS n FROM outreach_records GROUP BY status').all<{ status: string; n: number }>();
+  const countByStage = new Map((counts.results ?? []).map((r) => [r.status, r.n]));
 
-  const conditions: string[] = [];
-  const bindings: unknown[] = [];
+  const cardStmt = db.prepare(`
+    SELECT o.id AS outreach_id, o.business_id, b.name AS business_name, b.zip_code, b.niche,
+           o.call_attempts, o.last_contact_date AS last_contact
+    FROM outreach_records o JOIN businesses b ON b.id = o.business_id
+    WHERE o.status = ? ORDER BY o.updated_at DESC LIMIT 10`);
+  const cardResults = await db.batch<Card>(PIPELINE_STAGES.map((stage) => cardStmt.bind(stage)));
 
-  if (stage) { conditions.push('p.stage = ?'); bindings.push(stage); }
-  if (assignedTo) { conditions.push('p.assigned_to = ?'); bindings.push(assignedTo); }
-
-  const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
-
-  // Aggregated kanban counts per stage
-  const stageCounts = await db
-    .prepare(
-      `SELECT stage, COUNT(*) as count FROM pipeline_items ${where} GROUP BY stage ORDER BY stage`
-    )
-    .bind(...bindings)
-    .all<{ stage: string; count: number }>();
-
-  // Data with business join
-  const data = await db
-    .prepare(
-      `SELECT p.*, b.name as business_name, b.niche, b.zip_code, b.city, b.state
-       FROM pipeline_items p
-       JOIN businesses b ON p.business_id = b.id
-       ${where}
-       ORDER BY p.updated_at DESC`
-    )
-    .bind(...bindings)
-    .all();
-
-  return c.json({
-    stages: stageCounts.results ?? [],
-    items: data.results ?? [],
-  });
+  const columns = PIPELINE_STAGES.map((stage, i) => ({
+    stage,
+    count: countByStage.get(stage) ?? 0,
+    cards: cardResults[i].results ?? [],
+  }));
+  return c.json({ columns });
 });
 
-// GET /api/pipeline/:id
-router.get('/:id', requireAuth, async (c) => {
+// =py routes/pipeline.transition_stage
+router.patch('/:outreach_id/stage', requireAuth, requireAdmin, jsonBody(z.object({ new_stage: z.string() })), async (c) => {
+  const id = c.req.param('outreach_id');
+  const { new_stage } = c.req.valid('json');
   const db = c.env.DB;
-  const id = c.req.param('id')!;
-  const item = await db
-    .prepare(
-      `SELECT p.*, b.name as business_name, b.niche, b.zip_code, b.city, b.state
-       FROM pipeline_items p
-       JOIN businesses b ON p.business_id = b.id
-       WHERE p.id = ?`
-    )
-    .bind(id)
-    .first();
-  if (!item) return c.json({ error: 'Pipeline item not found' }, 404);
-  return c.json(item);
-});
 
-// POST /api/pipeline — add item (often auto-added during enrichment)
-router.post('/', requireAuth, requireAdmin, zValidator('json', createPipelineSchema), async (c) => {
-  const db = c.env.DB;
-  const data = c.req.valid('json');
-  const id = generateId();
+  const row = await db.prepare('SELECT status FROM outreach_records WHERE id = ?').bind(id).first<{ status: PipelineStage }>();
+  if (!row) return c.json({ detail: 'Outreach record not found' }, 404);
+  if (!(PIPELINE_STAGES as readonly string[]).includes(new_stage)) return c.json({ detail: `Invalid stage: ${new_stage}` }, 400);
 
-  await db
-    .prepare(
-      `INSERT INTO pipeline_items (id, business_id, stage, assigned_to, notes)
-       VALUES (?, ?, ?, ?, ?)`
-    )
-    .bind(id, data.business_id, data.stage, data.assigned_to ?? null, data.notes ?? null)
-    .run();
-
-  const created = await getById<PipelineItem>(db, 'pipeline_items', id);
-  return c.json(created, 201);
-});
-
-// PATCH /api/pipeline/:id — move stage (drag & drop)
-router.patch('/:id', requireAuth, requireAdmin, zValidator('json', updatePipelineSchema), async (c) => {
-  const db = c.env.DB;
-  const id = c.req.param('id')!;
-  const data = c.req.valid('json');
-
-  const existing = await getById<PipelineItem>(db, 'pipeline_items', id);
-  if (!existing) return c.json({ error: 'Pipeline item not found' }, 404);
-
-  const fields: string[] = [];
-  const values: unknown[] = [];
-
-  for (const [key, value] of Object.entries(data)) {
-    if (value !== undefined) {
-      fields.push(`${key} = ?`);
-      values.push(value ?? null);
-    }
+  const allowed = VALID_TRANSITIONS[row.status];
+  if (!allowed.includes(new_stage as PipelineStage)) {
+    return c.json({ detail: `Cannot transition from ${row.status} to ${new_stage}. Allowed: [${allowed.map((s) => `'${s}'`).join(', ')}]` }, 422);
   }
 
-  if (fields.length === 0) return c.json(existing);
-
-  values.push(id);
-  await db
-    .prepare(`UPDATE pipeline_items SET ${fields.join(', ')}, updated_at = datetime('now') WHERE id = ?`)
-    .bind(...values)
-    .run();
-
-  const updated = await getById<PipelineItem>(db, 'pipeline_items', id);
-  return c.json(updated);
-});
-
-// DELETE /api/pipeline/:id
-router.delete('/:id', requireAuth, requireAdmin, async (c) => {
-  const db = c.env.DB;
-  const deleted = await deleteById(db, 'pipeline_items', c.req.param('id')!);
-  if (!deleted) return c.json({ error: 'Pipeline item not found' }, 404);
-  return c.json({ deleted: true });
+  await db.prepare('UPDATE outreach_records SET status = ?, updated_at = ? WHERE id = ?').bind(new_stage, nowIso(), id).run();
+  return c.json({ status: 'ok', outreach_id: id, new_stage });
 });
 
 export default router;
