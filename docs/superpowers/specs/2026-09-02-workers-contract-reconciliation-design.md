@@ -57,4 +57,4 @@ Endpoints removed because neither Python nor the frontend has them: `POST /busin
 
 ## Testing
 
-`@cloudflare/vitest-pool-workers` runs each spec inside workerd with an isolated local D1. The migrations directory is applied before each test file. Every test in `tests/api/test_*.py` is ported one-to-one to `api/test/<route>.test.ts`, keeping the Python test names so coverage can be diffed.
+`@cloudflare/vitest-plugin` runs each spec inside workerd with an isolated local D1. The migrations directory is applied before each test file. Every test in `tests/api/test_*.py` is ported one-to-one to `api/test/<route>.test.ts`, keeping the Python test names so coverage can be diffed.
