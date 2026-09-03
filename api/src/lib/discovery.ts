@@ -1,4 +1,5 @@
 // =py pipeline/discovery
+import { locateCorridor } from './corridors';
 import { computeDigitalDeficit } from './scoring';
 import { extractEnrichment, findPlace, getPlaceDetails, type PlacesEnv, type PlaceEnrichment } from '../scrapers/google-places';
 import {
@@ -21,6 +22,7 @@ export interface DiscoveredBusiness {
   name: string;
   zip_code: string;
   digital_deficit_score: number;
+  nof_corridor: string | null;
 }
 
 // =py run_discovery — Socrata → Google Places → score → persist
@@ -127,6 +129,12 @@ async function enrichAndPersist(
     has_meta_ads: 0,
   } as Parameters<typeof computeDigitalDeficit>[0]);
 
+  const latitude = bizData.latitude ?? enrichment.latitude ?? null;
+  const longitude = bizData.longitude ?? enrichment.longitude ?? null;
+  // Python never sets this at ingest — corridor membership was precomputed once against PostGIS,
+  // so a business discovered afterwards was silently ineligible for every NOF grant (ADR 028).
+  const corridor = locateCorridor(latitude, longitude);
+
   const timestamp = nowIso();
 
   // Python commits every business in one session at the end of the run; D1 has no cross-statement
@@ -134,8 +142,9 @@ async function enrichAndPersist(
   await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO businesses (id, name, address, zip_code, phone, niche, license_number, license_status,
-         license_issue_date, google_place_id, latitude, longitude, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         license_issue_date, google_place_id, latitude, longitude, in_nof_corridor, nof_corridor_name,
+         created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
       businessId,
       // Python passes enrichment.get("name", name), which yields None when Google returns a null
@@ -151,8 +160,10 @@ async function enrichAndPersist(
       bizData.license_issue_date ? bizData.license_issue_date.slice(0, 10) : null,
       enrichment.google_place_id ?? null,
       // The city geocodes the licence address, so its coordinates lead and Google's only fill gaps.
-      bizData.latitude ?? enrichment.latitude ?? null,
-      bizData.longitude ?? enrichment.longitude ?? null,
+      latitude,
+      longitude,
+      corridor ? 1 : 0,
+      corridor?.corridor_name ?? null,
       timestamp,
       timestamp,
     ),
@@ -180,6 +191,12 @@ async function enrichAndPersist(
     ).bind(scoreId, businessId, deficit, deficit, timestamp, timestamp),
   ]);
 
-  console.log('business_persisted', { name, score: deficit });
-  return { id: businessId, name: enrichment.name ?? name, zip_code: zipCode, digital_deficit_score: deficit };
+  console.log('business_persisted', { name, score: deficit, corridor: corridor?.corridor_name ?? null });
+  return {
+    id: businessId,
+    name: enrichment.name ?? name,
+    zip_code: zipCode,
+    digital_deficit_score: deficit,
+    nof_corridor: corridor?.corridor_name ?? null,
+  };
 }

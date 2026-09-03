@@ -139,6 +139,25 @@ describe('runDiscovery', () => {
     });
   });
 
+  it('records corridor membership at ingest, which Python never did', async () => {
+    routeGoogle();
+    const discovered = await runDiscovery(keyless, '60619', 'barbershops', 5);
+
+    // 41.7514/-87.6044 is the city's own geocode for this licence, and it falls on a corridor
+    expect(discovered[0].nof_corridor).toMatch(/corridor \d+$/);
+    const business = await businessRow(discovered[0].id);
+    expect(business).toMatchObject({ in_nof_corridor: 1, nof_corridor_name: discovered[0].nof_corridor });
+  });
+
+  it('leaves a business off-corridor when its coordinates are downtown', async () => {
+    routeGoogle([{ ...SOCRATA_ROW, latitude: '41.8789', longitude: '-87.6359' }]);
+    const discovered = await runDiscovery(keyless, '60619', 'barbershops', 5);
+
+    expect(discovered[0].nof_corridor).toBeNull();
+    const business = await businessRow(discovered[0].id);
+    expect(business).toMatchObject({ in_nof_corridor: 0, nof_corridor_name: null });
+  });
+
   it('collapses licence renewals so one storefront costs one Places lookup', async () => {
     const renewals = [
       { ...SOCRATA_ROW, license_number: '111', license_start_date: '2019-05-15T00:00:00.000', license_status: 'AAC' },
