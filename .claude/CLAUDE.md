@@ -71,7 +71,7 @@ npx wrangler pages deploy dist --project-name=leadforge-frontend --branch=master
 
 **Auth.** Both backends issue HS256 JWTs with `sub`, `role` (`admin` | `viewer`), and `type` (`access` | `refresh`) in the payload — no `email`. Access tokens 60 min, refresh tokens 30 days in an HTTP-only cookie. On Workers the cookie is `SameSite=None; Secure` because the Pages frontend is cross-site (ADR 027), and the production `CORS_ORIGINS` var must list the Pages origin exactly. Public routes: health, login/refresh, and the Retell webhook. Every other route requires a token, and writes require `admin`. In Workers, `requireAuth` sets `user` on the Hono context and `requireAdmin` reads it, so `requireAdmin` must be chained after `requireAuth`. `JWT_SECRET` is required: auth routes and middleware return 500 `{ detail: 'JWT_SECRET not configured' }` when it is unset. Set it with `wrangler secret put JWT_SECRET` before deploying.
 
-D1 queries are inline in each route. Table names, column lists and ORDER BY fragments are literals from code; every value from a request goes through `.bind()`. The `LATEST_SCORE_JOIN` and `LATEST_OUTREACH_JOIN` fragments in `routes/businesses.ts` are the one place that picks the current score and stage per business.
+D1 queries are inline in each route. Table names, column lists and ORDER BY fragments are literals from code; every value from a request goes through `.bind()`. The `LATEST_SCORE_JOIN` and `LATEST_OUTREACH_JOIN` fragments in `routes/businesses.ts` pick the current score and stage per business; `lib/sentiment-feedback.ts` applies the same `score_version DESC` rule when it adjusts the latest score.
 
 **No spatial queries on D1.** NOF corridor membership was computed once against PostGIS with a 50 m `ST_DWithin` buffer (`scripts/precompute_corridors.py`) and stored as `in_nof_corridor` / `nof_corridor_name` on `businesses`. New businesses need a non-PostGIS check at ingest.
 
@@ -96,5 +96,6 @@ D1 queries are inline in each route. Table names, column lists and ORDER BY frag
 ## Known discrepancies
 
 - `Dockerfile` CMD runs `leadforge.api.main:app`, but the app object is `leadforge.api.app:app`. The README and Makefile use the correct path.
-- `api/wrangler.jsonc` binds `ENRICHMENT_QUEUE`, `OUTREACH_QUEUE`, and `RECALIBRATION_QUEUE` producers that nothing sends to and no consumer reads. `COOKIE_STORE` is bound but unused by any route.
+- `call_attempts` is never incremented on Workers (the only Python writer, `voice/call_manager.py`, is unported), so the 0.90 no-answer multiplier in `lib/sentiment-feedback.ts` cannot fire in production until the voice port lands.
+- `api/wrangler.jsonc` binds `ENRICHMENT_QUEUE`, `OUTREACH_QUEUE`, and `RECALIBRATION_QUEUE` producers that nothing sends to and no consumer reads. The sentiment consumer has no dead-letter queue, matching Celery, so a message that exhausts its retries is dropped with only the logged errors as a trace. `COOKIE_STORE` is bound but unused by any route.
 - There is no CI workflow or pre-commit config in the repo.

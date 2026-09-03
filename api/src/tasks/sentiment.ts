@@ -5,9 +5,6 @@ import { analyzeSentiment } from '../lib/llm/sentiment';
 import { applySentimentFeedback, type FeedbackOutreach } from '../lib/sentiment-feedback';
 import type { Bindings, OutreachRecordRow } from '../types';
 
-/** Body of a SENTIMENT_QUEUE message; produced by routes/webhooks.ts after a call_ended with a transcript. */
-export interface SentimentMessage { outreach_id: string }
-
 type Row = FeedbackOutreach & Pick<OutreachRecordRow, 'id' | 'call_transcript'>;
 
 // =py process_sentiment_task — analyze the transcript, then apply the score feedback (ADR 014).

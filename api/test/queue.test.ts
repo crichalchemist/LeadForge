@@ -1,5 +1,5 @@
 // =py tasks/sentiment_tasks.process_sentiment_task and the Worker's queue() export
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { env } from 'cloudflare:workers';
 import worker from '../src/index';
 import { processSentiment } from '../src/tasks/sentiment';
@@ -115,6 +115,7 @@ const brokenDb = { ...env, DB: { prepare() { throw new Error('D1 unavailable'); 
 
 describe('queue handler', () => {
   beforeEach(resetDb);
+  afterEach(() => vi.restoreAllMocks());
 
   it('processes a sentiment message through Workers AI and acks it', async () => {
     const businessId = await createBusiness();
@@ -144,6 +145,22 @@ describe('queue handler', () => {
     await worker.queue!(batch('leadforge-sentiment', [m]), brokenDb);
     expect(m.acked).toBe(true);
     expect(m.retried).toBe(false);
+  });
+
+  it('settles every message in a batch independently', async () => {
+    const businessId = await createBusiness();
+    await createScore(businessId, { composite_acquisition_score: 50.0 });
+    const id = await createOutreach(businessId, { status: 'voicemail' });
+    await setCall(id, { disposition: 'no_answer', attempts: 2 });
+    const bad = message({});
+    const good = message({ outreach_id: id });
+    const missing = message({ outreach_id: crypto.randomUUID() });
+
+    await worker.queue!(batch('leadforge-sentiment', [bad, good, missing]), env);
+
+    expect([bad.acked, good.acked, missing.acked]).toEqual([true, true, true]);
+    expect([bad.retried, good.retried, missing.retried]).toEqual([false, false, false]);
+    expect((await scoreRow(businessId)).sentiment_adjustment).toBe(0.9);
   });
 
   it('rejects a batch from a queue with no consumer', async () => {

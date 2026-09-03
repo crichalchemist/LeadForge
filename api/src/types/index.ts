@@ -1,5 +1,7 @@
 import type { NofStage, PipelineStage } from '../lib/stages';
-import type { SentimentMessage } from '../tasks/sentiment';
+
+/** Body of a SENTIMENT_QUEUE message; produced by routes/webhooks.ts, consumed by tasks/sentiment.ts. */
+export interface SentimentMessage { outreach_id: string }
 
 export interface Bindings {
   DB: D1Database;

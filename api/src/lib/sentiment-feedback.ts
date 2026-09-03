@@ -32,8 +32,15 @@ export async function applySentimentFeedback(db: D1Database, outreach: FeedbackO
   if (multiplier === null) return null;
 
   const newScore = Math.min(score.composite_acquisition_score * multiplier, 100.0);
-  await db.prepare('UPDATE lead_scores SET composite_acquisition_score = ?, sentiment_adjustment = ?, updated_at = ? WHERE id = ?')
-    .bind(newScore, multiplier, nowIso(), score.id).run();
+  // Tighter than Python: Queues deliver at least once, so the write itself re-checks the guard
+  // to keep a concurrent redelivery from compounding the multiplier.
+  const res = await db.prepare(
+    'UPDATE lead_scores SET composite_acquisition_score = ?, sentiment_adjustment = ?, updated_at = ? WHERE id = ? AND sentiment_adjustment IS NULL',
+  ).bind(newScore, multiplier, nowIso(), score.id).run();
+  if (!res.meta.changes) {
+    console.log('sentiment_feedback_already_applied', { business_id: outreach.business_id });
+    return null;
+  }
   console.log('sentiment_feedback_applied', {
     business_id: outreach.business_id, old_score: score.composite_acquisition_score, new_score: newScore, multiplier,
   });

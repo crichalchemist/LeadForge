@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import type { Bindings } from './types';
+import type { Bindings, SentimentMessage } from './types';
 import authRoutes from './routes/auth';
 import businessRoutes from './routes/businesses';
 import leadRoutes from './routes/leads';
@@ -9,7 +9,7 @@ import outreachRoutes from './routes/outreach';
 import webhookRoutes from './routes/webhooks';
 import grantRoutes from './routes/grants';
 import reportRoutes from './routes/reports';
-import { processSentiment, type SentimentMessage } from './tasks/sentiment';
+import { processSentiment } from './tasks/sentiment';
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
 
