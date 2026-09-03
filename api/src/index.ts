@@ -9,6 +9,7 @@ import outreachRoutes from './routes/outreach';
 import webhookRoutes from './routes/webhooks';
 import grantRoutes from './routes/grants';
 import reportRoutes from './routes/reports';
+import discoveryRoutes from './routes/discovery';
 import { processSentiment } from './tasks/sentiment';
 
 const app = new Hono<{ Bindings: Bindings }>({ strict: false });
@@ -36,6 +37,7 @@ app.route('/api/outreach', outreachRoutes);
 app.route('/api/webhooks/retell', webhookRoutes);
 app.route('/api/grants', grantRoutes);
 app.route('/api/reports', reportRoutes);
+app.route('/api/discovery', discoveryRoutes);
 
 // =py tasks/celery_app task_routes — one consumer per Celery queue. Only sentiment is ported; wrangler.jsonc
 // binds a consumer for it alone, so any other queue name here is a configuration error.
