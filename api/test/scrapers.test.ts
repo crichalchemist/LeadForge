@@ -106,8 +106,7 @@ describe('TestSocrataClient', () => {
     expect(normalized.name).toBe("John's Barbershop");
     expect(normalized.zip_code).toBe('60619');
     expect(normalized.niche).toBe('barbershops');
-    // AAI matches neither "aal" nor "active", so it falls through to expired
-    expect(normalized.license_status).toBe('expired');
+    expect(normalized.license_status).toBe('active'); // AAI means the license was issued
   });
 
   it('test_niche_mapping_covers_all_niches', () => {
@@ -115,12 +114,13 @@ describe('TestSocrataClient', () => {
   });
 
   it('test_license_status_mapping', () => {
-    expect(mapLicenseStatus('AAL')).toBe('active');
+    expect(mapLicenseStatus('AAI')).toBe('active');
     expect(mapLicenseStatus('ACTIVE')).toBe('active');
     expect(mapLicenseStatus('REV')).toBe('revoked');
     expect(mapLicenseStatus('REVOKED')).toBe('revoked');
     expect(mapLicenseStatus(null)).toBe('unknown');
-    expect(mapLicenseStatus('AAI')).toBe('expired');
+    // Cancelled during its term; the enum has no closer value
+    expect(mapLicenseStatus('AAC')).toBe('expired');
     expect(mapLicenseStatus('EXPIRED')).toBe('expired');
   });
 

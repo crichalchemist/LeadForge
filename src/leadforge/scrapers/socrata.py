@@ -114,10 +114,12 @@ class SocrataClient(BaseAPIClient):
 
     @staticmethod
     def _map_license_status(status: str | None) -> str:
+        # Dataset legend: AAI = license issued, AAC = cancelled during its term,
+        # REV = revoked, REA = revocation appealed.
         if not status:
             return "unknown"
         status_lower = status.lower()
-        if "aal" in status_lower or "active" in status_lower:
+        if "aai" in status_lower or "active" in status_lower:
             return "active"
         if "rev" in status_lower:
             return "revoked"

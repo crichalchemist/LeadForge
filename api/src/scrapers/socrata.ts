@@ -118,11 +118,12 @@ export function normalizeResult(raw: SocrataRow, niche: Niche): NormalizedBusine
   };
 }
 
-// =py _map_license_status — note that "AAI" matches neither branch and falls through to expired
+// =py _map_license_status — dataset legend: AAI = license issued, AAC = cancelled during its term,
+// REV = revoked, REA = revocation appealed.
 export function mapLicenseStatus(status: string | null | undefined): LicenseStatus {
   if (!status) return 'unknown';
   const lower = status.toLowerCase();
-  if (lower.includes('aal') || lower.includes('active')) return 'active';
+  if (lower.includes('aai') || lower.includes('active')) return 'active';
   if (lower.includes('rev')) return 'revoked';
   return 'expired';
 }

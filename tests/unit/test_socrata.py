@@ -50,9 +50,8 @@ class TestSocrataClient:
         assert normalized["name"] == "John's Barbershop"
         assert normalized["zip_code"] == "60619"
         assert normalized["niche"] == NicheType.BARBERSHOPS
-        assert (
-            normalized["license_status"] == "expired"
-        )  # AAI doesn't match "aal" or "active", so defaults to expired
+        # AAI means the license was issued
+        assert normalized["license_status"] == "active"
 
     def test_niche_mapping_covers_all_niches(self):
         for niche in NicheType:
@@ -60,12 +59,12 @@ class TestSocrataClient:
 
     def test_license_status_mapping(self):
         client = SocrataClient()
-        assert client._map_license_status("AAL") == "active"
+        assert client._map_license_status("AAI") == "active"
         assert client._map_license_status("ACTIVE") == "active"
         assert client._map_license_status("REV") == "revoked"
         assert client._map_license_status("REVOKED") == "revoked"
         assert client._map_license_status(None) == "unknown"
         assert (
-            client._map_license_status("AAI") == "expired"
-        )  # Doesn't match "aal" or "active", so defaults to expired
+            client._map_license_status("AAC") == "expired"
+        )  # Cancelled during its term; the enum has no closer value
         assert client._map_license_status("EXPIRED") == "expired"
