@@ -1,3 +1,4 @@
+.remember/
 # Python
 __pycache__/
 *.py[cod]
@@ -11,6 +12,8 @@ downloads/
 eggs/
 .eggs/
 lib/
+!/api/src/lib/
+!/api/src/lib/**
 lib64/
 parts/
 sdist/
