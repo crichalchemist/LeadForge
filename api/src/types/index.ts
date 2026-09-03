@@ -111,5 +111,9 @@ export interface GrantDocumentRow {
   created_at: string; updated_at: string;
 }
 
-// Consumed only by lib/scoring.ts (frozen; re-ported in Phase 3).
-export type DigitalPresence = DigitalPresenceRow & { facebook_url?: string | null; instagram_url?: string | null };
+export interface CompetitiveContextRow {
+  id: string; zip_code: string; niche: string; competitor_count: number;
+  avg_digital_score: number | null; competitor_ads_active_count: number; avg_rating: number | null;
+  median_household_income: number | null; population_density: number | null;
+  created_at: string; updated_at: string;
+}
