@@ -133,9 +133,8 @@ describe('auth', () => {
   });
 
   it('returns 500 when JWT_SECRET is not configured', async () => {
-    const res = await app.request(
-      '/api/auth/login',
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'a@b.c', password: 'x' }) },
+    const res = await app.fetch(
+      new Request('http://test/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'a@b.c', password: 'x' }) }),
       { ...env, JWT_SECRET: undefined }
     );
     expect(res.status).toBe(500);

@@ -1,4 +1,5 @@
 import type { NofStage, PipelineStage } from '../lib/stages';
+import type { SentimentMessage } from '../tasks/sentiment';
 
 export interface Bindings {
   DB: D1Database;
@@ -6,7 +7,7 @@ export interface Bindings {
   COOKIE_STORE: KVNamespace;
   ENRICHMENT_QUEUE: Queue;
   OUTREACH_QUEUE: Queue;
-  SENTIMENT_QUEUE: Queue;
+  SENTIMENT_QUEUE: Queue<SentimentMessage>;
   RECALIBRATION_QUEUE: Queue;
   JWT_SECRET?: string;
   RETELL_API_KEY?: string;
