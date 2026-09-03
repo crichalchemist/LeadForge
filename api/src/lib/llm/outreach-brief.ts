@@ -17,6 +17,7 @@ export interface OutreachBrief {
   objection_responses: Record<string, string>;
 }
 
+// Python renders a present-but-null rating or count as "None"; N/A and 0 are the deliberate reading of that.
 function facts(b: BriefBusiness, dp: BriefPresence | null, s: Required<BriefScores>): string {
   return `Business: ${b.name}
 Type: ${b.niche ?? 'unknown'}
@@ -81,9 +82,9 @@ export async function generateOutreachBrief(
     priceTier: scores.priceTier ?? 1, nofEligible: scores.nofEligible ?? false,
   };
   const template = s.nofEligible ? NOF_OUTREACH_BRIEF_PROMPT : OUTREACH_BRIEF_PROMPT;
-  const response = await client.complete(template(facts(business, dp, s)), { maxTokens: 1000, temperature: 0.5 });
-  if (!response) return fallbackBrief(business, s.nofEligible);
   try {
+    const response = await client.complete(template(facts(business, dp, s)), { maxTokens: 1000, temperature: 0.5 });
+    if (!response) return fallbackBrief(business, s.nofEligible);
     return JSON.parse(stripFences(response)) as OutreachBrief;
   } catch (error) {
     console.warn('outreach_brief_failed', business.name, error instanceof Error ? error.message : String(error));

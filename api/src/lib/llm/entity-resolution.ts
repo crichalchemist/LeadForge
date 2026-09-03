@@ -27,11 +27,13 @@ Respond with ONLY a JSON object:
 
 // =py resolve_entities: a match only counts when the model says so AND confidence >= MERGE_THRESHOLD
 export async function resolveEntities(recordA: BusinessRecord, recordB: BusinessRecord, client: LlmClient): Promise<EntityMatch> {
-  const response = await client.complete(ENTITY_RESOLUTION_PROMPT(recordA, recordB), { maxTokens: 200 });
-  if (!response) return { is_match: false, confidence: 0, reason: 'LLM unavailable' };
   try {
+    const response = await client.complete(ENTITY_RESOLUTION_PROMPT(recordA, recordB), { maxTokens: 200 });
+    if (!response) return { is_match: false, confidence: 0, reason: 'LLM unavailable' };
     const result = JSON.parse(stripFences(response)) as Partial<EntityMatch>;
-    const confidence = Number(result.confidence ?? 0);
+    // Python defaults a missing confidence to 0 but raises (and reports a parse error) on a non-numeric one.
+    const confidence = 'confidence' in result ? result.confidence : 0;
+    if (typeof confidence !== 'number' || !Number.isFinite(confidence)) throw new TypeError('confidence is not a number');
     return {
       is_match: Boolean(result.is_match) && confidence >= MERGE_THRESHOLD,
       confidence,

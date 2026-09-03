@@ -31,11 +31,13 @@ Analyze and respond with ONLY a JSON object:
 // =py analyze_sentiment; the score is clamped to [-1, 1] because ADR 014 multiplies it into the composite
 export async function analyzeSentiment(transcript: string, client: LlmClient): Promise<SentimentResult> {
   if (!transcript || !transcript.trim()) return emptySentiment();
-  const response = await client.complete(SENTIMENT_PROMPT(transcript.slice(0, 8000)), { maxTokens: 500, temperature: 0.1 });
-  if (!response) return emptySentiment();
   try {
+    const response = await client.complete(SENTIMENT_PROMPT(transcript.slice(0, 8000)), { maxTokens: 500, temperature: 0.1 });
+    if (!response) return emptySentiment();
     const result = JSON.parse(stripFences(response)) as SentimentResult;
-    const score = Number(result.sentiment_score ?? 0);
+    // Python defaults a missing key to 0.0 but raises (and falls back) on a non-numeric value.
+    const score = 'sentiment_score' in result ? result.sentiment_score : 0;
+    if (typeof score !== 'number' || !Number.isFinite(score)) throw new TypeError('sentiment_score is not a number');
     result.sentiment_score = Math.max(-1, Math.min(1, score));
     return result;
   } catch (error) {

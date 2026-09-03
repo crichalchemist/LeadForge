@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { FAST_MODEL, fastClient, qualityClient, stripFences, type LlmClient } from '../src/lib/llm/client';
+import { FAST_MODEL, fastClient, qualityClient, stripFences, type CompleteOptions, type LlmClient } from '../src/lib/llm/client';
 import { mergeRecords, resolveEntities } from '../src/lib/llm/entity-resolution';
 import { generateOutreachBrief } from '../src/lib/llm/outreach-brief';
 import { analyzeSentiment } from '../src/lib/llm/sentiment';
 
-// Stand-in for the LLM, like Python's AsyncMock(complete=...). Records prompts so tests can assert on them.
-function fakeClient(reply: string | null): LlmClient & { prompts: string[] } {
+// Stand-in for the LLM, like Python's AsyncMock(complete=...). Records prompts and options so tests can assert on them.
+function fakeClient(reply: string | null): LlmClient & { prompts: string[]; options: CompleteOptions[] } {
   const prompts: string[] = [];
-  return { prompts, async complete(prompt) { prompts.push(prompt); return reply; } };
+  const options: CompleteOptions[] = [];
+  return { prompts, options, async complete(prompt, opts = {}) { prompts.push(prompt); options.push(opts); return reply; } };
 }
+
+const throwingClient: LlmClient = { async complete() { throw new Error('boom'); } };
 
 describe('stripFences', () => {
   it('strips a ```json fence so fenced model output still parses', () => {
@@ -64,6 +67,7 @@ describe('resolveEntities', () => {
     expect(result.confidence).toBeGreaterThanOrEqual(0.8);
     expect(client.prompts[0]).toContain("Name: John's Barbershop");
     expect(client.prompts[0]).toContain('Name: Johns Barber Shop');
+    expect(client.options[0]).toEqual({ maxTokens: 200 });
   });
   it('test_non_matching_records', async () => {
     const client = fakeClient('{"is_match": false, "confidence": 0.2, "reason": "Different businesses"}');
@@ -90,6 +94,16 @@ describe('resolveEntities', () => {
     expect(result.is_match).toBe(false);
     expect(result.confidence).toBe(0);
     expect(result.reason).toMatch(/^Parse error/);
+  });
+  it('a non-numeric confidence is a parse error, not NaN', async () => {
+    const result = await resolveEntities(recordA, recordA, fakeClient('{"is_match": true, "confidence": "high"}'));
+    expect(result.is_match).toBe(false);
+    expect(result.confidence).toBe(0);
+    expect(result.reason).toMatch(/^Parse error/);
+  });
+  it('a client that throws is treated as unavailable', async () => {
+    const result = await resolveEntities(recordA, recordA, throwingClient);
+    expect(result.is_match).toBe(false);
   });
   it('test_merge_records_prefers_primary', () => {
     const primary = { name: "John's Barbershop", phone: '773-555-1234', email: null };
@@ -129,6 +143,11 @@ describe('generateOutreachBrief', () => {
     expect(prompt).toContain('Digital deficit score: 72/100');
     expect(prompt).toContain('Price tier: 2');
     expect(prompt).not.toContain('Neighborhood Opportunity Fund');
+    expect(client.options[0]).toEqual({ maxTokens: 1000, temperature: 0.5 });
+  });
+  it('a client that throws yields the fallback brief', async () => {
+    const brief = await generateOutreachBrief(business, dp, {}, throwingClient);
+    expect(brief.opening_line).toBe("Hi, I'm calling about Rosa's Nails");
   });
   it('uses the grant prompt when the business is NOF eligible (ADR 025)', async () => {
     const client = fakeClient(JSON.stringify(modelBrief));
@@ -159,6 +178,27 @@ describe('analyzeSentiment', () => {
     const result = await analyzeSentiment('Agent: hi. Owner: tell me more.', client);
     expect(result).toEqual(full);
     expect(client.prompts[0]).toContain('Owner: tell me more.');
+    expect(client.options[0]).toEqual({ maxTokens: 500, temperature: 0.1 });
+  });
+  it('truncates the transcript to 8000 characters before prompting', async () => {
+    const client = fakeClient(JSON.stringify(full));
+    await analyzeSentiment('a'.repeat(8000) + 'TAIL', client);
+    expect(client.prompts[0]).not.toContain('TAIL');
+    expect(client.prompts[0]).toContain('a'.repeat(8000));
+  });
+  it('a non-numeric or null score degrades to the neutral default rather than NaN', async () => {
+    const text = await analyzeSentiment('t', fakeClient('{"sentiment_score": "abc", "sentiment_label": "hostile"}'));
+    expect(text.sentiment_score).toBe(0);
+    expect(text.sentiment_label).toBe('neutral');
+    const nul = await analyzeSentiment('t', fakeClient('{"sentiment_score": null, "sentiment_label": "hostile"}'));
+    expect(nul.sentiment_label).toBe('neutral');
+    const missing = await analyzeSentiment('t', fakeClient('{"sentiment_label": "curious"}'));
+    expect(missing.sentiment_score).toBe(0);
+    expect(missing.sentiment_label).toBe('curious');
+  });
+  it('a client that throws yields the neutral default', async () => {
+    const result = await analyzeSentiment('t', throwingClient);
+    expect(result.summary).toBe('Sentiment analysis unavailable');
   });
   it('an empty transcript is neutral and never calls the model', async () => {
     const client = fakeClient(JSON.stringify(full));
