@@ -10,6 +10,10 @@ beforeEach(async () => {
 });
 
 const SOCRATA_ROW = {
+  account_number: '478849',
+  site_number: '1',
+  latitude: '41.7514067334',
+  longitude: '-87.6043524136',
   legal_name: 'JOHNS BARBERSHOP INC',
   doing_business_as_name: "John's Barbershop",
   address: '123 E 75TH ST',
@@ -71,8 +75,9 @@ describe('runDiscovery', () => {
       license_status: 'active',
       license_issue_date: '2019-05-15',
       google_place_id: 'ChIJ_sample_place_id_123',
-      latitude: 41.758,
-      longitude: -87.6055,
+      // Socrata's own geocode wins over the Places fixture's 41.758/-87.6055
+      latitude: 41.7514067334,
+      longitude: -87.6043524136,
     });
 
     const presence = await env.DB.prepare('SELECT * FROM digital_presences WHERE business_id = ?')
@@ -124,11 +129,53 @@ describe('runDiscovery', () => {
     // every point of it from data the key would have supplied
     expect(discovered[0].digital_deficit_score).toBe(74);
     const business = await businessRow(discovered[0].id);
-    expect(business).toMatchObject({ name: "John's Barbershop", address: '123 E 75TH ST', google_place_id: null });
+    expect(business).toMatchObject({
+      name: "John's Barbershop",
+      address: '123 E 75TH ST',
+      google_place_id: null,
+      // Coordinates survive with no API key at all, because the city supplies them
+      latitude: 41.7514067334,
+      longitude: -87.6043524136,
+    });
+  });
+
+  it('collapses licence renewals so one storefront costs one Places lookup', async () => {
+    const renewals = [
+      { ...SOCRATA_ROW, license_number: '111', license_start_date: '2019-05-15T00:00:00.000', license_status: 'AAC' },
+      { ...SOCRATA_ROW, license_number: '333', license_start_date: '2025-11-16T00:00:00.000', license_status: 'AAI' },
+      { ...SOCRATA_ROW, license_number: '222', license_start_date: '2022-07-01T00:00:00.000', license_status: 'AAC' },
+    ];
+    const calls = routeGoogle(renewals);
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+
+    expect(discovered).toHaveLength(1);
+    expect(calls.filter((url) => url.includes('maps.googleapis.com'))).toHaveLength(2); // find + details, once
+    // The most recent licence describes the business today
+    const business = await businessRow(discovered[0].id);
+    expect(business).toMatchObject({ license_number: '333', license_status: 'active', license_issue_date: '2025-11-16' });
+  });
+
+  it('treats limit as a count of businesses rather than licence rows', async () => {
+    const other = {
+      ...SOCRATA_ROW,
+      account_number: '999999',
+      doing_business_as_name: 'Fresh Cuts',
+      license_number: '2987654',
+    };
+    // Six rows, two businesses; a limit of 2 must yield both rather than stopping inside the renewals
+    routeGoogle([SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, other]);
+    const discovered = await runDiscovery(keyless, '60619', 'barbershops', 2);
+    expect(discovered.map((b) => b.name).sort()).toEqual(['Fresh Cuts', "John's Barbershop"]);
   });
 
   it('keeps going when one business fails', async () => {
-    const second = { ...SOCRATA_ROW, doing_business_as_name: 'Fresh Cuts', license_number: '2987654' };
+    // A distinct account number, or dedup would fold this into the row above
+    const second = {
+      ...SOCRATA_ROW,
+      account_number: '999999',
+      doing_business_as_name: 'Fresh Cuts',
+      license_number: '2987654',
+    };
     stubFetch((url) => {
       if (url.startsWith('https://data.cityofchicago.org')) return jsonResponse([SOCRATA_ROW, second]);
       if (url.includes('John%27s')) return new Response('upstream down', { status: 500 });

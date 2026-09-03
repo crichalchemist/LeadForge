@@ -1,10 +1,20 @@
 // =py pipeline/discovery
 import { computeDigitalDeficit } from './scoring';
 import { extractEnrichment, findPlace, getPlaceDetails, type PlacesEnv, type PlaceEnrichment } from '../scrapers/google-places';
-import { normalizeResult, searchBusinesses, type Niche, type NormalizedBusiness, type SocrataEnv } from '../scrapers/socrata';
+import {
+  dedupeLicenseRows,
+  normalizeResult,
+  searchBusinesses,
+  type Niche,
+  type NormalizedBusiness,
+  type SocrataEnv,
+} from '../scrapers/socrata';
 import { nowIso } from '../db/serialize';
 
 export type DiscoveryEnv = { DB: D1Database } & SocrataEnv & PlacesEnv;
+
+// Licence rows per business in the result window; 10 covers the repetition seen in the live data.
+const LICENSE_OVERFETCH = 10;
 
 export interface DiscoveredBusiness {
   id: string;
@@ -22,14 +32,20 @@ export async function runDiscovery(
 ): Promise<DiscoveredBusiness[]> {
   console.log('pipeline_start', { zip_code: zipCode, niche, limit });
 
-  const rawResults = await searchBusinesses(env, zipCode, niche, limit);
+  // `limit` counts businesses, but Socrata returns one row per licence renewal, so ask for more
+  // rows than businesses and collapse them. A shop with more than LICENSE_OVERFETCH renewals in
+  // the result window can still crowd out others; raising the limit is the remedy.
+  const rowLimit = limit ? limit * LICENSE_OVERFETCH : undefined;
+  const rawResults = await searchBusinesses(env, zipCode, niche, rowLimit);
   console.log('socrata_results', { count: rawResults.length });
   if (rawResults.length === 0) {
     console.log('no_socrata_results', { zip_code: zipCode, niche });
     return [];
   }
 
-  const normalized = rawResults.map((raw) => normalizeResult(raw, niche));
+  const deduped = dedupeLicenseRows(rawResults.map((raw) => normalizeResult(raw, niche)));
+  const normalized = limit ? deduped.slice(0, limit) : deduped;
+  console.log('socrata_businesses', { licence_rows: rawResults.length, businesses: normalized.length });
 
   const persisted: DiscoveredBusiness[] = [];
   for (const bizData of normalized) {
@@ -134,8 +150,9 @@ async function enrichAndPersist(
       // Python's normalizer extracts this and then discovery drops it; the column exists, so it is stored.
       bizData.license_issue_date ? bizData.license_issue_date.slice(0, 10) : null,
       enrichment.google_place_id ?? null,
-      enrichment.latitude ?? null,
-      enrichment.longitude ?? null,
+      // The city geocodes the licence address, so its coordinates lead and Google's only fill gaps.
+      bizData.latitude ?? enrichment.latitude ?? null,
+      bizData.longitude ?? enrichment.longitude ?? null,
       timestamp,
       timestamp,
     ),

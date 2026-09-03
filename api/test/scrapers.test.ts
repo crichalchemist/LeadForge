@@ -15,6 +15,7 @@ import {
 import { searchBusiness as nextdoorSearch } from '../src/scrapers/nextdoor';
 import { analyze } from '../src/scrapers/pagespeed';
 import {
+  dedupeLicenseRows,
   mapLicenseStatus,
   NICHE_MAPPING,
   normalizeResult,
@@ -99,6 +100,37 @@ describe('TestSocrataClient', () => {
   it('test_search_businesses_empty_result', async () => {
     stubFetch(() => jsonResponse([]));
     expect(await searchBusinesses({}, '99999', 'barbershops')).toEqual([]);
+  });
+
+  it('parses the coordinates and identifiers the city supplies as text', () => {
+    const normalized = normalizeResult(
+      { ...SOCRATA_BARBERSHOPS[0], account_number: '478849', site_number: '1', latitude: '41.7514067334', longitude: '-87.6043524136' },
+      'barbershops',
+    );
+    expect(normalized.latitude).toBe(41.7514067334);
+    expect(normalized.longitude).toBe(-87.6043524136);
+    expect(normalized.account_number).toBe('478849');
+    // A row the city never geocoded yields null rather than NaN
+    expect(normalizeResult(SOCRATA_BARBERSHOPS[0], 'barbershops').latitude).toBeNull();
+  });
+
+  it('collapses licence renewals onto the newest row per account and site', () => {
+    const rows = [
+      { ...SOCRATA_BARBERSHOPS[0], account_number: '1', site_number: '1', license_start_date: '2019-05-15T00:00:00.000' },
+      { ...SOCRATA_BARBERSHOPS[0], account_number: '1', site_number: '1', license_start_date: '2025-11-16T00:00:00.000' },
+      { ...SOCRATA_BARBERSHOPS[0], account_number: '1', site_number: '2', license_start_date: '2021-01-10T00:00:00.000' },
+    ].map((row) => normalizeResult(row, 'barbershops'));
+
+    const deduped = dedupeLicenseRows(rows);
+    expect(deduped).toHaveLength(2); // two sites of one account survive
+    expect(deduped[0].license_issue_date).toBe('2025-11-16T00:00:00.000');
+  });
+
+  it('falls back to name and zip when a row has no account number', () => {
+    const rows = [SOCRATA_BARBERSHOPS[0], SOCRATA_BARBERSHOPS[0], SOCRATA_BARBERSHOPS[1]].map((row) =>
+      normalizeResult(row, 'barbershops'),
+    );
+    expect(dedupeLicenseRows(rows)).toHaveLength(2);
   });
 
   it('test_normalize_result', () => {

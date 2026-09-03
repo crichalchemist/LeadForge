@@ -34,6 +34,10 @@ export interface SocrataEnv {
 }
 
 export interface SocrataRow {
+  account_number?: string;
+  site_number?: string;
+  latitude?: string;
+  longitude?: string;
   legal_name?: string;
   doing_business_as_name?: string;
   address?: string;
@@ -47,6 +51,10 @@ export interface SocrataRow {
 export type LicenseStatus = 'active' | 'expired' | 'revoked' | 'unknown';
 
 export interface NormalizedBusiness {
+  account_number: string | null;
+  site_number: string | null;
+  latitude: number | null;
+  longitude: number | null;
   name: string;
   address: string;
   zip_code: string;
@@ -104,9 +112,21 @@ export async function searchBusinesses(
   return allResults;
 }
 
-// =py normalize_result
+// Socrata types every column as text, latitude included.
+function num(value: string | undefined): number | null {
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+// =py normalize_result, plus the account/site identifiers and coordinates Python leaves on the
+// table. The city geocodes 92% of licence rows, so these remove a reason to call Google Places.
 export function normalizeResult(raw: SocrataRow, niche: Niche): NormalizedBusiness {
   return {
+    account_number: raw.account_number ?? null,
+    site_number: raw.site_number ?? null,
+    latitude: num(raw.latitude),
+    longitude: num(raw.longitude),
     name: raw.doing_business_as_name || raw.legal_name || '',
     address: raw.address ?? '',
     zip_code: raw.zip_code ?? '',
@@ -126,4 +146,20 @@ export function mapLicenseStatus(status: string | null | undefined): LicenseStat
   if (lower.includes('aai') || lower.includes('active')) return 'active';
   if (lower.includes('rev')) return 'revoked';
   return 'expired';
+}
+
+// One licence row is one renewal, not one business — a single shop can occupy dozens of rows.
+// Collapsing them on the city's own account/site key before enrichment keeps a paid Places lookup
+// from being spent on the same storefront repeatedly. The most recent licence wins, so status and
+// issue date describe the business today. Rows with no account number fall back to name+zip.
+export function dedupeLicenseRows(rows: NormalizedBusiness[]): NormalizedBusiness[] {
+  const latest = new Map<string, NormalizedBusiness>();
+  for (const row of rows) {
+    const key = row.account_number
+      ? `${row.account_number}/${row.site_number ?? ''}`
+      : `${row.name.toLowerCase()}|${row.zip_code}`;
+    const seen = latest.get(key);
+    if (!seen || (row.license_issue_date ?? '') > (seen.license_issue_date ?? '')) latest.set(key, row);
+  }
+  return [...latest.values()];
 }
