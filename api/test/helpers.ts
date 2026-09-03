@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { env, exports } from 'cloudflare:workers';
 import { signToken } from '../src/lib/jwt';
 import { hashPassword } from '../src/lib/password';
@@ -88,4 +89,21 @@ export async function api(method: string, path: string, opts: ApiOptions = {}): 
     headers,
     body: opts.json !== undefined ? JSON.stringify(opts.json) : undefined,
   });
+}
+
+export type FetchHandler = (url: string, init?: RequestInit) => Response | Promise<Response>;
+
+/** Replace the global fetch for one test. Returns the URLs requested, in order. */
+export function stubFetch(handler: FetchHandler): string[] {
+  const calls: string[] = [];
+  vi.stubGlobal('fetch', async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    calls.push(url);
+    return handler(url, init);
+  });
+  return calls;
+}
+
+export function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 }

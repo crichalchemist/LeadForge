@@ -14,6 +14,13 @@ export interface Bindings {
   JWT_SECRET?: string;
   RETELL_API_KEY?: string;
   CORS_ORIGINS?: string;
+  // Scraper credentials (=py Settings). All optional: every scraper that needs one logs and
+  // returns its empty result when it is unset, as the Python clients do.
+  SOCRATA_APP_TOKEN?: string;
+  GOOGLE_PLACES_API_KEY?: string;
+  GOOGLE_PLACES_API_SECRET?: string;
+  YELP_API_KEY?: string;
+  APIFY_API_TOKEN?: string;
 }
 
 export interface AuthUser {
