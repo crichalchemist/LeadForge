@@ -121,14 +121,21 @@ describe('runDiscovery', () => {
     expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toHaveLength(0);
   });
 
-  it('runs without a Google key and records the deficit that missing data produces', async () => {
+  it('stores no deficit at all for a business it never looked up', async () => {
     const calls = routeGoogle();
     const discovered = await runDiscovery(keyless, '60619', 'barbershops', 5);
 
     expect(calls.some((url) => url.includes('maps.googleapis.com'))).toBe(false);
-    // no website (30) + no GBP (15) + zero reviews (10) + no social (12) + no ads (7) = 74,
-    // every point of it from data the key would have supplied
-    expect(discovered[0].digital_deficit_score).toBe(74);
+    // Scoring this 74 (see scoring.test.ts) would put a constant in lead_scores that looks like a
+    // measurement, ranks nothing, and earns the business a NOF property-need bonus on no evidence.
+    expect(discovered[0].digital_deficit_score).toBeNull();
+    const score = await env.DB.prepare(
+      'SELECT digital_deficit_score, composite_acquisition_score FROM lead_scores WHERE business_id = ?',
+    )
+      .bind(discovered[0].id)
+      .first();
+    expect(score).toEqual({ digital_deficit_score: null, composite_acquisition_score: null });
+
     const business = await businessRow(discovered[0].id);
     expect(business).toMatchObject({
       name: "John's Barbershop",
@@ -221,7 +228,7 @@ describe('runDiscovery', () => {
 
     const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5, health);
 
-    expect(discovered[0].digital_deficit_score).toBe(74);
+    expect(discovered[0].digital_deficit_score).toBeNull();
     expect(health).toEqual({ unavailable: 1, last_status: 'REQUEST_DENIED' });
   });
 

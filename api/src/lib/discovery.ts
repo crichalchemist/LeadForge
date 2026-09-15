@@ -5,6 +5,7 @@ import {
   extractEnrichment,
   findPlace,
   getPlaceDetails,
+  newPlacesHealth,
   type PlacesEnv,
   type PlaceEnrichment,
   type PlacesHealth,
@@ -31,7 +32,8 @@ export interface DiscoveredBusiness {
   id: string;
   name: string;
   zip_code: string;
-  digital_deficit_score: number;
+  /** null when the Places lookup failed — unmeasured, not zero-deficit. */
+  digital_deficit_score: number | null;
   nof_corridor: string | null;
 }
 
@@ -94,7 +96,10 @@ async function enrichAndPersist(
   const zipCode = bizData.zip_code;
 
   let enrichment: Partial<PlaceEnrichment> = {};
-  const place = await findPlace(env, name, `${address}, Chicago, IL ${zipCode}`, health);
+  // Tally this business's lookups separately, then fold into the run's. Whether *this* business
+  // was actually looked up decides whether its deficit is a measurement or a guess.
+  const lookups = newPlacesHealth();
+  const place = await findPlace(env, name, `${address}, Chicago, IL ${zipCode}`, lookups);
 
   if (place) {
     const placeId = place.place_id;
@@ -105,7 +110,7 @@ async function enrichAndPersist(
         console.log('dedup_google_place_id', { name, place_id: placeId });
         return null;
       }
-      const details = await getPlaceDetails(env, placeId, health);
+      const details = await getPlaceDetails(env, placeId, lookups);
       if (details) enrichment = extractEnrichment(details);
     }
   } else {
@@ -119,6 +124,11 @@ async function enrichAndPersist(
     }
   }
 
+  if (health && lookups.unavailable > 0) {
+    health.unavailable += lookups.unavailable;
+    health.last_status = lookups.last_status;
+  }
+
   const businessId = crypto.randomUUID();
   const presenceId = crypto.randomUUID();
   const scoreId = crypto.randomUUID();
@@ -127,9 +137,15 @@ async function enrichAndPersist(
   const googleReviewCount = enrichment.google_review_count ?? 0;
   const hasGbp = enrichment.has_google_business_profile ?? false;
 
-  // The presence row as it will be stored; the deficit is computed from exactly these values,
-  // as Python computes it from the unflushed model where the unset columns read as None/False.
-  const deficit = computeDigitalDeficit({
+  // A failed lookup is not a finding. With Places unavailable every input below is absent and
+  // computeDigitalDeficit returns exactly 74 for every business on earth — a constant that would
+  // sit in lead_scores looking like a measurement, rank nothing (it is 40% of the composite), and
+  // trip computeNofEligibility's `deficit > 60` bonus for a business nobody researched. Store null
+  // instead: the columns are nullable, and `?? 0` in the NOF scorer already treats null as absent.
+  //
+  // Divergence from Python, deliberately: pipeline/discovery.py writes the 74.
+  const measured = lookups.unavailable === 0;
+  const deficit = !measured ? null : computeDigitalDeficit({
     has_website: hasWebsite ? 1 : 0,
     website_url: null,
     website_quality_score: null,

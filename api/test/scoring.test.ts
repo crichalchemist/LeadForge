@@ -44,6 +44,28 @@ describe('TestDigitalDeficitScoring', () => {
     expect(computeDigitalDeficit(makeDp())).toBe(0);
   });
 
+  // Not a Python mirror: this is the number a business scores when the enrichment source told us
+  // nothing, and it is exactly why discovery now stores null instead of a score in that case.
+  // It is also a constant — every unlooked-up business lands here, so it ranks nothing.
+  it('scores exactly 74 when every enrichable signal is absent', () => {
+    const absent = computeDigitalDeficit(
+      makeDp({
+        has_website: 0, // +30
+        website_quality_score: null,
+        has_ssl: null, // skipped: null is "not checked", not "no SSL"
+        has_google_business_profile: 0, // +15
+        gbp_completeness_score: null,
+        google_review_count: 0, // +10
+        has_facebook_page: 0,
+        has_instagram: 0, // +12 for the pair
+        fb_last_post_days_ago: null,
+        has_google_ads: 0,
+        has_meta_ads: 0, // +7 for the pair
+      }),
+    );
+    expect(absent).toBe(74);
+  });
+
   it('test_no_website_adds_30', () => {
     expect(computeDigitalDeficit(makeDp({ has_website: 0 }))).toBeGreaterThanOrEqual(30);
   });
