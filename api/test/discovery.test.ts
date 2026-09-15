@@ -2,6 +2,7 @@
 import { env } from 'cloudflare:workers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runDiscovery, type DiscoveryEnv } from '../src/lib/discovery';
+import { newPlacesHealth } from '../src/scrapers/google-places';
 import { accessToken, adminUser, api, createBusiness, jsonResponse, resetDb, stubFetch, viewerUser } from './helpers';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -210,6 +211,28 @@ describe('runDiscovery', () => {
     routeGoogle([]);
     expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toEqual([]);
   });
+
+  // A run against a key whose billing is disabled stores exactly what a run against shops Google
+  // has never heard of stores: 74 deficit points and no website. The tally is the only thing that
+  // tells an operator which of those two happened.
+  it('reports a denied key rather than passing off an unlooked-up business as researched', async () => {
+    const health = newPlacesHealth();
+    routeGoogle([SOCRATA_ROW], { status: 'REQUEST_DENIED', error_message: 'billing disabled' });
+
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5, health);
+
+    expect(discovered[0].digital_deficit_score).toBe(74);
+    expect(health).toEqual({ unavailable: 1, last_status: 'REQUEST_DENIED' });
+  });
+
+  it('reports a healthy run when Google answers every lookup', async () => {
+    const health = newPlacesHealth();
+    routeGoogle();
+
+    await runDiscovery(keyed, '60619', 'barbershops', 5, health);
+
+    expect(health).toEqual({ unavailable: 0, last_status: null });
+  });
 });
 
 describe('POST /api/discovery/run', () => {
@@ -247,5 +270,21 @@ describe('POST /api/discovery/run', () => {
     expect(body.discovered).toBe(1);
     expect(body.limit).toBe(5);
     expect(body.businesses[0].name).toBe("John's Barbershop");
+  });
+
+  // The Worker env under test has no GOOGLE_PLACES_API_KEY, which is also the deployed Worker's
+  // state: the route must say so rather than return a 200 that looks like a successful run.
+  it('tells the operator the Places lookups never happened instead of reporting a clean run', async () => {
+    const token = await accessToken(await adminUser());
+    routeGoogle();
+
+    const res = await api('POST', '/discovery/run', {
+      token,
+      json: { zip_code: '60619', niche: 'barbershops', limit: 5 },
+    });
+
+    const body = (await res.json()) as { discovered: number; places: { unavailable: number; last_status: string } };
+    expect(body.discovered).toBe(1);
+    expect(body.places).toEqual({ unavailable: 1, last_status: 'KEY_NOT_SET' });
   });
 });

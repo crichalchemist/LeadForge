@@ -5,6 +5,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { requireAdmin, requireAuth } from '../middleware/auth';
 import { runDiscovery } from '../lib/discovery';
+import { newPlacesHealth } from '../scrapers/google-places';
 import { NICHES } from '../lib/stages';
 import { jsonBody } from '../lib/validate';
 import type { AppEnv } from '../types';
@@ -23,8 +24,12 @@ const runSchema = z.object({
 
 router.post('/run', requireAuth, requireAdmin, jsonBody(runSchema), async (c) => {
   const { zip_code, niche, limit } = c.req.valid('json');
-  const businesses = await runDiscovery(c.env, zip_code, niche, limit);
-  return c.json({ zip_code, niche, limit, discovered: businesses.length, businesses });
+  // Google answers a denied key or an exhausted quota with HTTP 200, so without this tally a run
+  // that looked up nothing is indistinguishable from one where Chicago's shops are simply absent
+  // from Places — and every business would be stored with a maximal digital deficit either way.
+  const places = newPlacesHealth();
+  const businesses = await runDiscovery(c.env, zip_code, niche, limit, places);
+  return c.json({ zip_code, niche, limit, discovered: businesses.length, places, businesses });
 });
 
 export default router;

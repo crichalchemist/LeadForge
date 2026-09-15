@@ -18,6 +18,46 @@ export interface PlacesEnv {
   GOOGLE_PLACES_API_SECRET?: string;
 }
 
+/**
+ * Per-run tally of Places calls that failed for a configuration or quota reason rather than
+ * because Google had no record of the business. Callers create one per run and report it: a
+ * denied key and a genuine no-match are otherwise indistinguishable in the stored output.
+ */
+export interface PlacesHealth {
+  unavailable: number;
+  last_status: string | null;
+}
+
+export function newPlacesHealth(): PlacesHealth {
+  return { unavailable: 0, last_status: null };
+}
+
+interface PlacesEnvelope {
+  status?: string;
+  error_message?: string;
+}
+
+/**
+ * Google answers a denied key, an exhausted quota, and a malformed request with HTTP 200 and a
+ * `status` field, so `raise_for_status` never fires and the payload simply lacks its results key.
+ * Without this check every such reply reads as "no such business" and the pipeline stores a
+ * maximal digital deficit for a shop it never actually looked up.
+ *
+ * Divergence from Python: neither `find_place` nor `get_place_details` in
+ * `scrapers/google_places.py` inspects `status` either. Workers is the implementation of record
+ * for this never-run path, so the check lands here and Python keeps the blind spot.
+ */
+function placesUnavailable(data: PlacesEnvelope, health: PlacesHealth | undefined, context: object): boolean {
+  const status = data.status;
+  if (!status || status === 'OK' || status === 'ZERO_RESULTS') return false;
+  console.error('google_places_unavailable', { ...context, status, error_message: data.error_message });
+  if (health) {
+    health.unavailable += 1;
+    health.last_status = status;
+  }
+  return true;
+}
+
 export interface PlaceCandidate {
   place_id?: string;
   name?: string;
@@ -76,9 +116,18 @@ async function buildSignedUrl(env: PlacesEnv, path: string, params: Record<strin
 }
 
 // =py find_place
-export async function findPlace(env: PlacesEnv, businessName: string, address: string): Promise<PlaceCandidate | null> {
+export async function findPlace(
+  env: PlacesEnv,
+  businessName: string,
+  address: string,
+  health?: PlacesHealth,
+): Promise<PlaceCandidate | null> {
   if (!env.GOOGLE_PLACES_API_KEY) {
     console.warn('google_places_api_key_not_set');
+    if (health) {
+      health.unavailable += 1;
+      health.last_status = 'KEY_NOT_SET';
+    }
     return null;
   }
 
@@ -88,7 +137,9 @@ export async function findPlace(env: PlacesEnv, businessName: string, address: s
     fields: FIND_PLACE_FIELDS,
   });
 
-  const data = await fetchJson<{ candidates?: PlaceCandidate[] }>(url);
+  const data = await fetchJson<{ candidates?: PlaceCandidate[] } & PlacesEnvelope>(url);
+  if (placesUnavailable(data, health, { name: businessName })) return null;
+
   const candidates = data.candidates ?? [];
   if (candidates.length === 0) {
     console.log('google_place_not_found', { name: businessName });
@@ -98,7 +149,11 @@ export async function findPlace(env: PlacesEnv, businessName: string, address: s
 }
 
 // =py get_place_details
-export async function getPlaceDetails(env: PlacesEnv, placeId: string): Promise<PlaceDetails | null> {
+export async function getPlaceDetails(
+  env: PlacesEnv,
+  placeId: string,
+  health?: PlacesHealth,
+): Promise<PlaceDetails | null> {
   if (!env.GOOGLE_PLACES_API_KEY) return null;
 
   const url = await buildSignedUrl(env, '/maps/api/place/details/json', {
@@ -106,7 +161,9 @@ export async function getPlaceDetails(env: PlacesEnv, placeId: string): Promise<
     fields: DETAIL_FIELDS,
   });
 
-  const data = await fetchJson<{ result?: PlaceDetails }>(url);
+  const data = await fetchJson<{ result?: PlaceDetails } & PlacesEnvelope>(url);
+  if (placesUnavailable(data, health, { place_id: placeId })) return null;
+
   if (!data.result) {
     console.log('google_place_details_not_found', { place_id: placeId });
     return null;

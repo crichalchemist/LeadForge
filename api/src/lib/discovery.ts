@@ -1,7 +1,14 @@
 // =py pipeline/discovery
 import { locateCorridor } from './corridors';
 import { computeDigitalDeficit } from './scoring';
-import { extractEnrichment, findPlace, getPlaceDetails, type PlacesEnv, type PlaceEnrichment } from '../scrapers/google-places';
+import {
+  extractEnrichment,
+  findPlace,
+  getPlaceDetails,
+  type PlacesEnv,
+  type PlaceEnrichment,
+  type PlacesHealth,
+} from '../scrapers/google-places';
 import {
   dedupeLicenseRows,
   normalizeResult,
@@ -31,6 +38,7 @@ export async function runDiscovery(
   zipCode: string,
   niche: Niche,
   limit?: number,
+  health?: PlacesHealth,
 ): Promise<DiscoveredBusiness[]> {
   console.log('pipeline_start', { zip_code: zipCode, niche, limit });
 
@@ -52,7 +60,7 @@ export async function runDiscovery(
   const persisted: DiscoveredBusiness[] = [];
   for (const bizData of normalized) {
     try {
-      const business = await enrichAndPersist(env, bizData, niche);
+      const business = await enrichAndPersist(env, bizData, niche, health);
       if (business) persisted.push(business);
     } catch (error) {
       console.error('business_enrichment_failed', {
@@ -62,7 +70,10 @@ export async function runDiscovery(
     }
   }
 
-  console.log('pipeline_complete', { persisted_count: persisted.length });
+  console.log('pipeline_complete', {
+    persisted_count: persisted.length,
+    places_unavailable: health?.unavailable ?? 0,
+  });
   return persisted;
 }
 
@@ -71,6 +82,7 @@ async function enrichAndPersist(
   env: DiscoveryEnv,
   bizData: NormalizedBusiness,
   niche: Niche,
+  health?: PlacesHealth,
 ): Promise<DiscoveredBusiness | null> {
   const name = bizData.name.trim();
   if (!name) return null;
@@ -79,7 +91,7 @@ async function enrichAndPersist(
   const zipCode = bizData.zip_code;
 
   let enrichment: Partial<PlaceEnrichment> = {};
-  const place = await findPlace(env, name, `${address}, Chicago, IL ${zipCode}`);
+  const place = await findPlace(env, name, `${address}, Chicago, IL ${zipCode}`, health);
 
   if (place) {
     const placeId = place.place_id;
@@ -90,7 +102,7 @@ async function enrichAndPersist(
         console.log('dedup_google_place_id', { name, place_id: placeId });
         return null;
       }
-      const details = await getPlaceDetails(env, placeId);
+      const details = await getPlaceDetails(env, placeId, health);
       if (details) enrichment = extractEnrichment(details);
     }
   } else {

@@ -10,6 +10,7 @@ import {
   extractEnrichment,
   findPlace,
   getPlaceDetails,
+  newPlacesHealth,
   type PlacesEnv,
 } from '../src/scrapers/google-places';
 import { searchBusiness as nextdoorSearch } from '../src/scrapers/nextdoor';
@@ -237,6 +238,47 @@ describe('TestGooglePlacesClient', () => {
     expect(await findPlace({}, 'Shop', 'Chicago')).toBeNull();
     expect(await getPlaceDetails({}, 'place')).toBeNull();
     expect(calls).toHaveLength(0);
+  });
+
+  // The live failure this was written against: the key is valid but billing is disabled on the
+  // Cloud project. Google answers HTTP 200, so raise_for_status never fires and the payload just
+  // lacks `candidates` — identical on the wire to a shop Google has never heard of. Conflating the
+  // two stores a maximal digital deficit for a business nobody ever looked up.
+  it('distinguishes a denied key from a business Google has no record of', async () => {
+    const health = newPlacesHealth();
+    stubFetch(() =>
+      jsonResponse({
+        status: 'REQUEST_DENIED',
+        error_message: 'You must enable Billing on the Google Cloud Project',
+      }),
+    );
+
+    expect(await findPlace(env, "John's Barbershop", '123 E 75th St Chicago IL', health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'REQUEST_DENIED' });
+  });
+
+  it('does not count a genuine no-match against the health of the run', async () => {
+    const health = newPlacesHealth();
+    stubFetch(() => jsonResponse({ candidates: [], status: 'ZERO_RESULTS' }));
+
+    expect(await findPlace(env, 'Nonexistent Business', 'nowhere', health)).toBeNull();
+    expect(health).toEqual({ unavailable: 0, last_status: null });
+  });
+
+  it('counts an exhausted quota on the details call', async () => {
+    const health = newPlacesHealth();
+    stubFetch(() => jsonResponse({ status: 'OVER_QUERY_LIMIT' }));
+
+    expect(await getPlaceDetails(env, 'ChIJ_sample_place_id_123', health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'OVER_QUERY_LIMIT' });
+  });
+
+  it('counts an unset key as unavailable so a keyless run cannot read as a clean one', async () => {
+    const health = newPlacesHealth();
+    stubFetch(() => jsonResponse(FIND_PLACE_RESPONSE));
+
+    expect(await findPlace({}, 'Shop', 'Chicago', health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'KEY_NOT_SET' });
   });
 });
 
