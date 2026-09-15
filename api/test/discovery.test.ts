@@ -225,6 +225,22 @@ describe('runDiscovery', () => {
     expect(health).toEqual({ unavailable: 1, last_status: 'REQUEST_DENIED' });
   });
 
+  // Why a discovery run with a dead Google key must not be pointed at production: the rows it
+  // writes carry a null google_place_id, and the next run dedups on that column, so it matches
+  // nothing and inserts the business a second time. Nothing backfills the first copy —
+  // lib/enrichment.ts has no caller — so the 74-point row and the enriched row coexist.
+  it('duplicates rather than backfills a business first stored without a Google key', async () => {
+    routeGoogle();
+    expect(await runDiscovery(keyless, '60619', 'barbershops', 5)).toHaveLength(1);
+
+    expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toHaveLength(1);
+
+    const rows = await env.DB.prepare('SELECT google_place_id FROM businesses WHERE name = ?')
+      .bind("John's Barbershop")
+      .all<{ google_place_id: string | null }>();
+    expect(rows.results.map((r) => r.google_place_id)).toEqual([null, 'ChIJ_sample_place_id_123']);
+  });
+
   it('reports a healthy run when Google answers every lookup', async () => {
     const health = newPlacesHealth();
     routeGoogle();
