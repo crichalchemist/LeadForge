@@ -13,6 +13,13 @@ import {
   newPlacesHealth,
   type PlacesEnv,
 } from '../src/scrapers/google-places';
+import {
+  extractEnrichment as fsqExtractEnrichment,
+  findPlace as fsqFindPlace,
+  newFoursquareHealth,
+  SEARCH_FIELDS,
+  type FoursquareEnv,
+} from '../src/scrapers/foursquare';
 import { searchBusiness as nextdoorSearch } from '../src/scrapers/nextdoor';
 import { analyze } from '../src/scrapers/pagespeed';
 import {
@@ -463,5 +470,141 @@ describe('html scrapers', () => {
     const result = await nextdoorSearch('Shop', '60619', { session: 'abc' });
     expect(cookie).toBe('session=abc');
     expect(result?.nextdoor_recommendations).toBe(7);
+  });
+});
+
+// No Python counterpart: Foursquare replaces Google Places on Workers only, because the Google
+// Cloud project's billing account is dead indefinitely.
+describe('foursquare', () => {
+  const keyed: FoursquareEnv = { FOURSQUARE_API_KEY: 'TEST_KEY' };
+  const QUERY = {
+    name: "John's Barbershop",
+    address: '123 E 75TH ST',
+    zip_code: '60619',
+    latitude: 41.7514067334,
+    longitude: -87.6043524136,
+  };
+  const PLACE = {
+    fsq_place_id: 'fsq_abc',
+    name: "John's Barbershop",
+    location: { formatted_address: '123 E 75th St, Chicago, IL 60619' },
+    tel: '(773) 555-1234',
+    website: 'http://johnsbarbershop.com',
+    rating: 9.0,
+    stats: { total_ratings: 47 },
+    social_media: { facebook_id: '123', instagram: 'johnsbarbershop' },
+  };
+  const found = () => jsonResponse({ results: [PLACE] });
+
+  // The legacy v3 API took a bare key. This one declares an http/bearer scheme, so a missing
+  // prefix reads as an invalid key — a 401 that looks exactly like a revoked account.
+  it('sends the bearer prefix and the pinned API version a bare key would fail without', async () => {
+    let init: RequestInit | undefined;
+    stubFetch((_url, received) => {
+      init = received;
+      return found();
+    });
+
+    await fsqFindPlace(keyed, QUERY);
+
+    const headers = init!.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('Bearer TEST_KEY');
+    expect(headers['X-Places-Api-Version']).toBe('2025-06-17');
+  });
+
+  // Licence names are legal entities, not signage, so the city's geocode does the discriminating.
+  it('searches a tight radius around the city geocode rather than trusting the licence name', async () => {
+    const calls = stubFetch(() => found());
+
+    await fsqFindPlace(keyed, QUERY);
+
+    const url = new URL(calls[0]);
+    expect(url.origin + url.pathname).toBe('https://places-api.foursquare.com/places/search');
+    expect(url.searchParams.get('ll')).toBe('41.7514067334,-87.6043524136');
+    expect(url.searchParams.get('radius')).toBe('200');
+    expect(url.searchParams.get('query')).toBe("John's Barbershop");
+    // One result is all the pipeline stores, and the field list is pinned rather than defaulted
+    expect(url.searchParams.get('limit')).toBe('1');
+    expect(url.searchParams.get('fields')).toBe(SEARCH_FIELDS);
+  });
+
+  it('falls back to the locality when the city never geocoded the licence', async () => {
+    const calls = stubFetch(() => found());
+
+    await fsqFindPlace(keyed, { ...QUERY, latitude: null, longitude: null });
+
+    const url = new URL(calls[0]);
+    expect(url.searchParams.get('ll')).toBeNull();
+    expect(url.searchParams.get('near')).toBe('Chicago, IL');
+    // Without a point to bound the search, the address is the only locating signal left
+    expect(url.searchParams.get('query')).toBe("John's Barbershop 123 E 75TH ST");
+  });
+
+  it('rescales a 0-10 rating onto the 0-5 scale the scorers read', async () => {
+    // computeViability awards its top bonus at >= 4.0. Left raw, a mediocre 7.2 would max it for
+    // nearly every business — a constant dressed as a signal.
+    expect(fsqExtractEnrichment({ rating: 9.0 }).google_avg_rating).toBe(4.5);
+    expect(fsqExtractEnrichment({ rating: 7.2 }).google_avg_rating).toBe(3.6);
+    expect(fsqExtractEnrichment({}).google_avg_rating).toBeNull();
+  });
+
+  it('reads real social links where the Google client assumed every business had none', async () => {
+    const enrichment = fsqExtractEnrichment(PLACE);
+    expect(enrichment).toMatchObject({
+      fsq_place_id: 'fsq_abc',
+      website: 'http://johnsbarbershop.com',
+      has_website: true,
+      phone: '(773) 555-1234',
+      google_review_count: 47,
+      has_facebook_page: true,
+      has_instagram: true,
+    });
+    const bare = fsqExtractEnrichment({ fsq_place_id: 'fsq_none' });
+    expect(bare).toMatchObject({ has_website: false, has_facebook_page: false, has_instagram: false });
+    // Matched at all, which is what the Google port's `has_google_business_profile: true` meant
+    expect(bare.has_google_business_profile).toBe(true);
+  });
+
+  it('distinguishes a denied key from a business Foursquare has no record of', async () => {
+    const health = newFoursquareHealth();
+    stubFetch(() => jsonResponse({ message: 'invalid token' }, 401));
+
+    expect(await fsqFindPlace(keyed, QUERY, health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'UNAUTHORIZED' });
+  });
+
+  it('does not count a genuine no-match against the health of the run', async () => {
+    const health = newFoursquareHealth();
+    stubFetch(() => jsonResponse({ results: [] }));
+
+    expect(await fsqFindPlace(keyed, QUERY, health)).toBeNull();
+    expect(health).toEqual({ unavailable: 0, last_status: null });
+  });
+
+  it('separates an exhausted quota from a denied key, because only one of them is recoverable', async () => {
+    const health = newFoursquareHealth();
+    stubFetch(() => jsonResponse({ message: 'rate limited' }, 429));
+
+    await fsqFindPlace(keyed, QUERY, health);
+    expect(health).toEqual({ unavailable: 1, last_status: 'RATE_LIMITED' });
+  });
+
+  it('counts an unset key as unavailable so a keyless run cannot read as a clean one', async () => {
+    const health = newFoursquareHealth();
+    const calls = stubFetch(() => found());
+
+    expect(await fsqFindPlace({}, QUERY, health)).toBeNull();
+    expect(calls).toHaveLength(0);
+    expect(health).toEqual({ unavailable: 1, last_status: 'KEY_NOT_SET' });
+  });
+
+  it('counts a transport failure as unavailable rather than as an absent business', async () => {
+    const health = newFoursquareHealth();
+    stubFetch(() => {
+      throw new Error('connection reset');
+    });
+
+    expect(await fsqFindPlace(keyed, QUERY, health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'NETWORK_ERROR' });
   });
 });

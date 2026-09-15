@@ -5,15 +5,16 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { requireAdmin, requireAuth } from '../middleware/auth';
 import { runDiscovery } from '../lib/discovery';
-import { newPlacesHealth } from '../scrapers/google-places';
+import { newFoursquareHealth } from '../scrapers/foursquare';
 import { NICHES } from '../lib/stages';
 import { jsonBody } from '../lib/validate';
 import type { AppEnv } from '../types';
 
 const router = new Hono<AppEnv>();
 
-// Each business costs up to two Google subrequests on top of the Socrata page, and a Worker
-// invocation is capped at 50 subrequests on the free plan. 20 keeps the worst case at 41.
+// Each business costs one Foursquare subrequest on top of the Socrata page — its search response
+// carries the fields Google needed a second details call for — and a Worker invocation is capped at
+// 50 subrequests on the free plan. 20 keeps the worst case at 21.
 const MAX_LIMIT = 20;
 
 const runSchema = z.object({
@@ -24,10 +25,11 @@ const runSchema = z.object({
 
 router.post('/run', requireAuth, requireAdmin, jsonBody(runSchema), async (c) => {
   const { zip_code, niche, limit } = c.req.valid('json');
-  // Google answers a denied key or an exhausted quota with HTTP 200, so without this tally a run
-  // that looked up nothing is indistinguishable from one where Chicago's shops are simply absent
-  // from Places — and every business would be stored with a maximal digital deficit either way.
-  const places = newPlacesHealth();
+  // Without this tally a run that looked up nothing is indistinguishable from one where Chicago's
+  // shops are simply absent from Foursquare. The client reads HTTP status itself rather than going
+  // through fetchJson, whose throw would unwind past the tally and report a clean run that stored
+  // nothing at all.
+  const places = newFoursquareHealth();
   const businesses = await runDiscovery(c.env, zip_code, niche, limit, places);
   return c.json({ zip_code, niche, limit, discovered: businesses.length, places, businesses });
 });

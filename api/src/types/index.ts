@@ -19,6 +19,7 @@ export interface Bindings {
   SOCRATA_APP_TOKEN?: string;
   GOOGLE_PLACES_API_KEY?: string;
   GOOGLE_PLACES_API_SECRET?: string;
+  FOURSQUARE_API_KEY?: string;
   YELP_API_KEY?: string;
   APIFY_API_TOKEN?: string;
 }
@@ -53,7 +54,8 @@ export interface BusinessRow {
   license_number: string | null; license_status: string | null;
   license_issue_date: string | null; incorporation_date: string | null;
   employee_count_est: number | null; estimated_monthly_revenue: number | null;
-  google_place_id: string | null; thumbtack_hires: number | null;
+  google_place_id: string | null; fsq_place_id: string | null;
+  thumbtack_hires: number | null;
   nextdoor_recommendations: number | null; ig_location_tag_count: number | null;
   ig_hashtag_mention_count: number | null; fb_checkin_count: number | null;
   fb_ugc_tag_count: number | null; total_customer_ugc: number | null;

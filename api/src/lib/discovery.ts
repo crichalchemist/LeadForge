@@ -4,12 +4,11 @@ import { computeDigitalDeficit } from './scoring';
 import {
   extractEnrichment,
   findPlace,
-  getPlaceDetails,
-  newPlacesHealth,
-  type PlacesEnv,
-  type PlaceEnrichment,
-  type PlacesHealth,
-} from '../scrapers/google-places';
+  newFoursquareHealth,
+  type FoursquareEnv,
+  type FoursquareEnrichment,
+  type FoursquareHealth,
+} from '../scrapers/foursquare';
 import {
   dedupeLicenseRows,
   normalizeResult,
@@ -20,7 +19,7 @@ import {
 } from '../scrapers/socrata';
 import { nowIso } from '../db/serialize';
 
-export type DiscoveryEnv = { DB: D1Database } & SocrataEnv & PlacesEnv;
+export type DiscoveryEnv = { DB: D1Database } & SocrataEnv & FoursquareEnv;
 
 // Licence rows per business in the result window. Measured against the live dataset, a
 // barbershop/salon query averages 3.0 rows per business (508 rows, 168 businesses in 60619),
@@ -37,13 +36,13 @@ export interface DiscoveredBusiness {
   nof_corridor: string | null;
 }
 
-// =py run_discovery — Socrata → Google Places → score → persist
+// =py run_discovery — Socrata → Foursquare → score → persist
 export async function runDiscovery(
   env: DiscoveryEnv,
   zipCode: string,
   niche: Niche,
   limit?: number,
-  health?: PlacesHealth,
+  health?: FoursquareHealth,
 ): Promise<DiscoveredBusiness[]> {
   console.log('pipeline_start', { zip_code: zipCode, niche, limit });
 
@@ -77,17 +76,17 @@ export async function runDiscovery(
 
   console.log('pipeline_complete', {
     persisted_count: persisted.length,
-    places_unavailable: health?.unavailable ?? 0,
+    lookups_unavailable: health?.unavailable ?? 0,
   });
   return persisted;
 }
 
-// =py _enrich_and_persist — enrich one business via Google Places, dedup, score, and persist
+// =py _enrich_and_persist — enrich one business via Foursquare, dedup, score, and persist
 async function enrichAndPersist(
   env: DiscoveryEnv,
   bizData: NormalizedBusiness,
   niche: Niche,
-  health?: PlacesHealth,
+  health?: FoursquareHealth,
 ): Promise<DiscoveredBusiness | null> {
   const name = bizData.name.trim();
   if (!name) return null;
@@ -95,24 +94,29 @@ async function enrichAndPersist(
   const address = bizData.address;
   const zipCode = bizData.zip_code;
 
-  let enrichment: Partial<PlaceEnrichment> = {};
+  let enrichment: Partial<FoursquareEnrichment> = {};
   // Tally this business's lookups separately, then fold into the run's. Whether *this* business
   // was actually looked up decides whether its deficit is a measurement or a guess.
-  const lookups = newPlacesHealth();
-  const place = await findPlace(env, name, `${address}, Chicago, IL ${zipCode}`, lookups);
+  const lookups = newFoursquareHealth();
+  const place = await findPlace(
+    env,
+    { name, address, zip_code: zipCode, latitude: bizData.latitude, longitude: bizData.longitude },
+    lookups,
+  );
 
   if (place) {
-    const placeId = place.place_id;
+    const placeId = place.fsq_place_id;
     if (placeId) {
-      // Dedup check: does a business with this google_place_id already exist?
-      const existing = await env.DB.prepare('SELECT id FROM businesses WHERE google_place_id = ?').bind(placeId).first();
+      // Dedup check: does a business with this fsq_place_id already exist?
+      const existing = await env.DB.prepare('SELECT id FROM businesses WHERE fsq_place_id = ?').bind(placeId).first();
       if (existing) {
-        console.log('dedup_google_place_id', { name, place_id: placeId });
+        console.log('dedup_fsq_place_id', { name, place_id: placeId });
         return null;
       }
-      const details = await getPlaceDetails(env, placeId, lookups);
-      if (details) enrichment = extractEnrichment(details);
     }
+    // The search response already carries every field a details call would add, so there is no
+    // second lookup: where Google cost two subrequests per business, Foursquare costs one.
+    enrichment = extractEnrichment(place);
   } else {
     // Fallback dedup: name + zip
     const existing = await env.DB.prepare('SELECT id FROM businesses WHERE name = ? AND zip_code = ?')
@@ -136,8 +140,10 @@ async function enrichAndPersist(
   const hasWebsite = enrichment.has_website ?? false;
   const googleReviewCount = enrichment.google_review_count ?? 0;
   const hasGbp = enrichment.has_google_business_profile ?? false;
+  const hasFacebook = enrichment.has_facebook_page ?? false;
+  const hasInstagram = enrichment.has_instagram ?? false;
 
-  // A failed lookup is not a finding. With Places unavailable every input below is absent and
+  // A failed lookup is not a finding. With the source unavailable every input below is absent and
   // computeDigitalDeficit returns exactly 74 for every business on earth — a constant that would
   // sit in lead_scores looking like a measurement, rank nothing (it is 40% of the composite), and
   // trip computeNofEligibility's `deficit > 60` bonus for a business nobody researched. Store null
@@ -153,8 +159,8 @@ async function enrichAndPersist(
     has_google_business_profile: hasGbp ? 1 : 0,
     gbp_completeness_score: null,
     google_review_count: googleReviewCount,
-    has_facebook_page: 0,
-    has_instagram: 0,
+    has_facebook_page: hasFacebook ? 1 : 0,
+    has_instagram: hasInstagram ? 1 : 0,
     fb_last_post_days_ago: null,
     has_google_ads: 0,
     has_meta_ads: 0,
@@ -173,7 +179,7 @@ async function enrichAndPersist(
   await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO businesses (id, name, address, zip_code, phone, niche, license_number, license_status,
-         license_issue_date, google_place_id, latitude, longitude, in_nof_corridor, nof_corridor_name,
+         license_issue_date, fsq_place_id, latitude, longitude, in_nof_corridor, nof_corridor_name,
          created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
@@ -189,7 +195,7 @@ async function enrichAndPersist(
       bizData.license_status,
       // Python's normalizer extracts this and then discovery drops it; the column exists, so it is stored.
       bizData.license_issue_date ? bizData.license_issue_date.slice(0, 10) : null,
-      enrichment.google_place_id ?? null,
+      enrichment.fsq_place_id ?? null,
       // The city geocodes the licence address, so its coordinates lead and Google's only fill gaps.
       latitude,
       longitude,
@@ -200,8 +206,9 @@ async function enrichAndPersist(
     ),
     env.DB.prepare(
       `INSERT INTO digital_presences (id, business_id, has_website, website_url,
-         has_google_business_profile, google_review_count, google_avg_rating, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         has_google_business_profile, google_review_count, google_avg_rating,
+         has_facebook_page, has_instagram, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
       presenceId,
       businessId,
@@ -210,6 +217,8 @@ async function enrichAndPersist(
       hasGbp ? 1 : 0,
       googleReviewCount,
       enrichment.google_avg_rating ?? null,
+      hasFacebook ? 1 : 0,
+      hasInstagram ? 1 : 0,
       timestamp,
       timestamp,
     ),
