@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted
+Superseded by ADR-028. The dataset this decision depends on has been withdrawn
+from the Chicago Data Portal and D1 has no PostGIS.
 
 ## Date
 

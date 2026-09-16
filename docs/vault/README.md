@@ -32,7 +32,7 @@ To maintain organization across the 4-phase build:
 | 001 | Project scaffolding: uv + hatchling, src layout, Docker Compose | Accepted | 2026-03-14 |
 | 002 | ORM and migration: SQLAlchemy 2.0 async + asyncpg, Alembic, UUID PKs | Accepted | 2026-03-14 |
 | 003 | Scraping library: Scrapling for static+headless, Apify for Meta only | Accepted | 2026-03-14 |
-| 004 | Entity deduplication: google_place_id primary, fuzzy name+address fallback | Accepted | 2026-03-14 |
+| 004 | Entity deduplication: google_place_id primary, fuzzy name+address fallback | Superseded by 029 | 2026-03-14 |
 | 005 | API cost management: Google Places field masks, Socrata pagination | Accepted | 2026-03-14 |
 | 006 | Niche-to-Socrata mapping: configurable dict, not hardcoded | Accepted | 2026-03-14 |
 | 007 | Scraper resilience: independent scrapers, failures logged not fatal, Celery retry | Accepted | 2026-03-14 |
@@ -49,8 +49,12 @@ To maintain organization across the 4-phase build:
 | 018 | Pipeline transitions: valid transition enforcement in backend, optimistic updates in frontend | Accepted | 2026-03-14 |
 | 019 | Retell API v2 alignment: parameter names, webhook structure, signature verification | Accepted | 2026-03-14 |
 | 020 | NOF integration: grant-facilitated acquisition as parallel channel | Accepted | 2026-03-14 |
-| 021 | Corridor GIS: Chicago Data Portal to PostGIS spatial eligibility | Accepted | 2026-03-14 |
+| 021 | Corridor GIS: Chicago Data Portal to PostGIS spatial eligibility | Superseded by 028 | 2026-03-14 |
 | 022 | NOF eligibility scoring: corridor hard gate plus business signal scoring | Accepted | 2026-03-14 |
 | 023 | Dual pipeline CRM: independent GrantApplication and OutreachRecord tracks | Accepted | 2026-03-14 |
 | 024 | Grant financial calculator: pure function modeling NOF grant math | Accepted | 2026-03-14 |
 | 025 | Voice prompt fork: dynamic NOF vs marketing pitch based on eligibility | Accepted | 2026-03-14 |
+| 026 | Workers API mirrors the Python API contract; D1 schema mirrors SQLAlchemy models | Accepted | 2026-09-02 |
+| 027 | Frontend on Cloudflare Pages, cross-origin to the Workers API; refresh cookie SameSite=None | Accepted | 2026-09-02 |
+| 028 | NOF corridors as a bundled polygon asset, point-in-polygon at ingest | Accepted | 2026-09-02 |
+| 029 | Foursquare Places replaces Google Places as the enrichment source | Accepted | 2026-09-15 |

@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "leadforge-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "leadforge-db", "database_id": "1e6961e4-8e03-42bf-a466-a02cfc89cd05", "migrations_dir": "migrations" }
+  ],
+  "ai": { "binding": "AI" },
+  "queues": {
+    "producers": [
+      { "binding": "ENRICHMENT_QUEUE", "queue": "leadforge-enrichment" },
+      { "binding": "OUTREACH_QUEUE", "queue": "leadforge-outreach" },
+      { "binding": "SENTIMENT_QUEUE", "queue": "leadforge-sentiment" },
+      { "binding": "RECALIBRATION_QUEUE", "queue": "leadforge-recalibration" }
+    ],
+    // =py celery_app task_routes: one consumer per Celery queue. Only sentiment is ported (src/tasks/sentiment.ts);
+    // enrichment, outreach and recalibration consumers arrive with the scraper, voice and scoring ports.
+    "consumers": [
+      { "queue": "leadforge-sentiment", "max_retries": 2, "retry_delay": 60 }
+    ]
+  },
+  // =py celery_beat_schedule: quarterly recalibration and weekly corridor refresh. Neither body is portable yet
+  // (recalibration needs the scoring re-port, corridor refresh needs PostGIS), so no cron is declared; the empty
+  // list removes the four placeholder crons from the deployed Worker.
+  "triggers": { "crons": [] },
+  "kv_namespaces": [
+    { "binding": "COOKIE_STORE", "id": "eb9c3cb694cf41518eeeb65c61297939" }
+  ],
+  // Production values. `wrangler dev` overrides them from .dev.vars.
+  "vars": { "CORS_ORIGINS": "https://leadforge-frontend-80u.pages.dev" }
+}

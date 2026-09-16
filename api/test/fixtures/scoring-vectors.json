@@ -1,0 +1,6583 @@
+[
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 15.6,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 186,
+   "google_avg_rating": null,
+   "review_velocity_30d": 4.7,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 207,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3856,
+   "license_status": null,
+   "total_customer_ugc": 33,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": 62425.05
+  },
+  "context": {
+   "competitor_count": 4,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 2.3,
+   "median_household_income": 96483.51,
+   "population_density": 21755.8
+  },
+  "corridor": null,
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 51.0,
+   "viability_score": 71.0,
+   "competitive_pressure_score": 20.0,
+   "composite_acquisition_score": 50.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 51.0,
+   "viability_alone": 71.0,
+   "pressure_alone": 20.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.82,
+   "google_review_count": 33,
+   "google_avg_rating": 4.6,
+   "review_velocity_30d": 3.9,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 113,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3947,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 18,
+   "employee_count_est": 14,
+   "estimated_monthly_revenue": 41674.45
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "tire_shops",
+  "expected": {
+   "digital_deficit_score": 31.0,
+   "viability_score": 76.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 39.0,
+   "price_tier": 3,
+   "nof_eligibility_score": 65.0,
+   "deficit_alone": 31.0,
+   "viability_alone": 76.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": null,
+   "google_avg_rating": 2.5,
+   "review_velocity_30d": 4.6,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 31,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2356,
+   "license_status": "unknown",
+   "total_customer_ugc": 13,
+   "nextdoor_recommendations": 16,
+   "thumbtack_hires": 6,
+   "employee_count_est": 4,
+   "estimated_monthly_revenue": 39832.04
+  },
+  "context": {
+   "competitor_count": 4,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 4,
+   "avg_rating": null,
+   "median_household_income": 56789.55,
+   "population_density": 13910.3
+  },
+  "corridor": "priority",
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 45.0,
+   "viability_score": 46.0,
+   "competitive_pressure_score": 25.0,
+   "composite_acquisition_score": 40.35,
+   "price_tier": 1,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 45.0,
+   "viability_alone": 46.0,
+   "pressure_alone": 25.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 23.4,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.34,
+   "google_review_count": 154,
+   "google_avg_rating": 3.9,
+   "review_velocity_30d": -2.0,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 291,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2718,
+   "license_status": null,
+   "total_customer_ugc": 43,
+   "nextdoor_recommendations": 6,
+   "thumbtack_hires": 25,
+   "employee_count_est": 3,
+   "estimated_monthly_revenue": 30835.8
+  },
+  "context": {
+   "competitor_count": 25,
+   "avg_digital_score": 94.4,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 3.9,
+   "median_household_income": 89029.73,
+   "population_density": 12627.5
+  },
+  "corridor": null,
+  "niche": "beauty_supply",
+  "expected": {
+   "digital_deficit_score": 43.0,
+   "viability_score": 81.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 61.8,
+   "price_tier": 2,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 43.0,
+   "viability_alone": 81.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 14,
+   "thumbtack_hires": 27,
+   "employee_count_est": 13,
+   "estimated_monthly_revenue": 35511.8
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 13.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 4.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 50.0,
+   "deficit_alone": null,
+   "viability_alone": 13.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.88,
+   "google_review_count": 24,
+   "google_avg_rating": 2.2,
+   "review_velocity_30d": 1.8,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 52,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2266,
+   "license_status": null,
+   "total_customer_ugc": 84,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 4,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 0,
+   "avg_rating": null,
+   "median_household_income": 41076.5,
+   "population_density": 14783.7
+  },
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 12.0,
+   "viability_score": 58.0,
+   "competitive_pressure_score": 10.0,
+   "composite_acquisition_score": 27.6,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 12.0,
+   "viability_alone": 58.0,
+   "pressure_alone": 10.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 85.0,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.8,
+   "google_review_count": null,
+   "google_avg_rating": 3.2,
+   "review_velocity_30d": -0.1,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 78,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 916,
+   "license_status": "expired",
+   "total_customer_ugc": 10,
+   "nextdoor_recommendations": 14,
+   "thumbtack_hires": null,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": null
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 35.0,
+   "viability_score": 18.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 20.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 52.0,
+   "deficit_alone": 35.0,
+   "viability_alone": 18.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 41,
+   "google_avg_rating": 2.6,
+   "review_velocity_30d": 0.7,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 397,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3543,
+   "license_status": "active",
+   "total_customer_ugc": 9,
+   "nextdoor_recommendations": 1,
+   "thumbtack_hires": null,
+   "employee_count_est": 4,
+   "estimated_monthly_revenue": 48827.18
+  },
+  "context": {
+   "competitor_count": 6,
+   "avg_digital_score": 41.4,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 4.9,
+   "median_household_income": 62117.79,
+   "population_density": 22846.8
+  },
+  "corridor": null,
+  "niche": "septic_services",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 61.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 58.8,
+   "price_tier": 2,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 61.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 53.3,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.08,
+   "google_review_count": 79,
+   "google_avg_rating": 3.3,
+   "review_velocity_30d": 0.2,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 36,
+   "nextdoor_recommendations": 4,
+   "thumbtack_hires": 17,
+   "employee_count_est": 17,
+   "estimated_monthly_revenue": 37943.17
+  },
+  "context": {
+   "competitor_count": 20,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 3.3,
+   "median_household_income": 29832.88,
+   "population_density": 15131.3
+  },
+  "corridor": "priority",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 48.0,
+   "viability_score": 46.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 49.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 70.0,
+   "deficit_alone": 48.0,
+   "viability_alone": 46.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 76.0,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.65,
+   "google_review_count": null,
+   "google_avg_rating": 2.4,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 194,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 1926,
+   "license_status": "unknown",
+   "total_customer_ugc": 61,
+   "nextdoor_recommendations": 5,
+   "thumbtack_hires": 1,
+   "employee_count_est": 14,
+   "estimated_monthly_revenue": 62714.75
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": 48.3,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 1.8,
+   "median_household_income": 54627.03,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 23.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 25.0,
+   "composite_acquisition_score": 28.75,
+   "price_tier": 3,
+   "nof_eligibility_score": 65.0,
+   "deficit_alone": 23.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 25.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": 82,
+   "nextdoor_recommendations": 12,
+   "thumbtack_hires": 2,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 21,
+   "avg_digital_score": 91.9,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 3.8,
+   "median_household_income": null,
+   "population_density": 1370.6
+  },
+  "corridor": "eligible",
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 25.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 20.0,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 25.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.44,
+   "google_review_count": null,
+   "google_avg_rating": 2.1,
+   "review_velocity_30d": 0.8,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 332,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2251,
+   "license_status": "active",
+   "total_customer_ugc": 9,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 13,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 20494.18
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": 16.8,
+   "competitor_ads_active_count": 6,
+   "avg_rating": null,
+   "median_household_income": 34551.59,
+   "population_density": 12596.5
+  },
+  "corridor": null,
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 50.0,
+   "composite_acquisition_score": 51.8,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 50.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.11,
+   "google_review_count": 145,
+   "google_avg_rating": 1.5,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 27,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 34,
+   "nextdoor_recommendations": 3,
+   "thumbtack_hires": 30,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": 62947.06
+  },
+  "context": {
+   "competitor_count": 7,
+   "avg_digital_score": 81.3,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 1.4,
+   "median_household_income": null,
+   "population_density": 11469.4
+  },
+  "corridor": null,
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 35.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 30.0,
+   "composite_acquisition_score": 34.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 35.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 30.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 19,
+   "thumbtack_hires": 28,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 19,
+   "avg_digital_score": 43.5,
+   "competitor_ads_active_count": 0,
+   "avg_rating": null,
+   "median_household_income": 81972.56,
+   "population_density": null
+  },
+  "corridor": "priority",
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 10.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 13.5,
+   "price_tier": 1,
+   "nof_eligibility_score": 45.0,
+   "deficit_alone": null,
+   "viability_alone": 10.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 2.7,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.74,
+   "google_review_count": 39,
+   "google_avg_rating": 4.2,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 14,
+   "nextdoor_recommendations": 15,
+   "thumbtack_hires": null,
+   "employee_count_est": 3,
+   "estimated_monthly_revenue": 63724.48
+  },
+  "context": {
+   "competitor_count": 25,
+   "avg_digital_score": 70.1,
+   "competitor_ads_active_count": 1,
+   "avg_rating": null,
+   "median_household_income": null,
+   "population_density": 12643.7
+  },
+  "corridor": "priority",
+  "niche": "meat_markets",
+  "expected": {
+   "digital_deficit_score": 45.0,
+   "viability_score": 48.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 51.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 70.0,
+   "deficit_alone": 45.0,
+   "viability_alone": 48.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 94.5,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.18,
+   "google_review_count": 95,
+   "google_avg_rating": null,
+   "review_velocity_30d": 4.6,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 106,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2140,
+   "license_status": null,
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 8,
+   "thumbtack_hires": 7,
+   "employee_count_est": 14,
+   "estimated_monthly_revenue": 74118.72
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": 1.8,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 1.3,
+   "median_household_income": 41201.93,
+   "population_density": 14546.0
+  },
+  "corridor": null,
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 48.0,
+   "viability_score": 56.0,
+   "competitive_pressure_score": 25.0,
+   "composite_acquisition_score": 45.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 48.0,
+   "viability_alone": 56.0,
+   "pressure_alone": 25.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 39,
+   "nextdoor_recommendations": 18,
+   "thumbtack_hires": 6,
+   "employee_count_est": 9,
+   "estimated_monthly_revenue": 63123.16
+  },
+  "context": null,
+  "corridor": "priority",
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 18.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 6.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 65.0,
+   "deficit_alone": null,
+   "viability_alone": 18.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 3420,
+   "license_status": "active",
+   "total_customer_ugc": 12,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 22,
+   "employee_count_est": 20,
+   "estimated_monthly_revenue": 51539.71
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 53.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 18.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 53.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 57.9,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.77,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": 3.0,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 171,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3373,
+   "license_status": "revoked",
+   "total_customer_ugc": 26,
+   "nextdoor_recommendations": 15,
+   "thumbtack_hires": 8,
+   "employee_count_est": 9,
+   "estimated_monthly_revenue": 15705.95
+  },
+  "context": {
+   "competitor_count": 2,
+   "avg_digital_score": 6.3,
+   "competitor_ads_active_count": 5,
+   "avg_rating": 1.9,
+   "median_household_income": 25998.37,
+   "population_density": 22637.0
+  },
+  "corridor": "eligible",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 8.0,
+   "viability_score": 56.0,
+   "competitive_pressure_score": 50.0,
+   "composite_acquisition_score": 35.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 8.0,
+   "viability_alone": 56.0,
+   "pressure_alone": 50.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 2300,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 12,
+   "thumbtack_hires": 20,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 15782.08
+  },
+  "context": null,
+  "corridor": "priority",
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 30.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 10.5,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 30.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 28.3,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 24,
+   "google_avg_rating": null,
+   "review_velocity_30d": 3.3,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 70,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2500,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 16,
+   "thumbtack_hires": 1,
+   "employee_count_est": 0,
+   "estimated_monthly_revenue": 10307.83
+  },
+  "context": {
+   "competitor_count": 17,
+   "avg_digital_score": 15.5,
+   "competitor_ads_active_count": 1,
+   "avg_rating": null,
+   "median_household_income": 119072.97,
+   "population_density": 4765.5
+  },
+  "corridor": null,
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 32.0,
+   "viability_score": 48.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 39.6,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 32.0,
+   "viability_alone": 48.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.58,
+   "google_review_count": 11,
+   "google_avg_rating": null,
+   "review_velocity_30d": 2.3,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 285,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 14,
+   "thumbtack_hires": 7,
+   "employee_count_est": 6,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 15,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 3.0,
+   "median_household_income": 99501.75,
+   "population_density": 12604.8
+  },
+  "corridor": null,
+  "niche": "tire_shops",
+  "expected": {
+   "digital_deficit_score": 23.0,
+   "viability_score": 36.0,
+   "competitive_pressure_score": 50.0,
+   "composite_acquisition_score": 34.3,
+   "price_tier": 2,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 23.0,
+   "viability_alone": 36.0,
+   "pressure_alone": 50.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 1436,
+   "license_status": "revoked",
+   "total_customer_ugc": 8,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 17,
+   "employee_count_est": 3,
+   "estimated_monthly_revenue": 523.85
+  },
+  "context": null,
+  "corridor": null,
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 28.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 9.8,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 28.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 71.6,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.95,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": 0.3,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 310,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "expired",
+   "total_customer_ugc": 0,
+   "nextdoor_recommendations": 0,
+   "thumbtack_hires": null,
+   "employee_count_est": 13,
+   "estimated_monthly_revenue": 21271.1
+  },
+  "context": {
+   "competitor_count": 20,
+   "avg_digital_score": 68.5,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 2.9,
+   "median_household_income": null,
+   "population_density": null
+  },
+  "corridor": "priority",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 16.0,
+   "viability_score": 11.0,
+   "competitive_pressure_score": 70.0,
+   "composite_acquisition_score": 27.75,
+   "price_tier": 3,
+   "nof_eligibility_score": 60.0,
+   "deficit_alone": 16.0,
+   "viability_alone": 11.0,
+   "pressure_alone": 70.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 29.5,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.16,
+   "google_review_count": 69,
+   "google_avg_rating": 4.4,
+   "review_velocity_30d": -0.3,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 123,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 1793,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 27,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 3716.16
+  },
+  "context": {
+   "competitor_count": 15,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 5,
+   "avg_rating": null,
+   "median_household_income": 98122.57,
+   "population_density": 11177.0
+  },
+  "corridor": "priority",
+  "niche": "barbershops",
+  "expected": {
+   "digital_deficit_score": 46.0,
+   "viability_score": 60.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 55.65,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 46.0,
+   "viability_alone": 60.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": -0.8,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 315,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3439,
+   "license_status": "expired",
+   "total_customer_ugc": 65,
+   "nextdoor_recommendations": 13,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 22029.2
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 0,
+   "avg_rating": null,
+   "median_household_income": 39165.84,
+   "population_density": 6817.9
+  },
+  "corridor": "priority",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 35.0,
+   "viability_score": 50.0,
+   "competitive_pressure_score": 30.0,
+   "composite_acquisition_score": 39.0,
+   "price_tier": 1,
+   "nof_eligibility_score": 68.0,
+   "deficit_alone": 35.0,
+   "viability_alone": 50.0,
+   "pressure_alone": 30.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 82.3,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.3,
+   "google_review_count": 42,
+   "google_avg_rating": null,
+   "review_velocity_30d": -1.2,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 234,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 60,
+   "license_status": null,
+   "total_customer_ugc": 59,
+   "nextdoor_recommendations": 15,
+   "thumbtack_hires": 17,
+   "employee_count_est": 16,
+   "estimated_monthly_revenue": 26056.06
+  },
+  "context": {
+   "competitor_count": 2,
+   "avg_digital_score": 95.1,
+   "competitor_ads_active_count": 4,
+   "avg_rating": null,
+   "median_household_income": 116084.49,
+   "population_density": 10852.4
+  },
+  "corridor": "priority",
+  "niche": "septic_services",
+  "expected": {
+   "digital_deficit_score": 31.0,
+   "viability_score": 43.0,
+   "competitive_pressure_score": 60.0,
+   "composite_acquisition_score": 42.45,
+   "price_tier": 3,
+   "nof_eligibility_score": 70.0,
+   "deficit_alone": 31.0,
+   "viability_alone": 43.0,
+   "pressure_alone": 60.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 29.9,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 19,
+   "google_avg_rating": null,
+   "review_velocity_30d": -0.0,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2866,
+   "license_status": "revoked",
+   "total_customer_ugc": 50,
+   "nextdoor_recommendations": 2,
+   "thumbtack_hires": 6,
+   "employee_count_est": 2,
+   "estimated_monthly_revenue": 29839.61
+  },
+  "context": {
+   "competitor_count": 22,
+   "avg_digital_score": 82.0,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 4.3,
+   "median_household_income": null,
+   "population_density": 18662.6
+  },
+  "corridor": "priority",
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 20.0,
+   "viability_score": 55.0,
+   "competitive_pressure_score": 80.0,
+   "composite_acquisition_score": 47.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 20.0,
+   "viability_alone": 55.0,
+   "pressure_alone": 80.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 0.1,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 164,
+   "google_avg_rating": 3.1,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 669,
+   "license_status": "revoked",
+   "total_customer_ugc": 13,
+   "nextdoor_recommendations": 6,
+   "thumbtack_hires": 26,
+   "employee_count_est": 20,
+   "estimated_monthly_revenue": 11230.41
+  },
+  "context": {
+   "competitor_count": 8,
+   "avg_digital_score": 55.6,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 2.3,
+   "median_household_income": 88619.14,
+   "population_density": 13788.4
+  },
+  "corridor": "eligible",
+  "niche": "barbershops",
+  "expected": {
+   "digital_deficit_score": 35.0,
+   "viability_score": 43.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 39.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 35.0,
+   "viability_alone": 43.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 28.3,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 95,
+   "google_avg_rating": 4.7,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 52,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 7,
+   "thumbtack_hires": 6,
+   "employee_count_est": 0,
+   "estimated_monthly_revenue": 10013.65
+  },
+  "context": {
+   "competitor_count": 23,
+   "avg_digital_score": 32.0,
+   "competitor_ads_active_count": 4,
+   "avg_rating": null,
+   "median_household_income": null,
+   "population_density": 1580.5
+  },
+  "corridor": null,
+  "niche": "meat_markets",
+  "expected": {
+   "digital_deficit_score": 42.0,
+   "viability_score": 40.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 42.05,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 42.0,
+   "viability_alone": 40.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 60.8,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.58,
+   "google_review_count": 137,
+   "google_avg_rating": 4.9,
+   "review_velocity_30d": 0.8,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 373,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 12,
+   "employee_count_est": 11,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 4,
+   "avg_digital_score": 4.1,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 4.1,
+   "median_household_income": null,
+   "population_density": 7221.5
+  },
+  "corridor": "priority",
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 46.0,
+   "viability_score": 51.0,
+   "competitive_pressure_score": 15.0,
+   "composite_acquisition_score": 40.0,
+   "price_tier": 3,
+   "nof_eligibility_score": 57.0,
+   "deficit_alone": 46.0,
+   "viability_alone": 51.0,
+   "pressure_alone": 15.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 3643,
+   "license_status": "unknown",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 12,
+   "thumbtack_hires": 13,
+   "employee_count_est": 20,
+   "estimated_monthly_revenue": 9222.06
+  },
+  "context": {
+   "competitor_count": 16,
+   "avg_digital_score": 8.3,
+   "competitor_ads_active_count": 2,
+   "avg_rating": null,
+   "median_household_income": 44803.11,
+   "population_density": null
+  },
+  "corridor": null,
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 43.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 26.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 43.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.89,
+   "google_review_count": 195,
+   "google_avg_rating": 3.0,
+   "review_velocity_30d": -1.8,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 396,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 442,
+   "license_status": "active",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 17,
+   "employee_count_est": 13,
+   "estimated_monthly_revenue": 43556.86
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 16.0,
+   "viability_score": 33.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 17.95,
+   "price_tier": 3,
+   "nof_eligibility_score": 60.0,
+   "deficit_alone": 16.0,
+   "viability_alone": 33.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 15.6,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": null,
+   "google_avg_rating": 3.6,
+   "review_velocity_30d": 2.2,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 98,
+   "nextdoor_recommendations": 20,
+   "thumbtack_hires": 27,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 1257.83
+  },
+  "context": {
+   "competitor_count": 22,
+   "avg_digital_score": 28.8,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 1.9,
+   "median_household_income": null,
+   "population_density": 4815.2
+  },
+  "corridor": "eligible",
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 32.0,
+   "viability_score": 41.0,
+   "competitive_pressure_score": 70.0,
+   "composite_acquisition_score": 44.65,
+   "price_tier": 3,
+   "nof_eligibility_score": 40.0,
+   "deficit_alone": 32.0,
+   "viability_alone": 41.0,
+   "pressure_alone": 70.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.61,
+   "google_review_count": 28,
+   "google_avg_rating": 3.1,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 322,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 61,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 14,
+   "employee_count_est": 16,
+   "estimated_monthly_revenue": 33652.0
+  },
+  "context": {
+   "competitor_count": 21,
+   "avg_digital_score": 48.2,
+   "competitor_ads_active_count": 6,
+   "avg_rating": null,
+   "median_household_income": 65313.74,
+   "population_density": 17184.2
+  },
+  "corridor": "priority",
+  "niche": "beauty_supply",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 90.0,
+   "composite_acquisition_score": 61.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 85.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 90.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 27.0,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 79,
+   "google_avg_rating": null,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 28,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 24,
+   "employee_count_est": 0,
+   "estimated_monthly_revenue": 9435.23
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": 26.3,
+   "competitor_ads_active_count": 0,
+   "avg_rating": null,
+   "median_household_income": 116380.99,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 25.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 39.95,
+   "price_tier": 1,
+   "nof_eligibility_score": 48.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 25.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 58.1,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 121,
+   "google_avg_rating": 2.2,
+   "review_velocity_30d": 1.6,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 322,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 887,
+   "license_status": "revoked",
+   "total_customer_ugc": 23,
+   "nextdoor_recommendations": 13,
+   "thumbtack_hires": 25,
+   "employee_count_est": 12,
+   "estimated_monthly_revenue": 55634.31
+  },
+  "context": {
+   "competitor_count": 9,
+   "avg_digital_score": 53.8,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 1.7,
+   "median_household_income": 33661.46,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 51.0,
+   "competitive_pressure_score": 35.0,
+   "composite_acquisition_score": 52.6,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 51.0,
+   "pressure_alone": 35.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.76,
+   "google_review_count": 64,
+   "google_avg_rating": 4.7,
+   "review_velocity_30d": -1.9,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 1488,
+   "license_status": null,
+   "total_customer_ugc": 27,
+   "nextdoor_recommendations": 4,
+   "thumbtack_hires": 29,
+   "employee_count_est": 0,
+   "estimated_monthly_revenue": 50914.94
+  },
+  "context": {
+   "competitor_count": 7,
+   "avg_digital_score": 14.3,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 3.0,
+   "median_household_income": 47647.37,
+   "population_density": 17604.2
+  },
+  "corridor": null,
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 15.0,
+   "viability_score": 70.0,
+   "competitive_pressure_score": 30.0,
+   "composite_acquisition_score": 38.0,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 15.0,
+   "viability_alone": 70.0,
+   "pressure_alone": 30.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 42.6,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.22,
+   "google_review_count": 2,
+   "google_avg_rating": 1.2,
+   "review_velocity_30d": 4.5,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 46,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3334,
+   "license_status": "revoked",
+   "total_customer_ugc": 24,
+   "nextdoor_recommendations": 8,
+   "thumbtack_hires": 15,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": 32852.59
+  },
+  "context": {
+   "competitor_count": 12,
+   "avg_digital_score": 17.6,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 1.5,
+   "median_household_income": null,
+   "population_density": 9614.1
+  },
+  "corridor": "eligible",
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 39.0,
+   "viability_score": 61.0,
+   "competitive_pressure_score": 80.0,
+   "composite_acquisition_score": 56.95,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 39.0,
+   "viability_alone": 61.0,
+   "pressure_alone": 80.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 62.7,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.75,
+   "google_review_count": 89,
+   "google_avg_rating": 1.6,
+   "review_velocity_30d": -1.6,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 337,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2847,
+   "license_status": "active",
+   "total_customer_ugc": 64,
+   "nextdoor_recommendations": 0,
+   "thumbtack_hires": null,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 1,
+   "avg_digital_score": 0.2,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 4.6,
+   "median_household_income": 109551.8,
+   "population_density": 17816.7
+  },
+  "corridor": "eligible",
+  "niche": "beauty_supply",
+  "expected": {
+   "digital_deficit_score": 27.0,
+   "viability_score": 70.0,
+   "competitive_pressure_score": 30.0,
+   "composite_acquisition_score": 42.8,
+   "price_tier": 1,
+   "nof_eligibility_score": 60.0,
+   "deficit_alone": 27.0,
+   "viability_alone": 70.0,
+   "pressure_alone": 30.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 88.2,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 135,
+   "google_avg_rating": 2.2,
+   "review_velocity_30d": -1.7,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 767,
+   "license_status": "unknown",
+   "total_customer_ugc": 28,
+   "nextdoor_recommendations": 18,
+   "thumbtack_hires": 28,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 16402.57
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 0,
+   "avg_rating": null,
+   "median_household_income": 53971.74,
+   "population_density": 700.2
+  },
+  "corridor": null,
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 40.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 14.0,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 0.0,
+   "viability_alone": 40.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 76,
+   "google_avg_rating": 3.8,
+   "review_velocity_30d": 1.4,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 359,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 9,
+   "thumbtack_hires": null,
+   "employee_count_est": 9,
+   "estimated_monthly_revenue": 23080.2
+  },
+  "context": {
+   "competitor_count": 4,
+   "avg_digital_score": 49.0,
+   "competitor_ads_active_count": 2,
+   "avg_rating": null,
+   "median_household_income": 66450.64,
+   "population_density": 22173.4
+  },
+  "corridor": "priority",
+  "niche": "security_services",
+  "expected": {
+   "digital_deficit_score": 58.0,
+   "viability_score": 44.0,
+   "competitive_pressure_score": 35.0,
+   "composite_acquisition_score": 47.35,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 58.0,
+   "viability_alone": 44.0,
+   "pressure_alone": 35.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 2318,
+   "license_status": "revoked",
+   "total_customer_ugc": 49,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": 8,
+   "estimated_monthly_revenue": 76638.28
+  },
+  "context": {
+   "competitor_count": 12,
+   "avg_digital_score": 19.1,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 2.2,
+   "median_household_income": null,
+   "population_density": 3067.5
+  },
+  "corridor": "eligible",
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 33.0,
+   "competitive_pressure_score": 30.0,
+   "composite_acquisition_score": 19.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 33.0,
+   "pressure_alone": 30.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 1184,
+   "license_status": "unknown",
+   "total_customer_ugc": 28,
+   "nextdoor_recommendations": 5,
+   "thumbtack_hires": 20,
+   "employee_count_est": 15,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 12,
+   "avg_digital_score": 61.5,
+   "competitor_ads_active_count": 6,
+   "avg_rating": 1.5,
+   "median_household_income": 83688.02,
+   "population_density": 10069.5
+  },
+  "corridor": "priority",
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 29.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 38.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 69.8,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": null,
+   "google_avg_rating": 4.9,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 329,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2270,
+   "license_status": "expired",
+   "total_customer_ugc": 68,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 15,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": 15500.44
+  },
+  "context": {
+   "competitor_count": 11,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 3,
+   "avg_rating": null,
+   "median_household_income": 27014.31,
+   "population_density": 18370.8
+  },
+  "corridor": null,
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 58.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 55.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 58.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 64.0,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.06,
+   "google_review_count": 35,
+   "google_avg_rating": 3.4,
+   "review_velocity_30d": 0.4,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 294,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3187,
+   "license_status": "unknown",
+   "total_customer_ugc": 61,
+   "nextdoor_recommendations": 9,
+   "thumbtack_hires": 16,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 33527.39
+  },
+  "context": null,
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 68.0,
+   "viability_score": 78.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 54.5,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 68.0,
+   "viability_alone": 78.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 69.7,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.57,
+   "google_review_count": null,
+   "google_avg_rating": 1.2,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 383,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 493,
+   "license_status": "revoked",
+   "total_customer_ugc": 96,
+   "nextdoor_recommendations": 10,
+   "thumbtack_hires": 30,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": 55369.69
+  },
+  "context": {
+   "competitor_count": 6,
+   "avg_digital_score": 16.3,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 2.1,
+   "median_household_income": 51745.33,
+   "population_density": 4402.4
+  },
+  "corridor": null,
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 38.0,
+   "viability_score": 28.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 38.75,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 38.0,
+   "viability_alone": 28.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.18,
+   "google_review_count": 106,
+   "google_avg_rating": 4.7,
+   "review_velocity_30d": 1.5,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 305,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3917,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 1,
+   "thumbtack_hires": 16,
+   "employee_count_est": 4,
+   "estimated_monthly_revenue": 9045.77
+  },
+  "context": {
+   "competitor_count": 12,
+   "avg_digital_score": 5.9,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 2.8,
+   "median_household_income": null,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 43.0,
+   "viability_score": 81.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 56.8,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 43.0,
+   "viability_alone": 81.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 7.2,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.97,
+   "google_review_count": 23,
+   "google_avg_rating": 1.2,
+   "review_velocity_30d": 3.8,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 209,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3830,
+   "license_status": "active",
+   "total_customer_ugc": 86,
+   "nextdoor_recommendations": 20,
+   "thumbtack_hires": 8,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 16164.26
+  },
+  "context": {
+   "competitor_count": 7,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 2.7,
+   "median_household_income": 90976.19,
+   "population_density": 13662.9
+  },
+  "corridor": "eligible",
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 78.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 69.55,
+   "price_tier": 1,
+   "nof_eligibility_score": 83.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 78.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 22.0,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.12,
+   "google_review_count": 136,
+   "google_avg_rating": 1.6,
+   "review_velocity_30d": 4.3,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2737,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 17,
+   "thumbtack_hires": 22,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 60953.82
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "security_services",
+  "expected": {
+   "digital_deficit_score": 42.0,
+   "viability_score": 68.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 40.6,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 42.0,
+   "viability_alone": 68.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 69.7,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.42,
+   "google_review_count": 27,
+   "google_avg_rating": null,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 36,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 3,
+   "employee_count_est": 11,
+   "estimated_monthly_revenue": 22197.18
+  },
+  "context": null,
+  "corridor": null,
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 28.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 31.0,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 28.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.09,
+   "google_review_count": 141,
+   "google_avg_rating": 4.9,
+   "review_velocity_30d": 0.6,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 220,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 772,
+   "license_status": null,
+   "total_customer_ugc": 50,
+   "nextdoor_recommendations": 19,
+   "thumbtack_hires": 16,
+   "employee_count_est": 12,
+   "estimated_monthly_revenue": 4724.09
+  },
+  "context": {
+   "competitor_count": 13,
+   "avg_digital_score": 99.2,
+   "competitor_ads_active_count": 6,
+   "avg_rating": 4.4,
+   "median_household_income": 69468.21,
+   "population_density": 6564.9
+  },
+  "corridor": "eligible",
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 61.0,
+   "viability_score": 66.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 61.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 77.0,
+   "deficit_alone": 61.0,
+   "viability_alone": 66.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 146,
+   "google_avg_rating": 2.4,
+   "review_velocity_30d": -0.9,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 64,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 468,
+   "license_status": "revoked",
+   "total_customer_ugc": 55,
+   "nextdoor_recommendations": 3,
+   "thumbtack_hires": 3,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 77610.25
+  },
+  "context": {
+   "competitor_count": 7,
+   "avg_digital_score": 82.9,
+   "competitor_ads_active_count": 3,
+   "avg_rating": null,
+   "median_household_income": 96869.98,
+   "population_density": null
+  },
+  "corridor": "priority",
+  "niche": "tire_shops",
+  "expected": {
+   "digital_deficit_score": 8.0,
+   "viability_score": 35.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 26.7,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 8.0,
+   "viability_alone": 35.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.41,
+   "google_review_count": null,
+   "google_avg_rating": 4.8,
+   "review_velocity_30d": -1.7,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 181,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 22,
+   "nextdoor_recommendations": 17,
+   "thumbtack_hires": 5,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 1,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 1.4,
+   "median_household_income": 44023.23,
+   "population_density": null
+  },
+  "corridor": null,
+  "niche": "septic_services",
+  "expected": {
+   "digital_deficit_score": 18.0,
+   "viability_score": 30.0,
+   "competitive_pressure_score": 15.0,
+   "composite_acquisition_score": 21.45,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 18.0,
+   "viability_alone": 30.0,
+   "pressure_alone": 15.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 85.4,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.12,
+   "google_review_count": null,
+   "google_avg_rating": 3.5,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 59,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 1655,
+   "license_status": "revoked",
+   "total_customer_ugc": 9,
+   "nextdoor_recommendations": 20,
+   "thumbtack_hires": 24,
+   "employee_count_est": 7,
+   "estimated_monthly_revenue": 24806.15
+  },
+  "context": {
+   "competitor_count": 0,
+   "avg_digital_score": 13.3,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 1.1,
+   "median_household_income": 51177.55,
+   "population_density": 23628.0
+  },
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 25.0,
+   "viability_score": 41.0,
+   "competitive_pressure_score": 50.0,
+   "composite_acquisition_score": 36.85,
+   "price_tier": 2,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 25.0,
+   "viability_alone": 41.0,
+   "pressure_alone": 50.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 3.1,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.47,
+   "google_review_count": 23,
+   "google_avg_rating": null,
+   "review_velocity_30d": 2.0,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 58,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 527,
+   "license_status": "active",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 7,
+   "thumbtack_hires": 0,
+   "employee_count_est": 8,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 6,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 3.3,
+   "median_household_income": 117678.93,
+   "population_density": 7284.3
+  },
+  "corridor": "priority",
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 30.0,
+   "viability_score": 36.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 35.85,
+   "price_tier": 2,
+   "nof_eligibility_score": 62.0,
+   "deficit_alone": 30.0,
+   "viability_alone": 36.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 85.0,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.43,
+   "google_review_count": 65,
+   "google_avg_rating": 4.2,
+   "review_velocity_30d": 4.0,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 311,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2591,
+   "license_status": null,
+   "total_customer_ugc": 51,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 65261.62
+  },
+  "context": {
+   "competitor_count": 16,
+   "avg_digital_score": 97.9,
+   "competitor_ads_active_count": 4,
+   "avg_rating": null,
+   "median_household_income": 96133.39,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "meat_markets",
+  "expected": {
+   "digital_deficit_score": 67.0,
+   "viability_score": 88.0,
+   "competitive_pressure_score": 80.0,
+   "composite_acquisition_score": 77.6,
+   "price_tier": 3,
+   "nof_eligibility_score": 78.0,
+   "deficit_alone": 67.0,
+   "viability_alone": 88.0,
+   "pressure_alone": 80.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 66.3,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.74,
+   "google_review_count": 53,
+   "google_avg_rating": 1.8,
+   "review_velocity_30d": 1.7,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3953,
+   "license_status": "active",
+   "total_customer_ugc": 67,
+   "nextdoor_recommendations": 0,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 43587.42
+  },
+  "context": {
+   "competitor_count": 20,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 2.2,
+   "median_household_income": 69630.0,
+   "population_density": 17971.6
+  },
+  "corridor": "eligible",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 30.0,
+   "viability_score": 78.0,
+   "competitive_pressure_score": 60.0,
+   "composite_acquisition_score": 54.3,
+   "price_tier": 1,
+   "nof_eligibility_score": 68.0,
+   "deficit_alone": 30.0,
+   "viability_alone": 78.0,
+   "pressure_alone": 60.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.89,
+   "google_review_count": null,
+   "google_avg_rating": 2.1,
+   "review_velocity_30d": 3.2,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 146,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "expired",
+   "total_customer_ugc": 97,
+   "nextdoor_recommendations": 16,
+   "thumbtack_hires": 15,
+   "employee_count_est": 11,
+   "estimated_monthly_revenue": 79963.84
+  },
+  "context": {
+   "competitor_count": 25,
+   "avg_digital_score": 6.1,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 3.2,
+   "median_household_income": 100483.11,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 23.0,
+   "viability_score": 36.0,
+   "competitive_pressure_score": 90.0,
+   "composite_acquisition_score": 44.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 55.0,
+   "deficit_alone": 23.0,
+   "viability_alone": 36.0,
+   "pressure_alone": 90.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 58.8,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.54,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 171,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3720,
+   "license_status": "active",
+   "total_customer_ugc": 89,
+   "nextdoor_recommendations": 2,
+   "thumbtack_hires": null,
+   "employee_count_est": 13,
+   "estimated_monthly_revenue": 15856.3
+  },
+  "context": {
+   "competitor_count": 6,
+   "avg_digital_score": 48.3,
+   "competitor_ads_active_count": 2,
+   "avg_rating": null,
+   "median_household_income": null,
+   "population_density": 10761.3
+  },
+  "corridor": "priority",
+  "niche": "tire_shops",
+  "expected": {
+   "digital_deficit_score": 38.0,
+   "viability_score": 53.0,
+   "competitive_pressure_score": 70.0,
+   "composite_acquisition_score": 51.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 80.0,
+   "deficit_alone": 38.0,
+   "viability_alone": 53.0,
+   "pressure_alone": 70.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 39.6,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.8,
+   "google_review_count": 67,
+   "google_avg_rating": null,
+   "review_velocity_30d": -1.2,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 33,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2867,
+   "license_status": null,
+   "total_customer_ugc": 76,
+   "nextdoor_recommendations": 3,
+   "thumbtack_hires": 29,
+   "employee_count_est": 18,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 13,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 4.1,
+   "median_household_income": 87026.46,
+   "population_density": 21133.8
+  },
+  "corridor": "priority",
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 57.0,
+   "viability_score": 73.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 64.6,
+   "price_tier": 3,
+   "nof_eligibility_score": 72.0,
+   "deficit_alone": 57.0,
+   "viability_alone": 73.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.69,
+   "google_review_count": null,
+   "google_avg_rating": 3.3,
+   "review_velocity_30d": -1.5,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 288,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 1444,
+   "license_status": "unknown",
+   "total_customer_ugc": 60,
+   "nextdoor_recommendations": 5,
+   "thumbtack_hires": 23,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": 58051.68
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 60.0,
+   "viability_score": 43.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 39.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 65.0,
+   "deficit_alone": 60.0,
+   "viability_alone": 43.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 11.8,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 106,
+   "google_avg_rating": 2.8,
+   "review_velocity_30d": 3.5,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 385,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3395,
+   "license_status": "active",
+   "total_customer_ugc": 76,
+   "nextdoor_recommendations": 20,
+   "thumbtack_hires": null,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": 9526.31
+  },
+  "context": {
+   "competitor_count": 12,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 4.1,
+   "median_household_income": 114366.38,
+   "population_density": 16066.4
+  },
+  "corridor": "priority",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 36.0,
+   "viability_score": 86.0,
+   "competitive_pressure_score": 75.0,
+   "composite_acquisition_score": 63.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 85.0,
+   "deficit_alone": 36.0,
+   "viability_alone": 86.0,
+   "pressure_alone": 75.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 98.3,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.16,
+   "google_review_count": 127,
+   "google_avg_rating": 4.2,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 244,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 1046,
+   "license_status": "revoked",
+   "total_customer_ugc": 21,
+   "nextdoor_recommendations": 19,
+   "thumbtack_hires": 5,
+   "employee_count_est": 5,
+   "estimated_monthly_revenue": 76736.63
+  },
+  "context": {
+   "competitor_count": 0,
+   "avg_digital_score": 67.9,
+   "competitor_ads_active_count": 6,
+   "avg_rating": 2.1,
+   "median_household_income": 52887.37,
+   "population_density": 2978.4
+  },
+  "corridor": "eligible",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 18.0,
+   "viability_score": 53.0,
+   "competitive_pressure_score": 15.0,
+   "composite_acquisition_score": 29.5,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 18.0,
+   "viability_alone": 53.0,
+   "pressure_alone": 15.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 18.3,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 178,
+   "google_avg_rating": 2.9,
+   "review_velocity_30d": 0.7,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 215,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 1139,
+   "license_status": "unknown",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 4,
+   "thumbtack_hires": 26,
+   "employee_count_est": 0,
+   "estimated_monthly_revenue": 54854.92
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 53.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 39.75,
+   "price_tier": 3,
+   "nof_eligibility_score": 58.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 53.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 26,
+   "google_avg_rating": 2.2,
+   "review_velocity_30d": 3.7,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 159,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 1564,
+   "license_status": "expired",
+   "total_customer_ugc": 2,
+   "nextdoor_recommendations": 20,
+   "thumbtack_hires": 24,
+   "employee_count_est": 12,
+   "estimated_monthly_revenue": 64730.64
+  },
+  "context": {
+   "competitor_count": 22,
+   "avg_digital_score": 48.4,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 3.7,
+   "median_household_income": 78942.69,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 56.0,
+   "competitive_pressure_score": 75.0,
+   "composite_acquisition_score": 64.35,
+   "price_tier": 3,
+   "nof_eligibility_score": 80.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 56.0,
+   "pressure_alone": 75.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 25.9,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.9,
+   "google_review_count": 50,
+   "google_avg_rating": 2.7,
+   "review_velocity_30d": 2.3,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 339,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 625,
+   "license_status": null,
+   "total_customer_ugc": 17,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 21,
+   "employee_count_est": 18,
+   "estimated_monthly_revenue": 35350.3
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": 29.8,
+   "competitor_ads_active_count": 6,
+   "avg_rating": 4.8,
+   "median_household_income": null,
+   "population_density": 7857.4
+  },
+  "corridor": "eligible",
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 73.0,
+   "viability_score": 41.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 57.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 73.0,
+   "viability_alone": 41.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 81.1,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.84,
+   "google_review_count": null,
+   "google_avg_rating": 4.6,
+   "review_velocity_30d": -0.9,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 98,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3229,
+   "license_status": null,
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 14,
+   "thumbtack_hires": 20,
+   "employee_count_est": 9,
+   "estimated_monthly_revenue": 66919.07
+  },
+  "context": {
+   "competitor_count": 12,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 3.6,
+   "median_household_income": null,
+   "population_density": 19044.4
+  },
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 68.0,
+   "viability_score": 58.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 57.5,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 68.0,
+   "viability_alone": 58.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 79.0,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.2,
+   "google_review_count": 33,
+   "google_avg_rating": 3.8,
+   "review_velocity_30d": 4.9,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 288,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 1510,
+   "license_status": null,
+   "total_customer_ugc": 21,
+   "nextdoor_recommendations": 17,
+   "thumbtack_hires": 10,
+   "employee_count_est": 20,
+   "estimated_monthly_revenue": 2460.9
+  },
+  "context": {
+   "competitor_count": 15,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 1.8,
+   "median_household_income": null,
+   "population_density": 14466.9
+  },
+  "corridor": "priority",
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 37.0,
+   "viability_score": 69.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 48.95,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 37.0,
+   "viability_alone": 69.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.92,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": 1.9,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": 53,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 13,
+   "employee_count_est": 3,
+   "estimated_monthly_revenue": 36043.43
+  },
+  "context": null,
+  "corridor": "priority",
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 57.0,
+   "viability_score": 36.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 35.4,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 57.0,
+   "viability_alone": 36.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 63.9,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 17,
+   "google_avg_rating": 3.1,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 105,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 64,
+   "nextdoor_recommendations": 7,
+   "thumbtack_hires": null,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 21,
+   "avg_digital_score": 25.4,
+   "competitor_ads_active_count": 5,
+   "avg_rating": null,
+   "median_household_income": 95352.17,
+   "population_density": 7210.1
+  },
+  "corridor": "eligible",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 8.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 80.0,
+   "composite_acquisition_score": 36.5,
+   "price_tier": 3,
+   "nof_eligibility_score": 52.0,
+   "deficit_alone": 8.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 80.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 8.6,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": null,
+   "google_avg_rating": 1.2,
+   "review_velocity_30d": 2.6,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 34,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 1548,
+   "license_status": null,
+   "total_customer_ugc": 67,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 23,
+   "employee_count_est": 6,
+   "estimated_monthly_revenue": 30494.44
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 2.6,
+   "median_household_income": null,
+   "population_density": 20610.6
+  },
+  "corridor": "priority",
+  "niche": "tire_shops",
+  "expected": {
+   "digital_deficit_score": 47.0,
+   "viability_score": 51.0,
+   "competitive_pressure_score": 50.0,
+   "composite_acquisition_score": 49.15,
+   "price_tier": 2,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 47.0,
+   "viability_alone": 51.0,
+   "pressure_alone": 50.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 76.4,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.73,
+   "google_review_count": 41,
+   "google_avg_rating": 1.2,
+   "review_velocity_30d": 1.1,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 208,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 948,
+   "license_status": null,
+   "total_customer_ugc": 46,
+   "nextdoor_recommendations": 12,
+   "thumbtack_hires": 0,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 2325.54
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": 62.1,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 1.3,
+   "median_household_income": 102766.16,
+   "population_density": null
+  },
+  "corridor": null,
+  "niche": "security_services",
+  "expected": {
+   "digital_deficit_score": 60.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 90.0,
+   "composite_acquisition_score": 59.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 60.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 90.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 29.7,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.19,
+   "google_review_count": 102,
+   "google_avg_rating": 1.6,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 341,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3055,
+   "license_status": "active",
+   "total_customer_ugc": 35,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": 71048.91
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": 10.1,
+   "competitor_ads_active_count": 6,
+   "avg_rating": 4.6,
+   "median_household_income": 23326.26,
+   "population_density": 9252.2
+  },
+  "corridor": "priority",
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 55.0,
+   "viability_score": 68.0,
+   "competitive_pressure_score": 25.0,
+   "composite_acquisition_score": 52.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 85.0,
+   "deficit_alone": 55.0,
+   "viability_alone": 68.0,
+   "pressure_alone": 25.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 31.3,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.63,
+   "google_review_count": 128,
+   "google_avg_rating": 3.4,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 217,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": 97,
+   "nextdoor_recommendations": 6,
+   "thumbtack_hires": 21,
+   "employee_count_est": 7,
+   "estimated_monthly_revenue": 15757.92
+  },
+  "context": {
+   "competitor_count": 20,
+   "avg_digital_score": 77.2,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 2.3,
+   "median_household_income": 45353.79,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 35.0,
+   "viability_score": 53.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 43.8,
+   "price_tier": 2,
+   "nof_eligibility_score": 65.0,
+   "deficit_alone": 35.0,
+   "viability_alone": 53.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 27.9,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.91,
+   "google_review_count": 90,
+   "google_avg_rating": 1.3,
+   "review_velocity_30d": 2.8,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": 91,
+   "nextdoor_recommendations": 9,
+   "thumbtack_hires": 6,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 3.67
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "tire_shops",
+  "expected": {
+   "digital_deficit_score": 45.0,
+   "viability_score": 53.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 36.55,
+   "price_tier": 1,
+   "nof_eligibility_score": 50.0,
+   "deficit_alone": 45.0,
+   "viability_alone": 53.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 95.0,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.39,
+   "google_review_count": null,
+   "google_avg_rating": 4.9,
+   "review_velocity_30d": 1.6,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3022,
+   "license_status": "unknown",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 14,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 10,
+   "avg_digital_score": 2.7,
+   "competitor_ads_active_count": 3,
+   "avg_rating": null,
+   "median_household_income": 82968.4,
+   "population_density": 14911.4
+  },
+  "corridor": null,
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 30.0,
+   "viability_score": 58.0,
+   "competitive_pressure_score": 80.0,
+   "composite_acquisition_score": 52.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 30.0,
+   "viability_alone": 58.0,
+   "pressure_alone": 80.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 38.8,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.43,
+   "google_review_count": 106,
+   "google_avg_rating": 1.2,
+   "review_velocity_30d": 3.7,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 286,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 72,
+   "nextdoor_recommendations": 10,
+   "thumbtack_hires": 27,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": 49149.45
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 56.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 40.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 60.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 56.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 73.7,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.52,
+   "google_review_count": 85,
+   "google_avg_rating": 3.7,
+   "review_velocity_30d": -0.9,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 74,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2022,
+   "license_status": "unknown",
+   "total_customer_ugc": 1,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": 8,
+   "estimated_monthly_revenue": 68723.16
+  },
+  "context": null,
+  "corridor": null,
+  "niche": "septic_services",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 51.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 17.85,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 0.0,
+   "viability_alone": 51.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 10.9,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 40,
+   "google_avg_rating": 1.4,
+   "review_velocity_30d": 3.9,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 303,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 191,
+   "license_status": null,
+   "total_customer_ugc": 79,
+   "nextdoor_recommendations": 5,
+   "thumbtack_hires": 7,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 1713.54
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 48.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 32.5,
+   "price_tier": 1,
+   "nof_eligibility_score": 45.0,
+   "deficit_alone": 48.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 2,
+   "nextdoor_recommendations": 2,
+   "thumbtack_hires": 15,
+   "employee_count_est": 18,
+   "estimated_monthly_revenue": 11252.39
+  },
+  "context": {
+   "competitor_count": 1,
+   "avg_digital_score": 87.3,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 1.0,
+   "median_household_income": null,
+   "population_density": 9905.7
+  },
+  "corridor": null,
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 8.0,
+   "competitive_pressure_score": 15.0,
+   "composite_acquisition_score": 6.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 8.0,
+   "pressure_alone": 15.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.05,
+   "google_review_count": 196,
+   "google_avg_rating": 3.6,
+   "review_velocity_30d": -0.5,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 388,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3430,
+   "license_status": "expired",
+   "total_customer_ugc": 28,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 8,
+   "employee_count_est": 20,
+   "estimated_monthly_revenue": null
+  },
+  "context": null,
+  "corridor": null,
+  "niche": "meat_markets",
+  "expected": {
+   "digital_deficit_score": 61.0,
+   "viability_score": 71.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 49.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 61.0,
+   "viability_alone": 71.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 57.5,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": 1.3,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 218,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 539,
+   "license_status": "active",
+   "total_customer_ugc": 81,
+   "nextdoor_recommendations": 4,
+   "thumbtack_hires": 0,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 58519.32
+  },
+  "context": {
+   "competitor_count": 4,
+   "avg_digital_score": 74.4,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 3.3,
+   "median_household_income": 24505.13,
+   "population_density": 10300.8
+  },
+  "corridor": null,
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 31.0,
+   "viability_score": 28.0,
+   "competitive_pressure_score": 35.0,
+   "composite_acquisition_score": 30.95,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 31.0,
+   "viability_alone": 28.0,
+   "pressure_alone": 35.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 15.1,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.88,
+   "google_review_count": 5,
+   "google_avg_rating": 1.0,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 273,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 474,
+   "license_status": "active",
+   "total_customer_ugc": 60,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 15,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 65028.16
+  },
+  "context": {
+   "competitor_count": 10,
+   "avg_digital_score": 42.9,
+   "competitor_ads_active_count": 5,
+   "avg_rating": null,
+   "median_household_income": 64298.15,
+   "population_density": null
+  },
+  "corridor": null,
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 55.0,
+   "viability_score": 25.0,
+   "competitive_pressure_score": 60.0,
+   "composite_acquisition_score": 45.75,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 55.0,
+   "viability_alone": 25.0,
+   "pressure_alone": 60.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 34.6,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 144,
+   "google_avg_rating": 4.0,
+   "review_velocity_30d": 0.4,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 139,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 75,
+   "nextdoor_recommendations": 17,
+   "thumbtack_hires": 17,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": null,
+  "corridor": "priority",
+  "niche": "security_services",
+  "expected": {
+   "digital_deficit_score": 28.0,
+   "viability_score": 68.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 35.0,
+   "price_tier": 1,
+   "nof_eligibility_score": 55.0,
+   "deficit_alone": 28.0,
+   "viability_alone": 68.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 1575,
+   "license_status": null,
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 8,
+   "thumbtack_hires": null,
+   "employee_count_est": 0,
+   "estimated_monthly_revenue": 1328.15
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": 7.8,
+   "competitor_ads_active_count": 0,
+   "avg_rating": null,
+   "median_household_income": 94734.05,
+   "population_density": null
+  },
+  "corridor": "priority",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 25.0,
+   "competitive_pressure_score": 10.0,
+   "composite_acquisition_score": 11.25,
+   "price_tier": 1,
+   "nof_eligibility_score": 55.0,
+   "deficit_alone": null,
+   "viability_alone": 25.0,
+   "pressure_alone": 10.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 22.2,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.23,
+   "google_review_count": null,
+   "google_avg_rating": 4.9,
+   "review_velocity_30d": -1.5,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 262,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": 34,
+   "nextdoor_recommendations": 15,
+   "thumbtack_hires": 14,
+   "employee_count_est": 15,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": 71.7,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 1.4,
+   "median_household_income": 37984.03,
+   "population_density": 16094.0
+  },
+  "corridor": null,
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 43.0,
+   "viability_score": 43.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 48.5,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 43.0,
+   "viability_alone": 43.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 27.5,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.24,
+   "google_review_count": 122,
+   "google_avg_rating": 1.8,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 53,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2120,
+   "license_status": "unknown",
+   "total_customer_ugc": 56,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 0,
+   "employee_count_est": 6,
+   "estimated_monthly_revenue": 46448.22
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 58.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 41.5,
+   "price_tier": 1,
+   "nof_eligibility_score": 70.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 58.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.15,
+   "google_review_count": null,
+   "google_avg_rating": 4.6,
+   "review_velocity_30d": 1.6,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 374,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 16,
+   "thumbtack_hires": 1,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 19,
+   "avg_digital_score": 38.2,
+   "competitor_ads_active_count": 1,
+   "avg_rating": null,
+   "median_household_income": 78465.51,
+   "population_density": 10570.2
+  },
+  "corridor": "eligible",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 55.0,
+   "viability_score": 31.0,
+   "competitive_pressure_score": 75.0,
+   "composite_acquisition_score": 51.6,
+   "price_tier": 3,
+   "nof_eligibility_score": 42.0,
+   "deficit_alone": 55.0,
+   "viability_alone": 31.0,
+   "pressure_alone": 75.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 15.7,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 133,
+   "google_avg_rating": 1.9,
+   "review_velocity_30d": 1.9,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 16,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": 87,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 43349.13
+  },
+  "context": {
+   "competitor_count": 11,
+   "avg_digital_score": 83.9,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 2.0,
+   "median_household_income": null,
+   "population_density": null
+  },
+  "corridor": null,
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 42.0,
+   "viability_score": 43.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 41.85,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 42.0,
+   "viability_alone": 43.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 12.8,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 48,
+   "google_avg_rating": 1.3,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 1886,
+   "license_status": null,
+   "total_customer_ugc": 100,
+   "nextdoor_recommendations": 15,
+   "thumbtack_hires": null,
+   "employee_count_est": 20,
+   "estimated_monthly_revenue": 68753.84
+  },
+  "context": {
+   "competitor_count": 8,
+   "avg_digital_score": 28.7,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 1.6,
+   "median_household_income": 83052.71,
+   "population_density": 18351.2
+  },
+  "corridor": "priority",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 45.0,
+   "viability_score": 58.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 54.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 80.0,
+   "deficit_alone": 45.0,
+   "viability_alone": 58.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 61.4,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 198,
+   "google_avg_rating": null,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 340,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2747,
+   "license_status": "unknown",
+   "total_customer_ugc": 13,
+   "nextdoor_recommendations": 12,
+   "thumbtack_hires": null,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 67922.29
+  },
+  "context": {
+   "competitor_count": 1,
+   "avg_digital_score": 75.9,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 4.2,
+   "median_household_income": 25286.47,
+   "population_density": 6531.8
+  },
+  "corridor": "priority",
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 61.0,
+   "viability_score": 65.0,
+   "competitive_pressure_score": 15.0,
+   "composite_acquisition_score": 50.9,
+   "price_tier": 3,
+   "nof_eligibility_score": 88.0,
+   "deficit_alone": 61.0,
+   "viability_alone": 65.0,
+   "pressure_alone": 15.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 2528,
+   "license_status": "unknown",
+   "total_customer_ugc": 38,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": 0,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 15,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 3.0,
+   "median_household_income": 49055.4,
+   "population_density": 2691.9
+  },
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 30.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 21.75,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 30.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 34.9,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.85,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 353,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3201,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 19,
+   "thumbtack_hires": 12,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 69754.53
+  },
+  "context": {
+   "competitor_count": 4,
+   "avg_digital_score": 49.2,
+   "competitor_ads_active_count": 1,
+   "avg_rating": null,
+   "median_household_income": 108932.97,
+   "population_density": 9675.8
+  },
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 40.0,
+   "viability_score": 40.0,
+   "competitive_pressure_score": 35.0,
+   "composite_acquisition_score": 38.75,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 40.0,
+   "viability_alone": 40.0,
+   "pressure_alone": 35.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 3.2,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 162,
+   "google_avg_rating": null,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 299,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": 89,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 27,
+   "employee_count_est": 15,
+   "estimated_monthly_revenue": 76413.54
+  },
+  "context": {
+   "competitor_count": 16,
+   "avg_digital_score": 92.2,
+   "competitor_ads_active_count": 6,
+   "avg_rating": 2.2,
+   "median_household_income": null,
+   "population_density": 11806.5
+  },
+  "corridor": "priority",
+  "niche": "security_services",
+  "expected": {
+   "digital_deficit_score": 55.0,
+   "viability_score": 48.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 52.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 55.0,
+   "viability_alone": 48.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 23.9,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.49,
+   "google_review_count": null,
+   "google_avg_rating": 2.5,
+   "review_velocity_30d": 2.3,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 398,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 9,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": null,
+  "corridor": "priority",
+  "niche": "security_services",
+  "expected": {
+   "digital_deficit_score": 46.0,
+   "viability_score": 13.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 22.95,
+   "price_tier": 1,
+   "nof_eligibility_score": 45.0,
+   "deficit_alone": 46.0,
+   "viability_alone": 13.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 9.6,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 161,
+   "google_avg_rating": 3.4,
+   "review_velocity_30d": -0.8,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 606,
+   "license_status": "active",
+   "total_customer_ugc": 96,
+   "nextdoor_recommendations": 17,
+   "thumbtack_hires": 20,
+   "employee_count_est": 8,
+   "estimated_monthly_revenue": 39460.85
+  },
+  "context": {
+   "competitor_count": 19,
+   "avg_digital_score": 19.2,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 2.2,
+   "median_household_income": 28978.32,
+   "population_density": 14256.7
+  },
+  "corridor": "priority",
+  "niche": "barbershops",
+  "expected": {
+   "digital_deficit_score": 35.0,
+   "viability_score": 53.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 46.3,
+   "price_tier": 2,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 35.0,
+   "viability_alone": 53.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 76.6,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 37,
+   "google_avg_rating": 2.0,
+   "review_velocity_30d": 1.9,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 59,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": 87,
+   "nextdoor_recommendations": 15,
+   "thumbtack_hires": null,
+   "employee_count_est": 12,
+   "estimated_monthly_revenue": null
+  },
+  "context": null,
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 22.0,
+   "viability_score": 46.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 24.9,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 22.0,
+   "viability_alone": 46.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 57.5,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 200,
+   "google_avg_rating": 4.9,
+   "review_velocity_30d": 2.2,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3986,
+   "license_status": "active",
+   "total_customer_ugc": 35,
+   "nextdoor_recommendations": 18,
+   "thumbtack_hires": 23,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 51102.62
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 38.0,
+   "viability_score": 98.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 49.5,
+   "price_tier": 3,
+   "nof_eligibility_score": 68.0,
+   "deficit_alone": 38.0,
+   "viability_alone": 98.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 46.8,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.83,
+   "google_review_count": null,
+   "google_avg_rating": 1.7,
+   "review_velocity_30d": 3.6,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 352,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": 28,
+   "nextdoor_recommendations": 6,
+   "thumbtack_hires": 5,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 27487.99
+  },
+  "context": null,
+  "corridor": "priority",
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 38.0,
+   "viability_score": 23.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 23.25,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 38.0,
+   "viability_alone": 23.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 39.8,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.0,
+   "google_review_count": 127,
+   "google_avg_rating": null,
+   "review_velocity_30d": 4.1,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 48,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3089,
+   "license_status": "revoked",
+   "total_customer_ugc": 92,
+   "nextdoor_recommendations": 13,
+   "thumbtack_hires": null,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": 62717.71
+  },
+  "context": {
+   "competitor_count": 21,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 4.4,
+   "median_household_income": 20072.94,
+   "population_density": 17381.7
+  },
+  "corridor": "eligible",
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 42.0,
+   "viability_score": 81.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 58.9,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 42.0,
+   "viability_alone": 81.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 72.6,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.26,
+   "google_review_count": 178,
+   "google_avg_rating": null,
+   "review_velocity_30d": -1.0,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 194,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 828,
+   "license_status": null,
+   "total_customer_ugc": 35,
+   "nextdoor_recommendations": 5,
+   "thumbtack_hires": null,
+   "employee_count_est": 9,
+   "estimated_monthly_revenue": 54570.07
+  },
+  "context": {
+   "competitor_count": 25,
+   "avg_digital_score": 50.5,
+   "competitor_ads_active_count": 4,
+   "avg_rating": null,
+   "median_household_income": 51946.78,
+   "population_density": 10241.6
+  },
+  "corridor": "eligible",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 33.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 51.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 85.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 33.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 68.4,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.15,
+   "google_review_count": null,
+   "google_avg_rating": 3.7,
+   "review_velocity_30d": 1.3,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 232,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": 17,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 9,
+   "employee_count_est": 6,
+   "estimated_monthly_revenue": 61976.81
+  },
+  "context": {
+   "competitor_count": 24,
+   "avg_digital_score": 12.6,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 2.3,
+   "median_household_income": 63374.22,
+   "population_density": 22841.0
+  },
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 30.0,
+   "viability_score": 34.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 40.15,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 30.0,
+   "viability_alone": 34.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 64.6,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.79,
+   "google_review_count": 172,
+   "google_avg_rating": 2.1,
+   "review_velocity_30d": 2.7,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 238,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": 62,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 21,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": 18047.0
+  },
+  "context": {
+   "competitor_count": 19,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 5,
+   "avg_rating": 3.3,
+   "median_household_income": 33210.28,
+   "population_density": 1577.2
+  },
+  "corridor": "priority",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 35.0,
+   "viability_score": 51.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 45.6,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 35.0,
+   "viability_alone": 51.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 89.2,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 10,
+   "google_avg_rating": 4.1,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 95,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 2,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 23,
+   "avg_digital_score": 48.9,
+   "competitor_ads_active_count": 3,
+   "avg_rating": null,
+   "median_household_income": null,
+   "population_density": 7.6
+  },
+  "corridor": "eligible",
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 38.0,
+   "viability_score": 30.0,
+   "competitive_pressure_score": 70.0,
+   "composite_acquisition_score": 43.2,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 38.0,
+   "viability_alone": 30.0,
+   "pressure_alone": 70.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 82.3,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.71,
+   "google_review_count": null,
+   "google_avg_rating": 1.1,
+   "review_velocity_30d": 1.2,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 50,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 889,
+   "license_status": null,
+   "total_customer_ugc": 88,
+   "nextdoor_recommendations": 13,
+   "thumbtack_hires": 8,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 4.4,
+   "median_household_income": 64686.15,
+   "population_density": 12396.7
+  },
+  "corridor": "eligible",
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 23.0,
+   "viability_score": 31.0,
+   "competitive_pressure_score": 20.0,
+   "composite_acquisition_score": 25.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 57.0,
+   "deficit_alone": 23.0,
+   "viability_alone": 31.0,
+   "pressure_alone": 20.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 71.5,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.3,
+   "google_review_count": 97,
+   "google_avg_rating": 1.3,
+   "review_velocity_30d": 3.7,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 21,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": 28,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 18,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 58160.53
+  },
+  "context": {
+   "competitor_count": 22,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 4.0,
+   "median_household_income": 83273.57,
+   "population_density": 15048.3
+  },
+  "corridor": null,
+  "niche": "septic_services",
+  "expected": {
+   "digital_deficit_score": 15.0,
+   "viability_score": 48.0,
+   "competitive_pressure_score": 60.0,
+   "composite_acquisition_score": 37.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 15.0,
+   "viability_alone": 48.0,
+   "pressure_alone": 60.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 2035,
+   "license_status": "revoked",
+   "total_customer_ugc": 88,
+   "nextdoor_recommendations": 5,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 64590.6
+  },
+  "context": null,
+  "corridor": "priority",
+  "niche": "beauty_supply",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 35.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 12.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 35.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 29.1,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 48,
+   "google_avg_rating": null,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 356,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 643,
+   "license_status": "active",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 0,
+   "thumbtack_hires": 4,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 79278.95
+  },
+  "context": {
+   "competitor_count": 5,
+   "avg_digital_score": 5.9,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 2.4,
+   "median_household_income": 115015.77,
+   "population_density": 22048.2
+  },
+  "corridor": null,
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 57.0,
+   "viability_score": 20.0,
+   "competitive_pressure_score": 35.0,
+   "composite_acquisition_score": 38.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 57.0,
+   "viability_alone": 20.0,
+   "pressure_alone": 35.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 68.2,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.9,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": 0.6,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2077,
+   "license_status": "expired",
+   "total_customer_ugc": 76,
+   "nextdoor_recommendations": 12,
+   "thumbtack_hires": null,
+   "employee_count_est": 13,
+   "estimated_monthly_revenue": 45442.43
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 6,
+   "avg_rating": 1.8,
+   "median_household_income": 53118.64,
+   "population_density": 24940.1
+  },
+  "corridor": "priority",
+  "niche": "tire_shops",
+  "expected": {
+   "digital_deficit_score": 34.0,
+   "viability_score": 51.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 45.2,
+   "price_tier": 3,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 34.0,
+   "viability_alone": 51.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 36.7,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 183,
+   "google_avg_rating": 4.4,
+   "review_velocity_30d": 1.0,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 116,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 1250,
+   "license_status": null,
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 15,
+   "thumbtack_hires": 11,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 63084.02
+  },
+  "context": {
+   "competitor_count": 3,
+   "avg_digital_score": 77.9,
+   "competitor_ads_active_count": 2,
+   "avg_rating": null,
+   "median_household_income": 31180.82,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 40.0,
+   "viability_score": 73.0,
+   "competitive_pressure_score": 15.0,
+   "composite_acquisition_score": 45.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 58.0,
+   "deficit_alone": 40.0,
+   "viability_alone": 73.0,
+   "pressure_alone": 15.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.15,
+   "google_review_count": 199,
+   "google_avg_rating": null,
+   "review_velocity_30d": -0.3,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 185,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "expired",
+   "total_customer_ugc": 0,
+   "nextdoor_recommendations": 5,
+   "thumbtack_hires": 1,
+   "employee_count_est": 14,
+   "estimated_monthly_revenue": 27205.82
+  },
+  "context": {
+   "competitor_count": 21,
+   "avg_digital_score": 95.1,
+   "competitor_ads_active_count": 5,
+   "avg_rating": null,
+   "median_household_income": 119302.55,
+   "population_density": 2579.9
+  },
+  "corridor": "priority",
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 60.0,
+   "viability_score": 23.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 45.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 65.0,
+   "deficit_alone": 60.0,
+   "viability_alone": 23.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 34.5,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.08,
+   "google_review_count": null,
+   "google_avg_rating": 1.3,
+   "review_velocity_30d": -1.2,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 382,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 1247,
+   "license_status": "active",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 17,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": 50297.98
+  },
+  "context": {
+   "competitor_count": 12,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 3,
+   "avg_rating": null,
+   "median_household_income": 43423.74,
+   "population_density": 19849.2
+  },
+  "corridor": "priority",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 33.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 46.5,
+   "price_tier": 3,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 33.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 41.1,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.09,
+   "google_review_count": 9,
+   "google_avg_rating": 2.2,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 301,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2603,
+   "license_status": "unknown",
+   "total_customer_ugc": 49,
+   "nextdoor_recommendations": 14,
+   "thumbtack_hires": 19,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 29567.16
+  },
+  "context": {
+   "competitor_count": 24,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 2,
+   "avg_rating": null,
+   "median_household_income": null,
+   "population_density": null
+  },
+  "corridor": "priority",
+  "niche": "septic_services",
+  "expected": {
+   "digital_deficit_score": 48.0,
+   "viability_score": 50.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 47.95,
+   "price_tier": 1,
+   "nof_eligibility_score": 68.0,
+   "deficit_alone": 48.0,
+   "viability_alone": 50.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.09,
+   "google_review_count": 75,
+   "google_avg_rating": 3.1,
+   "review_velocity_30d": 2.8,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 136,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 1207,
+   "license_status": "unknown",
+   "total_customer_ugc": 17,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 16,
+   "employee_count_est": 20,
+   "estimated_monthly_revenue": 48565.42
+  },
+  "context": {
+   "competitor_count": 4,
+   "avg_digital_score": 61.4,
+   "competitor_ads_active_count": 5,
+   "avg_rating": 3.4,
+   "median_household_income": 118171.47,
+   "population_density": 17635.8
+  },
+  "corridor": "eligible",
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 66.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 60.35,
+   "price_tier": 3,
+   "nof_eligibility_score": 85.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 66.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.14,
+   "google_review_count": 134,
+   "google_avg_rating": 3.3,
+   "review_velocity_30d": -1.9,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3340,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 3,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 16,
+   "avg_digital_score": 93.3,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 2.6,
+   "median_household_income": null,
+   "population_density": 20357.0
+  },
+  "corridor": null,
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 10.0,
+   "viability_score": 50.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 35.25,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 10.0,
+   "viability_alone": 50.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 591,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 12,
+   "thumbtack_hires": 28,
+   "employee_count_est": 20,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 17,
+   "avg_digital_score": 82.4,
+   "competitor_ads_active_count": 5,
+   "avg_rating": 1.6,
+   "median_household_income": 79427.14,
+   "population_density": 10546.9
+  },
+  "corridor": null,
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 13.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 20.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 13.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 64.0,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.9,
+   "google_review_count": 99,
+   "google_avg_rating": 3.3,
+   "review_velocity_30d": -1.0,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3610,
+   "license_status": "expired",
+   "total_customer_ugc": 50,
+   "nextdoor_recommendations": 0,
+   "thumbtack_hires": 5,
+   "employee_count_est": 12,
+   "estimated_monthly_revenue": 29687.29
+  },
+  "context": {
+   "competitor_count": 8,
+   "avg_digital_score": 0.8,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 1.3,
+   "median_household_income": 117884.93,
+   "population_density": 18821.7
+  },
+  "corridor": "eligible",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 30.0,
+   "viability_score": 63.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 47.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 70.0,
+   "deficit_alone": 30.0,
+   "viability_alone": 63.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 3524,
+   "license_status": null,
+   "total_customer_ugc": 20,
+   "nextdoor_recommendations": 12,
+   "thumbtack_hires": 1,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": 70126.02
+  },
+  "context": {
+   "competitor_count": 15,
+   "avg_digital_score": 63.4,
+   "competitor_ads_active_count": 5,
+   "avg_rating": 1.3,
+   "median_household_income": 22196.47,
+   "population_density": 19610.1
+  },
+  "corridor": null,
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 48.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 30.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 48.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.08,
+   "google_review_count": 103,
+   "google_avg_rating": 2.0,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 146,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 233,
+   "license_status": "revoked",
+   "total_customer_ugc": 72,
+   "nextdoor_recommendations": 16,
+   "thumbtack_hires": null,
+   "employee_count_est": 12,
+   "estimated_monthly_revenue": 77793.88
+  },
+  "context": null,
+  "corridor": null,
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 23.0,
+   "viability_score": 43.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 24.25,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 23.0,
+   "viability_alone": 43.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 63.2,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.28,
+   "google_review_count": 28,
+   "google_avg_rating": 4.9,
+   "review_velocity_30d": 0.2,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3768,
+   "license_status": "active",
+   "total_customer_ugc": 74,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 13,
+   "employee_count_est": 9,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 5,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 5,
+   "avg_rating": null,
+   "median_household_income": 87695.46,
+   "population_density": 15764.2
+  },
+  "corridor": "eligible",
+  "niche": "smoke_shops",
+  "expected": {
+   "digital_deficit_score": 18.0,
+   "viability_score": 96.0,
+   "competitive_pressure_score": 35.0,
+   "composite_acquisition_score": 49.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 67.0,
+   "deficit_alone": 18.0,
+   "viability_alone": 96.0,
+   "pressure_alone": 35.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 3.9,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 102,
+   "google_avg_rating": null,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 136,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3511,
+   "license_status": "expired",
+   "total_customer_ugc": 28,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 21,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 46045.1
+  },
+  "context": {
+   "competitor_count": 20,
+   "avg_digital_score": 22.9,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 4.1,
+   "median_household_income": 24802.51,
+   "population_density": 5837.3
+  },
+  "corridor": "priority",
+  "niche": "meat_markets",
+  "expected": {
+   "digital_deficit_score": 38.0,
+   "viability_score": 65.0,
+   "competitive_pressure_score": 30.0,
+   "composite_acquisition_score": 45.45,
+   "price_tier": 1,
+   "nof_eligibility_score": 73.0,
+   "deficit_alone": 38.0,
+   "viability_alone": 65.0,
+   "pressure_alone": 30.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 18.1,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.04,
+   "google_review_count": null,
+   "google_avg_rating": 2.1,
+   "review_velocity_30d": 3.9,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 229,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 8,
+   "thumbtack_hires": 10,
+   "employee_count_est": 7,
+   "estimated_monthly_revenue": 7899.0
+  },
+  "context": {
+   "competitor_count": 10,
+   "avg_digital_score": 94.6,
+   "competitor_ads_active_count": 5,
+   "avg_rating": 1.9,
+   "median_household_income": 98156.44,
+   "population_density": 4316.7
+  },
+  "corridor": "priority",
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 58.0,
+   "viability_score": 16.0,
+   "competitive_pressure_score": 70.0,
+   "composite_acquisition_score": 46.3,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 58.0,
+   "viability_alone": 16.0,
+   "pressure_alone": 70.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 88.1,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.31,
+   "google_review_count": null,
+   "google_avg_rating": 2.1,
+   "review_velocity_30d": -1.2,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 184,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 1204,
+   "license_status": "unknown",
+   "total_customer_ugc": 91,
+   "nextdoor_recommendations": 18,
+   "thumbtack_hires": 27,
+   "employee_count_est": 0,
+   "estimated_monthly_revenue": 69283.02
+  },
+  "context": {
+   "competitor_count": 13,
+   "avg_digital_score": 52.7,
+   "competitor_ads_active_count": 3,
+   "avg_rating": null,
+   "median_household_income": 38356.9,
+   "population_density": 5415.7
+  },
+  "corridor": null,
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 48.0,
+   "viability_score": 45.0,
+   "competitive_pressure_score": 70.0,
+   "composite_acquisition_score": 52.45,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 48.0,
+   "viability_alone": 45.0,
+   "pressure_alone": 70.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 93.1,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.36,
+   "google_review_count": null,
+   "google_avg_rating": 1.1,
+   "review_velocity_30d": 2.1,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 52,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 93,
+   "nextdoor_recommendations": 5,
+   "thumbtack_hires": 11,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 60901.05
+  },
+  "context": {
+   "competitor_count": 8,
+   "avg_digital_score": 21.9,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 1.0,
+   "median_household_income": null,
+   "population_density": 6271.3
+  },
+  "corridor": "priority",
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 45.0,
+   "viability_score": 28.0,
+   "competitive_pressure_score": 60.0,
+   "composite_acquisition_score": 42.8,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 45.0,
+   "viability_alone": 28.0,
+   "pressure_alone": 60.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 82.9,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 180,
+   "google_avg_rating": 1.9,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": 65,
+   "nextdoor_recommendations": 15,
+   "thumbtack_hires": 29,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 78371.41
+  },
+  "context": {
+   "competitor_count": 10,
+   "avg_digital_score": 0.6,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 2.9,
+   "median_household_income": 31354.65,
+   "population_density": 1173.0
+  },
+  "corridor": "priority",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 19.0,
+   "viability_score": 45.0,
+   "competitive_pressure_score": 30.0,
+   "composite_acquisition_score": 30.85,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 19.0,
+   "viability_alone": 45.0,
+   "pressure_alone": 30.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 31.3,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.5,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": 4.8,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 173,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2047,
+   "license_status": null,
+   "total_customer_ugc": 72,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 2,
+   "employee_count_est": 15,
+   "estimated_monthly_revenue": 72554.47
+  },
+  "context": {
+   "competitor_count": 11,
+   "avg_digital_score": 47.6,
+   "competitor_ads_active_count": 0,
+   "avg_rating": null,
+   "median_household_income": 86154.22,
+   "population_density": null
+  },
+  "corridor": "priority",
+  "niche": "beauty_supply",
+  "expected": {
+   "digital_deficit_score": 43.0,
+   "viability_score": 46.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 49.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 43.0,
+   "viability_alone": 46.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 5.9,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.21,
+   "google_review_count": null,
+   "google_avg_rating": 3.8,
+   "review_velocity_30d": 4.7,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2294,
+   "license_status": "active",
+   "total_customer_ugc": 65,
+   "nextdoor_recommendations": 11,
+   "thumbtack_hires": null,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 16987.16
+  },
+  "context": {
+   "competitor_count": 13,
+   "avg_digital_score": 44.4,
+   "competitor_ads_active_count": 5,
+   "avg_rating": null,
+   "median_household_income": 75946.57,
+   "population_density": 24094.9
+  },
+  "corridor": null,
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 48.0,
+   "viability_score": 61.0,
+   "competitive_pressure_score": 90.0,
+   "composite_acquisition_score": 63.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 48.0,
+   "viability_alone": 61.0,
+   "pressure_alone": 90.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 77.2,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 189,
+   "google_avg_rating": 1.9,
+   "review_velocity_30d": -1.5,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 320,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 10,
+   "nextdoor_recommendations": 3,
+   "thumbtack_hires": 24,
+   "employee_count_est": 15,
+   "estimated_monthly_revenue": 66538.42
+  },
+  "context": {
+   "competitor_count": 5,
+   "avg_digital_score": 99.4,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 1.6,
+   "median_household_income": 83954.59,
+   "population_density": null
+  },
+  "corridor": null,
+  "niche": "barbershops",
+  "expected": {
+   "digital_deficit_score": 58.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 10.0,
+   "composite_acquisition_score": 39.0,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 58.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 10.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 60.3,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.5,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": 2.7,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 23,
+   "employee_count_est": 3,
+   "estimated_monthly_revenue": 39546.28
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 2.2,
+   "median_household_income": 41845.45,
+   "population_density": null
+  },
+  "corridor": "priority",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 16.0,
+   "competitive_pressure_score": 30.0,
+   "composite_acquisition_score": 13.1,
+   "price_tier": 2,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 0.0,
+   "viability_alone": 16.0,
+   "pressure_alone": 30.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 99.3,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": null,
+   "google_review_count": 148,
+   "google_avg_rating": null,
+   "review_velocity_30d": 0.7,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 267,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 88,
+   "nextdoor_recommendations": 11,
+   "thumbtack_hires": null,
+   "employee_count_est": 19,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 7,
+   "avg_digital_score": 16.7,
+   "competitor_ads_active_count": 4,
+   "avg_rating": null,
+   "median_household_income": 102742.01,
+   "population_density": 23513.4
+  },
+  "corridor": "priority",
+  "niche": "nail_salons",
+  "expected": {
+   "digital_deficit_score": 46.0,
+   "viability_score": 51.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 50.0,
+   "price_tier": 3,
+   "nof_eligibility_score": 62.0,
+   "deficit_alone": 46.0,
+   "viability_alone": 51.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.89,
+   "google_review_count": 173,
+   "google_avg_rating": 4.5,
+   "review_velocity_30d": 2.8,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 3557,
+   "license_status": "revoked",
+   "total_customer_ugc": 7,
+   "nextdoor_recommendations": 13,
+   "thumbtack_hires": 19,
+   "employee_count_est": 16,
+   "estimated_monthly_revenue": 10177.02
+  },
+  "context": {
+   "competitor_count": 18,
+   "avg_digital_score": 13.2,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 3.3,
+   "median_household_income": 64465.24,
+   "population_density": 240.5
+  },
+  "corridor": "priority",
+  "niche": "security_services",
+  "expected": {
+   "digital_deficit_score": 38.0,
+   "viability_score": 86.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 56.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 38.0,
+   "viability_alone": 86.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 22.0,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.99,
+   "google_review_count": 157,
+   "google_avg_rating": null,
+   "review_velocity_30d": 4.2,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 79,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 2614,
+   "license_status": "revoked",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 17,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 56965.24
+  },
+  "context": {
+   "competitor_count": 20,
+   "avg_digital_score": 92.9,
+   "competitor_ads_active_count": 0,
+   "avg_rating": 4.1,
+   "median_household_income": 78539.32,
+   "population_density": 11134.6
+  },
+  "corridor": "eligible",
+  "niche": "bars",
+  "expected": {
+   "digital_deficit_score": 45.0,
+   "viability_score": 63.0,
+   "competitive_pressure_score": 50.0,
+   "composite_acquisition_score": 52.55,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 45.0,
+   "viability_alone": 63.0,
+   "pressure_alone": 50.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": null,
+   "total_customer_ugc": 94,
+   "nextdoor_recommendations": 10,
+   "thumbtack_hires": 15,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 63734.81
+  },
+  "context": {
+   "competitor_count": 7,
+   "avg_digital_score": 13.3,
+   "competitor_ads_active_count": 2,
+   "avg_rating": null,
+   "median_household_income": 80008.46,
+   "population_density": 15437.7
+  },
+  "corridor": "eligible",
+  "niche": "meat_markets",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 25.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 22.5,
+   "price_tier": 3,
+   "nof_eligibility_score": 48.0,
+   "deficit_alone": null,
+   "viability_alone": 25.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 19,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 8,
+   "employee_count_est": 1,
+   "estimated_monthly_revenue": 9108.61
+  },
+  "context": {
+   "competitor_count": 6,
+   "avg_digital_score": 81.3,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 1.1,
+   "median_household_income": 105298.63,
+   "population_density": 21422.7
+  },
+  "corridor": null,
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 10.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 17.25,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 10.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.1,
+   "google_review_count": 37,
+   "google_avg_rating": 3.8,
+   "review_velocity_30d": 3.0,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 165,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 1,
+   "thumbtack_hires": null,
+   "employee_count_est": 15,
+   "estimated_monthly_revenue": null
+  },
+  "context": null,
+  "corridor": null,
+  "niche": "veterinarians",
+  "expected": {
+   "digital_deficit_score": 30.0,
+   "viability_score": 39.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 25.65,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 30.0,
+   "viability_alone": 39.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.5,
+   "google_review_count": 146,
+   "google_avg_rating": 1.1,
+   "review_velocity_30d": 3.8,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 385,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": 93,
+   "nextdoor_recommendations": 10,
+   "thumbtack_hires": 6,
+   "employee_count_est": 16,
+   "estimated_monthly_revenue": 24362.47
+  },
+  "context": {
+   "competitor_count": 8,
+   "avg_digital_score": 38.3,
+   "competitor_ads_active_count": 5,
+   "avg_rating": 2.6,
+   "median_household_income": 64778.35,
+   "population_density": 3908.4
+  },
+  "corridor": "priority",
+  "niche": "barbershops",
+  "expected": {
+   "digital_deficit_score": 45.0,
+   "viability_score": 51.0,
+   "competitive_pressure_score": 45.0,
+   "composite_acquisition_score": 47.1,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 45.0,
+   "viability_alone": 51.0,
+   "pressure_alone": 45.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.06,
+   "google_review_count": 150,
+   "google_avg_rating": 2.0,
+   "review_velocity_30d": 1.3,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 215,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 13,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 26,
+   "employee_count_est": 16,
+   "estimated_monthly_revenue": 34579.33
+  },
+  "context": {
+   "competitor_count": 0,
+   "avg_digital_score": 61.2,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 4.5,
+   "median_household_income": null,
+   "population_density": null
+  },
+  "corridor": "eligible",
+  "niche": "beauty_supply",
+  "expected": {
+   "digital_deficit_score": 56.0,
+   "viability_score": 46.0,
+   "competitive_pressure_score": 25.0,
+   "composite_acquisition_score": 44.75,
+   "price_tier": 3,
+   "nof_eligibility_score": 60.0,
+   "deficit_alone": 56.0,
+   "viability_alone": 46.0,
+   "pressure_alone": 25.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 66.2,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.89,
+   "google_review_count": 142,
+   "google_avg_rating": 4.9,
+   "review_velocity_30d": 1.7,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "active",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 2,
+   "thumbtack_hires": 18,
+   "employee_count_est": 9,
+   "estimated_monthly_revenue": 33578.52
+  },
+  "context": null,
+  "corridor": "eligible",
+  "niche": "tire_shops",
+  "expected": {
+   "digital_deficit_score": 64.0,
+   "viability_score": 56.0,
+   "competitive_pressure_score": 0.0,
+   "composite_acquisition_score": 45.2,
+   "price_tier": 3,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 64.0,
+   "viability_alone": 56.0,
+   "pressure_alone": 0.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 6.5,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.98,
+   "google_review_count": 154,
+   "google_avg_rating": 1.4,
+   "review_velocity_30d": null,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2218,
+   "license_status": "active",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 7,
+   "employee_count_est": 2,
+   "estimated_monthly_revenue": 45200.08
+  },
+  "context": {
+   "competitor_count": 12,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 4.1,
+   "median_household_income": 117432.09,
+   "population_density": 2719.2
+  },
+  "corridor": "priority",
+  "niche": "meat_markets",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 45.0,
+   "competitive_pressure_score": 50.0,
+   "composite_acquisition_score": 54.25,
+   "price_tier": 1,
+   "nof_eligibility_score": 88.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 45.0,
+   "pressure_alone": 50.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 62.3,
+   "has_ssl": 0,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.9,
+   "google_review_count": 155,
+   "google_avg_rating": null,
+   "review_velocity_30d": 3.8,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": 10,
+   "thumbtack_hires": null,
+   "employee_count_est": 5,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 19,
+   "avg_digital_score": 73.4,
+   "competitor_ads_active_count": 5,
+   "avg_rating": 3.7,
+   "median_household_income": 100065.89,
+   "population_density": 14355.1
+  },
+  "corridor": "priority",
+  "niche": "used_auto_parts",
+  "expected": {
+   "digital_deficit_score": 60.0,
+   "viability_score": 36.0,
+   "competitive_pressure_score": 65.0,
+   "composite_acquisition_score": 52.85,
+   "price_tier": 2,
+   "nof_eligibility_score": 57.0,
+   "deficit_alone": 60.0,
+   "viability_alone": 36.0,
+   "pressure_alone": 65.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 94.8,
+   "has_ssl": 1,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.17,
+   "google_review_count": null,
+   "google_avg_rating": null,
+   "review_velocity_30d": -1.4,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 375,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3674,
+   "license_status": "unknown",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 3,
+   "employee_count_est": 18,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 9,
+   "avg_digital_score": 21.8,
+   "competitor_ads_active_count": 6,
+   "avg_rating": null,
+   "median_household_income": 75171.18,
+   "population_density": 6261.3
+  },
+  "corridor": null,
+  "niche": "beauty_shops",
+  "expected": {
+   "digital_deficit_score": 55.0,
+   "viability_score": 33.0,
+   "competitive_pressure_score": 70.0,
+   "composite_acquisition_score": 51.05,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 55.0,
+   "viability_alone": 33.0,
+   "pressure_alone": 70.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 3.9,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.08,
+   "google_review_count": 86,
+   "google_avg_rating": null,
+   "review_velocity_30d": 2.7,
+   "has_facebook_page": 0,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 375,
+   "has_google_ads": 0,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 447,
+   "license_status": "active",
+   "total_customer_ugc": 76,
+   "nextdoor_recommendations": 14,
+   "thumbtack_hires": 12,
+   "employee_count_est": 3,
+   "estimated_monthly_revenue": 43751.06
+  },
+  "context": {
+   "competitor_count": 17,
+   "avg_digital_score": 9.6,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 2.6,
+   "median_household_income": 81097.16,
+   "population_density": 7550.9
+  },
+  "corridor": null,
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 65.0,
+   "viability_score": 61.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 61.1,
+   "price_tier": 2,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 65.0,
+   "viability_alone": 61.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 62.3,
+   "has_ssl": null,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": null,
+   "google_review_count": 197,
+   "google_avg_rating": 2.6,
+   "review_velocity_30d": 0.0,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 124,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "revoked",
+   "total_customer_ugc": 16,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 8,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 64954.39
+  },
+  "context": {
+   "competitor_count": 6,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 1.4,
+   "median_household_income": 73393.11,
+   "population_density": 22370.7
+  },
+  "corridor": null,
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 23.0,
+   "viability_score": 30.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 29.7,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 23.0,
+   "viability_alone": 30.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 70.5,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.14,
+   "google_review_count": 113,
+   "google_avg_rating": 4.1,
+   "review_velocity_30d": 3.4,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 87,
+   "has_google_ads": 1,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3596,
+   "license_status": "revoked",
+   "total_customer_ugc": 7,
+   "nextdoor_recommendations": 17,
+   "thumbtack_hires": 6,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 43517.84
+  },
+  "context": {
+   "competitor_count": 19,
+   "avg_digital_score": 71.9,
+   "competitor_ads_active_count": 3,
+   "avg_rating": 1.9,
+   "median_household_income": null,
+   "population_density": 15904.9
+  },
+  "corridor": null,
+  "niche": "lawn_services",
+  "expected": {
+   "digital_deficit_score": 45.0,
+   "viability_score": 78.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 59.05,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 45.0,
+   "viability_alone": 78.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 69.2,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.17,
+   "google_review_count": 88,
+   "google_avg_rating": 3.6,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 377,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 2199,
+   "license_status": "unknown",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 12,
+   "employee_count_est": 6,
+   "estimated_monthly_revenue": 46597.38
+  },
+  "context": {
+   "competitor_count": 1,
+   "avg_digital_score": 3.0,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 2.5,
+   "median_household_income": 61790.37,
+   "population_density": 14149.0
+  },
+  "corridor": "priority",
+  "niche": "security_services",
+  "expected": {
+   "digital_deficit_score": 23.0,
+   "viability_score": 56.0,
+   "competitive_pressure_score": 25.0,
+   "composite_acquisition_score": 35.05,
+   "price_tier": 1,
+   "nof_eligibility_score": 75.0,
+   "deficit_alone": 23.0,
+   "viability_alone": 56.0,
+   "pressure_alone": 25.0
+  }
+ },
+ {
+  "dp": null,
+  "business": {
+   "incorporation_days_ago": 1962,
+   "license_status": "revoked",
+   "total_customer_ugc": 66,
+   "nextdoor_recommendations": 9,
+   "thumbtack_hires": 11,
+   "employee_count_est": null,
+   "estimated_monthly_revenue": 3675.38
+  },
+  "context": {
+   "competitor_count": 13,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 2,
+   "avg_rating": null,
+   "median_household_income": 105678.11,
+   "population_density": 3912.5
+  },
+  "corridor": null,
+  "niche": "barbershops",
+  "expected": {
+   "digital_deficit_score": 0.0,
+   "viability_score": 45.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 29.5,
+   "price_tier": 1,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": null,
+   "viability_alone": 45.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": 40.7,
+   "has_ssl": 1,
+   "has_google_business_profile": 0,
+   "gbp_completeness_score": 0.8,
+   "google_review_count": 136,
+   "google_avg_rating": 4.1,
+   "review_velocity_30d": 4.0,
+   "has_facebook_page": 1,
+   "has_instagram": 0,
+   "fb_last_post_days_ago": 185,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": 858,
+   "license_status": "revoked",
+   "total_customer_ugc": 5,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": 3,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 13,
+   "avg_digital_score": null,
+   "competitor_ads_active_count": 4,
+   "avg_rating": 3.9,
+   "median_household_income": 90502.65,
+   "population_density": 7102.4
+  },
+  "corridor": "priority",
+  "niche": "meat_markets",
+  "expected": {
+   "digital_deficit_score": 53.0,
+   "viability_score": 46.0,
+   "competitive_pressure_score": 55.0,
+   "composite_acquisition_score": 51.05,
+   "price_tier": 2,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 53.0,
+   "viability_alone": 46.0,
+   "pressure_alone": 55.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 1,
+   "website_quality_score": 26.5,
+   "has_ssl": null,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.87,
+   "google_review_count": 97,
+   "google_avg_rating": 3.2,
+   "review_velocity_30d": null,
+   "has_facebook_page": 1,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": 372,
+   "has_google_ads": 1,
+   "has_meta_ads": 1
+  },
+  "business": {
+   "incorporation_days_ago": null,
+   "license_status": "unknown",
+   "total_customer_ugc": 81,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": 6,
+   "employee_count_est": 10,
+   "estimated_monthly_revenue": null
+  },
+  "context": {
+   "competitor_count": 24,
+   "avg_digital_score": 21.2,
+   "competitor_ads_active_count": 1,
+   "avg_rating": 1.3,
+   "median_household_income": null,
+   "population_density": 12774.7
+  },
+  "corridor": null,
+  "niche": "towing",
+  "expected": {
+   "digital_deficit_score": 28.0,
+   "viability_score": 38.0,
+   "competitive_pressure_score": 40.0,
+   "composite_acquisition_score": 34.5,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 28.0,
+   "viability_alone": 38.0,
+   "pressure_alone": 40.0
+  }
+ },
+ {
+  "dp": {
+   "has_website": 0,
+   "website_quality_score": null,
+   "has_ssl": 0,
+   "has_google_business_profile": 1,
+   "gbp_completeness_score": 0.15,
+   "google_review_count": null,
+   "google_avg_rating": 4.5,
+   "review_velocity_30d": 2.3,
+   "has_facebook_page": 0,
+   "has_instagram": 1,
+   "fb_last_post_days_ago": null,
+   "has_google_ads": 0,
+   "has_meta_ads": 0
+  },
+  "business": {
+   "incorporation_days_ago": 3316,
+   "license_status": "expired",
+   "total_customer_ugc": null,
+   "nextdoor_recommendations": null,
+   "thumbtack_hires": null,
+   "employee_count_est": 3,
+   "estimated_monthly_revenue": 43052.83
+  },
+  "context": {
+   "competitor_count": 8,
+   "avg_digital_score": 59.4,
+   "competitor_ads_active_count": 2,
+   "avg_rating": 2.4,
+   "median_household_income": null,
+   "population_density": 11765.8
+  },
+  "corridor": null,
+  "niche": "mobile_mechanics",
+  "expected": {
+   "digital_deficit_score": 55.0,
+   "viability_score": 56.0,
+   "competitive_pressure_score": 70.0,
+   "composite_acquisition_score": 59.1,
+   "price_tier": 3,
+   "nof_eligibility_score": 0.0,
+   "deficit_alone": 55.0,
+   "viability_alone": 56.0,
+   "pressure_alone": 70.0
+  }
+ }
+]
