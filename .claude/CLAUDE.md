@@ -48,7 +48,9 @@ npm run dev            # wrangler dev, local miniflare D1/KV under api/.wrangler
 npm run typecheck      # tsc --noEmit (strict)
 npm run build          # wrangler deploy --dry-run
 npm test               # vitest
-npx wrangler d1 migrations apply leadforge-db --local   # apply migrations locally; drop --local for remote
+npx wrangler d1 migrations apply leadforge-db            # local: wrangler 4 defaults to local
+npx wrangler d1 migrations apply leadforge-db --remote   # production. --remote is the opt-in, NOT --local:
+                                                         # dropping --local silently migrates miniflare instead
 npx wrangler secret put JWT_SECRET
 npx wrangler secret put RETELL_API_KEY   # HMAC key for the Retell webhook
 npx wrangler secret put FOURSQUARE_API_KEY  # discovery enrichment source (ADR 029)
