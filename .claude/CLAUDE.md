@@ -136,10 +136,33 @@ deficit's 30-point website term on fabricated evidence. Untried and likely to be
 string-similarity threshold: `limit=10` with a `fsq_category_ids` filter, and a radius tighter
 than 200 m.
 
-The bulk Open Source Places dataset (`hf://datasets/foursquare/fsq-os-places`, Apache-2.0) has no
-entitlement tiering and carries the denied fields, which would make matching an offline problem.
-As of 2026-09-16 it is still gated: the repo lists, but contents return `not in the authorized
-list` for `crichalchemist`. Whether to switch to it is an open question (ADR 029 Correction).
+**Overture Maps is the open alternative, measured 2026-09-16 and not yet adopted.** Foursquare
+donated its places data to Overture, whose release bucket is anonymously readable with no key, no
+gate and no rate limit: `s3://overturemaps-us-west-2/release/<version>/theme=places/type=place/*`
+(latest `2026-08-19.0`). Parquet with bbox row-group statistics, so a DuckDB query with a bounding
+box pulls the whole south side in ~5 s. Carries `names`, `categories`, `websites`, `socials`,
+`phones`, `emails`, `addresses`, `confidence`, `operating_status` — **but no rating and no review
+count**, so no free path restores those and `computeViability`'s rating block stays dead whichever
+source wins. Correction: this file previously said the bulk dataset "carries the denied fields";
+that is false for Overture and unverified for `fsq-os-places`, which cannot be read to check.
+
+Measured head-to-head on the same 157 licensed 60619 businesses with one name scorer
+(`scripts/measure_overture_match.py`): the API matched 140 but only 57 survive name corroboration
+(**83 false matches**), yielding 17 usable website and 4 usable social signals. Overture matched
+**74, all corroborated**, yielding **55 website and 60 social** signals. Fewer matches, 3x the
+usable website signal and 15x the social. Matching is an offline problem there, so experiments are
+free instead of one API call each.
+
+Two blockers before Overture could be adopted, neither yet resolved: only **4 of 74** Overture
+matches carry a Foursquare source id, so `fsq_place_id` would be NULL for nearly every row and the
+dedup key must become Overture's GERS `id` (a migration 0003) — and GERS id stability across
+monthly releases is unverified, which is the same duplicate-rows trap in a new costume.
+
+`hf://datasets/foursquare/fsq-os-places` (Apache-2.0) remains gated: `gated: auto`, token scoped
+correctly (`canReadGatedRepos: true`), but the account is not on the authorized list and the access
+form needs Organization, Title, Country and an intended-use declaration that only the owner can
+give. Overture makes that gate moot. The AWS open-data bucket `fsq-os-places-us-east-1` still
+exists but now holds only `LICENSE.txt` and `NOTICE.txt` — the data is gone from it.
 
 ## Known discrepancies
 

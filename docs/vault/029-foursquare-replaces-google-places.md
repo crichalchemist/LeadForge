@@ -175,3 +175,63 @@ bulk route has no entitlement tiering, carries the denied fields, and makes matc
 problem where ten algorithms can be tried in a minute instead of one per 157 calls. It remains
 gated: as of 2026-09-16 the repository lists but its contents return
 `Access to dataset foursquare/fsq-os-places is restricted and you are not in the authorized list`.
+
+## Second correction (2026-09-16) — Overture Maps measured against the same 157
+
+The standing question above is answered on the evidence, though the decision is not yet taken.
+
+Two claims in the section above are wrong and are left in place so the reasoning stays legible.
+"Carries the denied fields" is false: Overture's places schema has no rating and no review count,
+and `fsq-os-places` cannot be read to check whether it does. **No free path restores reviews or
+ratings**, so the source choice turns only on match quality and the cost of experimenting, not on
+`computeViability`'s rating block, which stays dead either way. And the gate is moot rather than
+blocking — Foursquare donated this data to Overture Maps, which is anonymously readable.
+
+### The open source
+
+`s3://overturemaps-us-west-2/release/2026-08-19.0/theme=places/type=place/*` — no key, no gate,
+no rate limit, Parquet with bbox row-group statistics. A DuckDB bounding-box query returned all
+8,470 places on the relevant stretch of the south side in about five seconds. Provenance in
+60619: 703 rows sourced from Meta, 194 Microsoft, 173 Foursquare, plus Overture's own conflation.
+It is a superset of the API's corpus, not a substitute for it.
+
+### Head-to-head, one scorer, same 157 businesses
+
+`scripts/measure_overture_match.py`. Both sides scored by the same function, so the comparison is
+of pipelines rather than of two differently-flattered numbers.
+
+| | Foursquare API (`limit=1`, 200 m) | Overture (150 m, IDF join) |
+|---|---|---|
+| Matched something | 140 | 74 |
+| Name-corroborated | 57 | 74 |
+| **False matches** | **83** | 0 above threshold; 12 lowest audited by hand |
+| Usable website signals | 17 | **55** |
+| Usable social signals | 4 | **60** |
+
+Half as many matches, three times the usable website signal and fifteen times the social. The
+API's 89% match rate was mostly `limit=1` returning whatever was nearest.
+
+### The scorer, and two bugs found inside it
+
+Name corroboration is IDF-weighted fuzzy token containment with a **head-token gate**: the rarest
+token in the licence name must be present in the candidate. IDF alone is not enough — three
+shared sector words ("african", "hair", "braiding") still outvote one distinctive name, which is
+how `CONSTANCE AFRICAN HAIR BRAIDING` scored 0.61 against `Marseillais African Hair Braiding`. A
+char-bigram fallback had the same effect and was removed; a prefix rule was added because bigram
+overlap scores the true match `BRAZZAVILLE`/`Brazza` at 0.50. Both bugs were caught by auditing
+the lowest-scoring *accepted* pairs, which is the only part of the distribution where a scoring
+flaw is visible. Results are insensitive to the radius (77 at 50 m, 79 at 150 m, 83 at 250 m) and
+the category filter *lowers* recall, because Overture files some salons as other business types.
+
+### What adopting Overture would require
+
+Not done, and not to be started before the source decision is taken:
+
+1. **The dedup key must change.** Only 4 of the 74 matches carry a Foursquare source id, so
+   `fsq_place_id` would be NULL for nearly every row — and a NULL dedup key is exactly the
+   duplicate-on-rerun trap this ADR already documents. The key becomes Overture's GERS `id`, as a
+   migration 0003.
+2. **GERS id stability across monthly releases is unverified.** An id that churns is the same
+   trap wearing a third costume, and it must be measured across two releases before any migration.
+3. A local corpus refresh becomes an operational step, as with the bundled corridor polygons
+   (ADR 028): the data is a pinned release, not a live lookup.
