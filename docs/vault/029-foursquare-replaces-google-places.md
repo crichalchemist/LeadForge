@@ -235,3 +235,29 @@ Not done, and not to be started before the source decision is taken:
    trap wearing a third costume, and it must be measured across two releases before any migration.
 3. A local corpus refresh becomes an operational step, as with the bundled corridor polygons
    (ADR 028): the data is a pinned release, not a live lookup.
+
+### The two corpora are complementary, which the table above hides
+
+Of the 83 licences with no corroborated Overture match, the API also failed to corroborate 66
+(80%) — both corpora agree those businesses have no findable public presence, which is a finding
+about the licence file rather than about either source. Chicago licences include home-based and
+dormant operations that no POI corpus carries.
+
+The remaining 17 are genuine Overture misses, and they are unambiguous: `AMIBE HAIR BRAIDING LLC`
+→ `Amibe Hair Braiding`, `SANGENE'S STYLING SALON` → `Sangene's Styling Salon`,
+`MARIONNA'S BEAUTY SALON` → `Marionna's Beauty Salon`. Overture has a POI at Sangene's address
+and files it under a different name entirely (`MJsFadeaway`), so its conflation is not strictly
+better — it is differently wrong. Conversely 34 are found only by Overture.
+
+| | corroborated |
+|---|---|
+| Overture only | 34 |
+| API only | 17 |
+| Both | 40 |
+| **Union** | **88 / 157** |
+
+So neither source dominates on recall, and the cheapest reading of this table is that they
+compose: Overture first at zero marginal cost, the API only for what Overture misses — 83 calls
+instead of 157 — with name corroboration applied to the API response before storing it, so the
+83 false matches are discarded rather than written. Not designed, not built; recorded because
+the measurement points at it.
