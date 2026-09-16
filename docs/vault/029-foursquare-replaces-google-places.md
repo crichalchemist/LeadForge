@@ -109,3 +109,69 @@ same thing, so the deficit's 15 points still key on presence in the enrichment s
    viable: all three of `computeNofEligibility`'s hard gates are free-data driven and it reaches
    75/100 without any Places source. Viability caps at 35/100 without reviews, so outreach scoring
    would stay parked. This is a narrowing of the product, not a fix for the data gap.
+
+---
+
+## Correction (2026-09-16) — measured against a live key
+
+The Decision above stands, but two claims in its Context and Consequences were wrong. They were
+taken from the published field list without a key to test against. Recorded here rather than
+edited away, because the gap between what the docs list and what a plan entitles is the whole
+lesson.
+
+### Wrong claim 1: "everything the deficit takes from Google"
+
+The response carries what your **plan entitles**, and the free Service Key does not entitle the
+review and rating fields. Requesting them does not omit them — it fails the entire request with
+HTTP 429 and `x-ratelimit-limit: 0`, which is an allowance the plan never had rather than an
+exhausted quota. Measured field by field:
+
+| Entitled (HTTP 200) | Denied (HTTP 429, `limit: 0`) |
+|---|---|
+| `fsq_place_id`, `name`, `location`, `latitude`, `longitude` | `rating` |
+| `website`, `tel`, `email` | `stats` (and so `stats.total_ratings`) |
+| `social_media`, `categories` | `hours`, `price`, `popularity` |
+
+So `SEARCH_FIELDS` is an entitlement boundary, not a preference: adding one denied field silently
+breaks every lookup. The deficit keeps its website (30), source-presence (15) and social (12)
+terms and loses the review terms (10/5); `computeViability` loses its whole rating/review/velocity
+block. A business the source has no record of therefore scores **64, not 74**.
+
+### Wrong claim 2: the match rate would be the thing to measure, and 89% is it
+
+Measured over all 157 licensed `hair service` businesses in 60619, one lookup each, using the
+city's geocode (157/157 geocoded) with a 200 m radius and `limit=1`:
+
+| | |
+|---|---|
+| Matched something | 140 / 157 (89.2%) |
+| **Name-corroborated** | **~76 / 157 (~48%)** |
+| Matched the wrong nearby business | ~60 of the 140 matches |
+| Website present among matches | 46 / 140 (32.9%) |
+| Phone present | 100 / 140 (71.4%) |
+| Facebook or Instagram present | 14 / 140 (10.0%) |
+
+The 89% is a *geo* match rate and is not the useful number. `limit=1` returns the nearest place
+whatever its name, so `ACHOTI SALON LLC` matched `Billbusters, Ledford, Wu & Borge` — a law firm,
+whose website would be imported as the salon's. **A false match is worse than no match**, because
+it flips the deficit's largest term the wrong way on fabricated evidence.
+
+Resulting deficit distribution: 5 distinct values spanning 7–64, with 59% of businesses in a
+single bucket (49). Better than one constant; not by as much as this ADR assumed.
+
+### What has not been tried
+
+The matching was not tuned before measuring, and two untested changes likely dominate any
+string-similarity threshold: `limit=10` with a `fsq_category_ids` filter (`categories` is
+entitled) so the best *plausible* candidate can be chosen rather than the nearest one, and a
+tighter radius than 200 m, which in a commercial corridor spans many storefronts. Threshold
+tuning on 157 rows was started and abandoned: every band examined was roughly half wrong, and
+each confound fixed (possessive `'s`, sector vocabulary) revealed the next.
+
+### Standing question
+
+Whether to stay on the API or switch to the bulk Open Source Places dataset is **reopened**. The
+bulk route has no entitlement tiering, carries the denied fields, and makes matching an offline
+problem where ten algorithms can be tried in a minute instead of one per 157 calls. It remains
+gated: as of 2026-09-16 the repository lists but its contents return
+`Access to dataset foursquare/fsq-os-places is restricted and you are not in the authorized list`.

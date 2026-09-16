@@ -112,22 +112,34 @@ wants a prepayment the owner has not made. Measured alternatives, 2026-09-15 —
 Nominatim matched 0 of 5 real 60619 businesses and Overpass failed on three mirrors across two
 sessions; Yelp Fusion's free tier has ended (~$8/1,000 calls).
 
-Foursquare is now the enrichment source (ADR 029). `GET https://places-api.foursquare.com/places/search`,
-`Authorization: Bearer <key>` (the legacy v3 API took a bare key; a missing prefix reads as a 401)
-and a required `X-Places-Api-Version: 2025-06-17` header whose schema permits exactly one value.
-A search result carries the same fields as a place-details lookup, so one call enriches a business
-where Google needed two. The free tier is 500 Pro calls a month with no card, then $15/1,000.
+Foursquare is the enrichment source (ADR 029). `GET https://places-api.foursquare.com/places/search`,
+`Authorization: Bearer <key>` — a **Service Key** from the Developer Console, not a legacy `fsq3…`
+API key; v3 is sunset and returns 410, and an `fsq3` key on the new host 401s. Required header
+`X-Places-Api-Version: 2025-06-17`.
 
-**Its match rate against real Chicago licence rows is still unmeasured** — that needs a key.
-Measuring all 168 real 60619 businesses costs 168 of the 500 monthly calls. Set the key with
-`npx wrangler secret put FOURSQUARE_API_KEY`, or locally with
-`wrangler dev --var FOURSQUARE_API_KEY:"$KEY"` — never `api/.dev.vars`, which is tracked in git.
+**`SEARCH_FIELDS` is an entitlement boundary, not a preference.** Measured 2026-09-16 on a free
+Service Key: `rating`, `stats`, `hours`, `price` and `popularity` return HTTP 429 with
+`x-ratelimit-limit: 0` — an allowance the plan never had, not an exhausted quota — and they fail
+the *whole request*, so adding one silently breaks every lookup. Entitled: `fsq_place_id`, `name`,
+`location`, `latitude`, `longitude`, `website`, `tel`, `email`, `social_media`, `categories`.
+No `stats` means no review count, which must be stored as **null, never 0** (see Discovery).
+Rate limits observed: `x-ratelimit-burst-limit: 150` alongside `x-ratelimit-limit: 180000`; a
+burst breach 429s everything until it refills, so lookups must be serial and paced (~1/s), not
+concurrent.
 
-Foursquare also publishes the same data in bulk under Apache-2.0
-(`hf://datasets/foursquare/fsq-os-places`, 11.5 GB, gated behind accepting terms), which would
-suit the ADR-028 bundled-asset pattern and cost no subrequests at ingest. That is the volume play
-if the API's match rate holds up; its coverage is unverified because the repo returns 401 even for
-its README.
+**Measured coverage, all 157 licensed `hair service` businesses in 60619** (one lookup each, city
+geocode + 200 m radius, `limit=1`): 140/157 matched *something* (89%), but only **~48% are
+name-corroborated** — `limit=1` returns the nearest place whatever its name, so `ACHOTI SALON LLC`
+matched a law firm whose website would be imported as the salon's. Among matches: website 33%,
+phone 71%, Facebook/Instagram 10%. **A false match is worse than no match**: it flips the
+deficit's 30-point website term on fabricated evidence. Untried and likely to beat any
+string-similarity threshold: `limit=10` with a `fsq_category_ids` filter, and a radius tighter
+than 200 m.
+
+The bulk Open Source Places dataset (`hf://datasets/foursquare/fsq-os-places`, Apache-2.0) has no
+entitlement tiering and carries the denied fields, which would make matching an offline problem.
+As of 2026-09-16 it is still gated: the repo lists, but contents return `not in the authorized
+list` for `crichalchemist`. Whether to switch to it is an open question (ADR 029 Correction).
 
 ## Known discrepancies
 
