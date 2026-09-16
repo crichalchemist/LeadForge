@@ -138,13 +138,15 @@ async function enrichAndPersist(
   const scoreId = crypto.randomUUID();
 
   const hasWebsite = enrichment.has_website ?? false;
-  const googleReviewCount = enrichment.google_review_count ?? 0;
+  // null, not 0: the free Foursquare plan does not entitle `stats`, and computeDigitalDeficit
+  // charges +10 for a zero review count while skipping the term entirely on null.
+  const googleReviewCount = enrichment.google_review_count ?? null;
   const hasGbp = enrichment.has_google_business_profile ?? false;
   const hasFacebook = enrichment.has_facebook_page ?? false;
   const hasInstagram = enrichment.has_instagram ?? false;
 
   // A failed lookup is not a finding. With the source unavailable every input below is absent and
-  // computeDigitalDeficit returns exactly 74 for every business on earth — a constant that would
+  // computeDigitalDeficit returns the same constant for every business on earth — one that would
   // sit in lead_scores looking like a measurement, rank nothing (it is 40% of the composite), and
   // trip computeNofEligibility's `deficit > 60` bonus for a business nobody researched. Store null
   // instead: the columns are nullable, and `?? 0` in the NOF scorer already treats null as absent.

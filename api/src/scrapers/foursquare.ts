@@ -10,11 +10,17 @@ const BASE_URL = 'https://places-api.foursquare.com';
 const API_VERSION = '2025-06-17';
 
 // A search result carries the same field set as GET /places/{id}, so one call enriches a business
-// where Google needed find-place *and* details. That halves the subrequest cost and doubles what a
-// 500-call free month buys. Naming the fields rather than accepting the all-Pro-fields default
-// keeps the set we consume visible in review, and immune to a change in what "default" means.
+// where Google needed find-place *and* details. Naming the fields rather than accepting the
+// all-Pro-fields default keeps the set we consume visible in review, and immune to a change in
+// what "default" means.
+//
+// This list is an ENTITLEMENT boundary, not a preference. Measured against a free Service Key on
+// 2026-09-16, requesting `rating`, `stats`, `hours`, `price` or `popularity` returns HTTP 429 with
+// `x-ratelimit-limit: 0` — not an exhausted quota but an allowance the plan never had, and it
+// fails the *whole request*, not just the extra field. Adding one of them here silently breaks
+// every lookup. Reviews and rating therefore need a paid plan; see ADR 029.
 export const SEARCH_FIELDS =
-  'fsq_place_id,name,location,latitude,longitude,tel,email,website,social_media,rating,stats';
+  'fsq_place_id,name,location,latitude,longitude,website,tel,email,social_media,categories';
 
 // The city geocodes the licence address and a storefront sits within a block of it: wide enough to
 // survive geocoder drift, tight enough that the shop two doors down is not a candidate.
@@ -60,7 +66,8 @@ export interface FoursquareEnrichment {
   website: string | null;
   latitude: number | null;
   longitude: number | null;
-  google_review_count: number;
+  /** null when the plan does not entitle `stats` — unmeasured, not zero reviews. */
+  google_review_count: number | null;
   google_avg_rating: number | null;
   has_website: boolean;
   has_google_business_profile: boolean;
@@ -180,11 +187,15 @@ export function extractEnrichment(place: FoursquarePlace): FoursquareEnrichment 
     website: place.website ?? null,
     latitude: place.latitude ?? null,
     longitude: place.longitude ?? null,
-    google_review_count: place.stats?.total_ratings ?? 0,
+    // null, never 0, when `stats` is absent. computeDigitalDeficit skips this term on null but
+    // charges +10 for a zero, so a 0 here would award a "no reviews" penalty to every business on
+    // the plan — the same constant-dressed-as-signal bug as the 74.
+    google_review_count: place.stats?.total_ratings ?? null,
     // Foursquare rates 0.0-10.0 where Google rates 0.0-5.0, and `google_avg_rating` is consumed as
     // a Google rating: computeViability awards its top bonus at >= 4.0. Left raw, a mediocre 7.2
     // would max that bonus for nearly every business — a constant dressed as a signal. This is a
-    // scale conversion only; it does not claim the two sources' distributions agree.
+    // scale conversion only; it does not claim the two sources' distributions agree. Only ever
+    // non-null on a plan entitled to `rating`.
     google_avg_rating: place.rating != null ? place.rating / 2 : null,
     has_website: Boolean(place.website),
     // Reproduces the Google port's rule rather than inventing one. `has_google_business_profile:

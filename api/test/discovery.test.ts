@@ -109,6 +109,36 @@ describe('runDiscovery', () => {
     });
   });
 
+  // The free Foursquare plan returns 429 limit=0 for `stats`, so a real free-tier response has no
+  // review count at all. Storing 0 would charge every business computeDigitalDeficit's +10 "zero
+  // reviews" penalty — a constant, the same bug as the 74. Null makes the scorer skip the term.
+  it('records no review count rather than zero when the plan cannot see reviews', async () => {
+    routeFoursquare([SOCRATA_ROW], {
+      results: [
+        {
+          fsq_place_id: 'fsq_free_plan',
+          name: "John's Barbershop",
+          location: { formatted_address: '123 E 75th St, Chicago, IL 60619' },
+          website: 'http://johnsbarbershop.com',
+          // no `stats`, no `rating`, no `social_media` — exactly what the entitled field set returns
+        },
+      ],
+    });
+
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+
+    const presence = await env.DB.prepare(
+      'SELECT google_review_count, google_avg_rating FROM digital_presences WHERE business_id = ?',
+    )
+      .bind(discovered[0].id)
+      .first();
+    expect(presence).toEqual({ google_review_count: null, google_avg_rating: null });
+
+    // website (0) + GBP (0) + reviews SKIPPED + no social (12) + no ads (7) = 19.
+    // A zero review count instead of null would make this 29.
+    expect(discovered[0].digital_deficit_score).toBe(19);
+  });
+
   it('skips a business already stored under the same fsq_place_id', async () => {
     await env.DB.prepare('INSERT INTO businesses (id, name, zip_code, niche, fsq_place_id) VALUES (?, ?, ?, ?, ?)')
       .bind(crypto.randomUUID(), 'Existing', '60619', 'barbershops', 'fsq_sample_place_id_123')
@@ -286,7 +316,9 @@ describe('runDiscovery', () => {
   });
 
   // A shop Foursquare genuinely does not list is a measurement, not an outage: the deficit is
-  // computed from its absence rather than withheld.
+  // computed from its absence rather than withheld. 64, not 74: the review term is unobservable on
+  // this plan for every business, so counting a no-match as "zero reviews" would hand unmatched
+  // businesses +10 that matched ones can never receive — a bias from the entitlement, not the shop.
   it('scores a business Foursquare has no record of rather than leaving it unmeasured', async () => {
     const health = newFoursquareHealth();
     routeFoursquare([SOCRATA_ROW], { results: [] });
@@ -294,7 +326,7 @@ describe('runDiscovery', () => {
     const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5, health);
 
     expect(health).toEqual({ unavailable: 0, last_status: null });
-    expect(discovered[0].digital_deficit_score).toBe(74);
+    expect(discovered[0].digital_deficit_score).toBe(64);
   });
 });
 
