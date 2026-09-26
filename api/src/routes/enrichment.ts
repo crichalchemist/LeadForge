@@ -15,10 +15,18 @@ import type { AppEnv } from '../types';
 
 const router = new Hono<AppEnv>();
 
-const MAX_LIMIT = 500;
+// Each candidate costs one query for the batch's three statements (UPDATE digital_presences, UPDATE
+// businesses, INSERT lead_scores) plus a share of the one candidate SELECT, so one invocation costs
+// 1 + 3*limit D1 queries in the worst case (every candidate actually changes something). Workers Free
+// is documented elsewhere in this codebase (ADR 030) as capping Worker-invocation subrequests at 50,
+// but that figure specifically for "D1 queries per invocation" was not re-verified here — treat it as
+// unconfirmed and stay well clear of it regardless, because the idempotent predicate makes repeated
+// small calls free: a partial run just gets picked up again. MAX_LIMIT = 15 puts the worst case at
+// 1 + 3*15 = 46; the default of 10 is 1 + 3*10 = 31.
+const MAX_LIMIT = 15;
 
 const backfillSchema = z.object({
-  limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(50),
+  limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(10),
 });
 
 interface Candidate extends OvertureMatch {
@@ -41,12 +49,22 @@ router.post('/overture-backfill', requireAuth, requireAdmin, jsonBody(backfillSc
   // something to, so a second run finds nothing. `site_number IS` rather than `=` because `=` yields
   // NULL for a null site number and the join would silently miss those rows.
   //
-  // `TRIM(COALESCE(om.website,'')) <> ''` rather than `om.website IS NOT NULL`: SQLite's IS NOT NULL
-  // is true for an empty string, but applyOvertureMatch's overturePresent() already treats a blank or
-  // whitespace-only website as absent (measured: 82 of 23,969 rows carry website = ''). A predicate
-  // that disagreed with that would select those rows as candidates forever — applyOvertureMatch would
-  // correctly decline to change anything, they would never be updated, and with no ORDER BY on this
-  // LIMIT query they could starve out every genuinely fixable candidate on every run.
+  // `ls` follows the same "latest row per business" window-function shape as LATEST_SCORE_JOIN in
+  // routes/businesses.ts (a multi-row candidate set, like this query, rather than the single-business
+  // lookup sentiment-feedback.ts uses). `ls.digital_deficit_score IS NOT NULL` excludes a business
+  // whose latest score is the deliberate NULL discovery.ts writes for a lookup that never completed
+  // (lib/discovery.ts:207-219): that NULL means "never measured", not "measured at zero", and the
+  // Google-only terms (GBP, review count) missing from an unmeasured row would make
+  // computeDigitalDeficit charge +15 for "no GBP" on no evidence and land systematically lower than a
+  // real measurement — an unmeasured business would then outrank a measured one. Re-enrichment from
+  // Google, not Overture alone, is what turns such a business into a real candidate.
+  //
+  // `TRIM(om.website, char(9)||char(10)||char(13)||' ')` rather than one-argument `TRIM` or
+  // `IS NOT NULL`: one-argument SQLite `TRIM` strips only U+0020, but applyOvertureMatch's
+  // overturePresent() uses JS `.trim()`, which strips tab/newline/CR too. Passing the same four
+  // characters explicitly is what makes the SQL and TypeScript blank-checks actually agree — the
+  // pair of tests below ("blank website" and "whitespace-only website") hold that agreement in place,
+  // since D1 cannot call the TypeScript function to check it directly.
   const candidates = await c.env.DB.prepare(
     `SELECT b.id AS business_id, dp.id AS presence_id,
             dp.has_website AS stored_has_website, dp.website_url AS stored_website_url,
@@ -56,14 +74,21 @@ router.post('/overture-backfill', requireAuth, requireAdmin, jsonBody(backfillSc
             b.phone AS stored_phone,
             om.account_number, om.site_number, om.matched, om.gers_id, om.matched_name,
             om.score, om.distance_m, om.website, om.has_facebook, om.has_instagram, om.phone,
-            (SELECT COALESCE(MAX(score_version), 0) FROM lead_scores WHERE business_id = b.id)
-              AS latest_version
+            ls.score_version AS latest_version
        FROM businesses b
        JOIN digital_presences dp ON dp.business_id = b.id
        JOIN overture_matches om
          ON om.account_number = b.account_number AND om.site_number IS b.site_number
+       LEFT JOIN (
+         SELECT business_id, score_version, digital_deficit_score FROM (
+           SELECT business_id, score_version, digital_deficit_score,
+                  ROW_NUMBER() OVER (PARTITION BY business_id ORDER BY score_version DESC) AS rn
+           FROM lead_scores
+         ) WHERE rn = 1
+       ) ls ON ls.business_id = b.id
       WHERE om.matched = 1
-        AND ( (dp.has_website = 0 AND TRIM(COALESCE(om.website,'')) <> '')
+        AND ls.digital_deficit_score IS NOT NULL
+        AND ( (dp.has_website = 0 AND TRIM(COALESCE(om.website,''), char(9)||char(10)||char(13)||' ') <> '')
            OR (dp.has_facebook_page = 0 AND om.has_facebook = 1)
            OR (dp.has_instagram = 0 AND om.has_instagram = 1) )
       LIMIT ?`,

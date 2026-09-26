@@ -40,7 +40,7 @@ async function seed(opts: { website?: string | null; facebook?: number } = {}) {
   return businessId;
 }
 
-const run = async (limit = 50) => {
+const run = async (limit = 10) => {
   if (!cachedToken) cachedToken = await accessToken(await adminUser());
   const res = await api('POST', '/enrichment/overture-backfill', { token: cachedToken, json: { limit } });
   return { res, body: (await res.json()) as { examined: number; updated: number; skipped: number } };
@@ -86,13 +86,29 @@ describe('POST /api/enrichment/overture-backfill', () => {
   });
 
   // The candidate query's WHERE clause is the idempotency mechanism, and it is encoded twice: once in
-  // SQL (this predicate), once in TypeScript (applyOvertureMatch's overturePresent). SQLite's
-  // `IS NOT NULL` is true for an empty string, so a naive predicate would select a business whose
-  // Overture row carries website = '' forever -- applyOvertureMatch would correctly decline to change
-  // anything, and with no ORDER BY on this query's LIMIT, a run whose limit filled up with these
-  // permanently-unfixable rows would do no useful work on every subsequent run either.
+  // SQL (this predicate), once in TypeScript (applyOvertureMatch's overturePresent). The two are made
+  // to agree on exactly the same "blank" definition -- SQL's TRIM(om.website, char(9)||char(10)||
+  // char(13)||' ') strips the same four characters JS's String.prototype.trim() does -- rather than by
+  // coincidence, because SQLite's one-argument TRIM strips only U+0020 and would disagree with the
+  // TypeScript guard on anything padded with a tab, newline or CR. This test and the next one
+  // ("whitespace-only website") are what hold that agreement in place: without either fix, the
+  // corresponding row would be selected as a candidate forever -- applyOvertureMatch would correctly
+  // decline to change anything, and with no ORDER BY on this query's LIMIT, permanently-unfixable rows
+  // like these could starve out every genuinely fixable candidate on every run.
   it('never resurfaces a business whose only Overture offering is a blank website', async () => {
     const businessId = await seed({ website: '', facebook: 0 });
+    expect((await run()).body).toEqual({ examined: 0, updated: 0, skipped: 0 });
+
+    const presence = await env.DB.prepare(
+      'SELECT has_website FROM digital_presences WHERE business_id = ?',
+    ).bind(businessId).first();
+    expect(presence).toEqual({ has_website: 0 });
+  });
+
+  it('never resurfaces a business whose only Overture offering is a whitespace-only website', async () => {
+    // A tab, not a space: one-argument SQLite TRIM would leave this non-empty and disagree with
+    // overturePresent()'s JS .trim(), which strips it. That disagreement is exactly finding I1.
+    const businessId = await seed({ website: '\t', facebook: 0 });
     expect((await run()).body).toEqual({ examined: 0, updated: 0, skipped: 0 });
 
     const presence = await env.DB.prepare(
@@ -122,6 +138,48 @@ describe('POST /api/enrichment/overture-backfill', () => {
       'SELECT has_website FROM digital_presences WHERE business_id = ?',
     ).bind(businessId).first();
     expect(presence).toEqual({ has_website: 0 });
+  });
+
+  // C1: a business whose live Places lookup never completed is stored with digital_deficit_score =
+  // NULL (lib/discovery.ts:207-219) precisely so a later reader can tell "never measured" apart from
+  // "measured at zero". The Google-only terms missing from such a row (GBP, review count) are the ones
+  // computeDigitalDeficit would charge against on no evidence, so recomputing here would fabricate a
+  // number that ranks the business as if it had been researched -- and, being lower for want of those
+  // charges, would rank it ABOVE businesses that actually were. Re-enrichment from Google is the only
+  // thing that should turn this into a real candidate; Overture alone must not.
+  it('does not fabricate a deficit for a business whose Places lookup never completed', async () => {
+    const businessId = crypto.randomUUID();
+    await env.DB.prepare(
+      `INSERT INTO businesses (id, name, zip_code, niche, account_number, site_number)
+       VALUES (?, 'Test Shop', '60619', 'barbershops', '478850', '1')`,
+    ).bind(businessId).run();
+    await env.DB.prepare(
+      `INSERT INTO digital_presences (id, business_id, has_website, has_google_business_profile,
+         google_review_count, has_facebook_page, has_instagram, created_at, updated_at)
+       VALUES (?, ?, 0, 0, NULL, 0, 0, '2026-09-25T00:00:00Z', '2026-09-25T00:00:00Z')`,
+    ).bind(crypto.randomUUID(), businessId).run();
+    await env.DB.prepare(
+      `INSERT INTO lead_scores (id, business_id, score_version, digital_deficit_score,
+         composite_acquisition_score, created_at, updated_at)
+       VALUES (?, ?, 1, NULL, NULL, '2026-09-25T00:00:00Z', '2026-09-25T00:00:00Z')`,
+    ).bind(crypto.randomUUID(), businessId).run();
+    await env.DB.prepare(
+      `INSERT INTO overture_matches (account_number, site_number, matched, website,
+         has_facebook, has_instagram, built_at)
+       VALUES ('478850', '1', 1, 'http://found.com', 0, 0, '2026-09-25T00:00:00Z')`,
+    ).run();
+
+    expect((await run()).body).toEqual({ examined: 0, updated: 0, skipped: 0 });
+
+    const presence = await env.DB.prepare(
+      'SELECT has_website FROM digital_presences WHERE business_id = ?',
+    ).bind(businessId).first();
+    expect(presence).toEqual({ has_website: 0 });
+
+    const score = await env.DB.prepare(
+      'SELECT score_version, digital_deficit_score FROM lead_scores WHERE business_id = ? ORDER BY score_version DESC LIMIT 1',
+    ).bind(businessId).first();
+    expect(score).toEqual({ score_version: 1, digital_deficit_score: null });
   });
 
   it('rejects a limit above the cap', async () => {
