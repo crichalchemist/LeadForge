@@ -107,10 +107,21 @@ Test helpers in `api/test/helpers.ts` bind fixed column lists: `createBusiness` 
 
 ## Data sources
 
-Google Places is unavailable indefinitely: the Cloud project's billing account is broken and
-wants a prepayment the owner has not made. Measured alternatives, 2026-09-15 — OpenStreetMap via
-Nominatim matched 0 of 5 real 60619 businesses and Overpass failed on three mirrors across two
-sessions; Yelp Fusion's free tier has ended (~$8/1,000 calls).
+**Google Places works again as of 2026-09-25**, correcting this file's previous "unavailable
+indefinitely". Billing is enabled on project `leadforge-509800`, the legacy
+`places-backend.googleapis.com` (the surface `api/src/scrapers/google-places.ts` actually calls)
+enabled without refusal, and a key restricted to that one service returns `status: OK` on both
+`findplacefromtext` and `details` with ratings included. `buildSignedUrl` signs only when
+`GOOGLE_PLACES_API_SECRET` is set, so no Maps signing secret is needed. The key is in the
+gitignored `.env` only — not a `wrangler secret` — and `discovery.ts` still calls Foursquare, not
+Google (ADR 029). Google is the only measured source carrying `rating` and `user_ratings_total`.
+Each business costs **two** calls (Find Place then Details), and Details requesting
+`rating`/`reviews` bills a dearer SKU than the Basic fields; per-SKU prices were not verified, so
+check the console before pointing a run at it.
+
+Measured alternatives, 2026-09-15 — OpenStreetMap via Nominatim matched 0 of 5 real 60619
+businesses and Overpass failed on three mirrors across two sessions; Yelp Fusion's free tier has
+ended (~$8/1,000 calls).
 
 Foursquare is the enrichment source (ADR 029). `GET https://places-api.foursquare.com/places/search`,
 `Authorization: Bearer <key>` — a **Service Key** from the Developer Console, not a legacy `fsq3…`
@@ -157,6 +168,36 @@ Two blockers before Overture could be adopted, neither yet resolved: only **4 of
 matches carry a Foursquare source id, so `fsq_place_id` would be NULL for nearly every row and the
 dedup key must become Overture's GERS `id` (a migration 0003) — and GERS id stability across
 monthly releases is unverified, which is the same duplicate-rows trap in a new costume.
+
+**Three-way head-to-head, 2026-09-25** — `scripts/fetch_places_candidates.mjs` then
+`scripts/measure_places_sources.py`. One name scorer, one candidate corpus, one 200 m radius, the
+same 157 licensed `hair service` businesses in 60619:
+
+| source | returned | name-corroborated | false | website | phone | social | rating | reviews ≥5 |
+|---|---|---|---|---|---|---|---|---|
+| Google | 102 | **74** (47%) | 28 | 23 | 62 | — | **71** | **60** |
+| Foursquare | 140 | 56 (36%) | **84** | 17 | 44 | 4 | 0 | 0 |
+| Overture | 157 | 71 (45%) | n/a | **52** | 70 | **57** | 0 | 0 |
+
+Overture's "returned" is 157 because every business has *some* POI within 200 m, and its matching
+is exhaustive and offline, so it has no false-match count comparable to a single nearest API
+result. Google's `locationbias` is a bias and not a filter, so the 200 m cut is applied at scoring
+time from a recorded distance; unrestricted, Google returns 144 and corroborates 86 but at 58 false.
+
+**Foursquare is dominated on every axis and carries no field the others lack**: fewer corroborated
+matches than either (56), the most false matches by far (84), a third of Overture's website
+coverage, and no rating. It adds only 12 businesses over Google ∪ Overture. Unions:
+Google ∪ Overture **89/157** (57%), all three 101 (64%). Overture covers 15 businesses Google
+misses; Google covers 18 Overture misses; Google supplies a rating for 56 of Overture's 71.
+Website coverage is Overture's strength and Google's weakness — 52 against 23, 37 of them
+Overture-only — which matters because the website term is 30 of the deficit's points.
+
+Caveat on the numbers: IDF is computed over the candidate corpus, so the bbox margin shifts every
+source's score together. This run used a margin giving 9,352 POIs, a superset of the 8,470 in the
+earlier Overture-only run, on which Overture re-measures at 71 rather than that run's 74 — a
+corpus difference, not new information. The 12 lowest-scoring accepted Google pairs were
+hand-audited and all 12 read correct; `REGINA AFRICAN IMPACT → Regina African Braiding` (6 m
+apart) is the one genuinely uncertain.
 
 `hf://datasets/foursquare/fsq-os-places` (Apache-2.0) remains gated: `gated: auto`, token scoped
 correctly (`canReadGatedRepos: true`), but the account is not on the authorized list and the access

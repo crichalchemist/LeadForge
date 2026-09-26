@@ -261,3 +261,74 @@ compose: Overture first at zero marginal cost, the API only for what Overture mi
 instead of 157 — with name corroboration applied to the API response before storing it, so the
 83 false matches are discarded rather than written. Not designed, not built; recorded because
 the measurement points at it.
+
+## Third correction (2026-09-25) — Google Places came back, and it changes the answer
+
+This ADR's premise was that Google Places was gone for good: "the Cloud project's billing account
+is broken and wants a prepayment the owner has not made." That is no longer true. Billing is
+enabled on project `leadforge-509800`, the legacy `places-backend.googleapis.com` — the surface
+`api/src/scrapers/google-places.ts` already calls — enables without refusal, and a key restricted
+to that one service returns `status: OK` on both `findplacefromtext` and `details`.
+
+The premise mattered more than the choice it produced. Foursquare was picked because it was the
+best *available* source, not the best source.
+
+### Three-way, one scorer, the same 157
+
+`scripts/fetch_places_candidates.mjs` + `scripts/measure_places_sources.py`. Same 157 licensed
+`hair service` businesses in 60619, same 200 m radius, same name scorer (IDF-weighted fuzzy token
+containment with a head-token gate), same candidate corpus for the IDF weights.
+
+| source | returned | name-corroborated | false | website | phone | social | rating | reviews ≥5 |
+|---|---|---|---|---|---|---|---|---|
+| Google | 102 | 74 (47%) | 28 | 23 | 62 | — | 71 | 60 |
+| Foursquare | 140 | 56 (36%) | 84 | 17 | 44 | 4 | 0 | 0 |
+| Overture | 157 | 71 (45%) | n/a | 52 | 70 | 57 | 0 | 0 |
+
+**Foursquare is dominated.** It corroborates fewer businesses than either alternative, produces by
+far the most false matches, carries a third of Overture's website coverage, and has no field the
+others lack — its rating and review count are the entitlement-denied ones that 429 the whole
+request. Over Google ∪ Overture it adds 12 businesses, and to get them the pipeline would filter
+84 false matches. The decision this ADR records should not survive on the evidence that replaced
+its premise.
+
+**The two survivors are complementary, not ranked.** Google ∪ Overture reaches 89/157 (57%);
+Overture covers 15 businesses Google misses and Google covers 18 of Overture's. They are strong in
+different fields: Overture supplies website for 52 against Google's 23 (37 Overture-only), which
+matters because the website term is 30 of the digital deficit's points; Google supplies a rating
+for 71, including 56 of Overture's own 71 matches, which is the `computeViability` block that no
+free source restores.
+
+### What this does and does not settle
+
+It settles that Foursquare should not remain the enrichment source. It does not settle what
+replaces it, because that turns on cost: Overture is free and unlimited with matching done offline,
+whereas Google bills **two** calls per business (Find Place, then Details), and Details requesting
+`rating`/`reviews` bills a dearer SKU than the Basic fields. Per-SKU prices were not verified here;
+the measurement itself cost 307 calls.
+
+The shape the evidence points at — recorded, not built — is Overture for identity, website and
+social at zero marginal cost, with Google called only for rating and review count on businesses
+already matched, plus the 18 Overture misses. That is ~89 Google businesses rather than 157, and
+name corroboration applied to the response before storing, so false matches are discarded rather
+than written.
+
+### Blockers unchanged by this
+
+Adopting Overture for identity still needs the dedup key to become Overture's GERS `id`, because
+only 4 of its matches carry a Foursquare source id and `fsq_place_id` would be NULL for nearly
+every row — the documented duplicate-on-rerun trap. GERS stability across monthly releases remains
+unverified. Adopting Google for ratings needs no migration: `businesses.google_place_id` still
+exists, retained but dead.
+
+### Provenance of the numbers
+
+IDF is computed over the candidate corpus, so the bbox margin shifts every source's score
+together. This run's margin yields 9,352 POIs, a superset of the 8,470 in the earlier
+Overture-only run; on it Overture re-measures at 71 rather than 74. That is a corpus difference,
+not new information, and the earlier run's exact box could not be reproduced. Google's
+`locationbias` is a bias and not a filter, so the 200 m cut is applied at scoring time from a
+recorded distance; unrestricted, Google returns 144 and corroborates 86 at 58 false. The 12
+lowest-scoring *accepted* Google pairs were hand-audited — the tail where both earlier scorer bugs
+were caught — and all 12 read correct, with `REGINA AFRICAN IMPACT → Regina African Braiding`
+(6 m apart, the licence's distinctive word absent from Google's name) the one genuinely uncertain.
