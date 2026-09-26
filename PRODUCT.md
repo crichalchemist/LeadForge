@@ -72,9 +72,12 @@ Three mechanisms, together:
 
 **Working today:** licence discovery with dedup on the licence account; name-corroborated Google
 Places enrichment; the Overture overlay; NOF corridor membership decided at ingest; versioned score
-rows that are never overwritten; the CRM pages (dashboard, ranked leads with zip and niche filters,
-lead detail, outreach board, grant board with document checklist and financial calculator,
-reports); and the post-call sentiment consumer.
+rows that are never overwritten; and the CRM pages (dashboard, ranked leads with zip and niche
+filters, lead detail, outreach board, grant board with document checklist and financial
+calculator, reports).
+
+**Deployed but never exercised:** the post-call sentiment consumer. It is live on the Worker, but it
+has never received a message, because no call has ever been placed.
 
 **Designed but not working. Never describe these as live:**
 
@@ -129,7 +132,7 @@ Real, citable:
   businesses); corridor discrimination (60619 at 76% and 60620 at 85% on-corridor, 60614 and 60611
   at 0%).
 - 30 ADRs in `docs/vault/`; specs and plans in `docs/superpowers/`.
-- Test suites (158 pytest, 601 vitest), enforced by CI on every push.
+- Test suites for both backends, enforced by CI on every push.
 
 Absent. Future work must not fabricate any of these:
 
