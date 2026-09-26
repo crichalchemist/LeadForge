@@ -38,6 +38,27 @@ interface PlacesEnvelope {
 }
 
 /**
+ * Radius of the Find Place location bias, and the cut the caller applies to the candidate that
+ * comes back. `locationbias` is a *bias*, not a filter: Google will answer outside it rather than
+ * return nothing. Measured on 157 licensed 60619 businesses, honouring it as a hard cut leaves 102
+ * candidates of which 77 corroborate, where ignoring it leaves 144 of which only 86 do — so the
+ * extra reach costs more false matches than it wins true ones (ADR 030).
+ */
+export const MATCH_RADIUS_M = 200;
+
+/** Haversine metres. D1 has no spatial functions and the Worker has no PostGIS, so this is it. */
+export function distanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000;
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLon = (lon2 - lon1) * rad;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+/**
  * Google answers a denied key, an exhausted quota, and a malformed request with HTTP 200 and a
  * `status` field, so `raise_for_status` never fires and the payload simply lacks its results key.
  * Without this check every such reply reads as "no such business" and the pipeline stores a
@@ -121,6 +142,10 @@ export async function findPlace(
   businessName: string,
   address: string,
   health?: PlacesHealth,
+  // Fifth rather than fourth so the existing positional callers keep working. Omitted when the city
+  // failed to geocode the licence (~8% of rows), in which case the caller has no coordinates to bias
+  // towards and must rely on name corroboration alone.
+  location?: { latitude: number | null; longitude: number | null },
 ): Promise<PlaceCandidate | null> {
   if (!env.GOOGLE_PLACES_API_KEY) {
     console.warn('google_places_api_key_not_set');
@@ -131,11 +156,15 @@ export async function findPlace(
     return null;
   }
 
-  const url = await buildSignedUrl(env, '/maps/api/place/findplacefromtext/json', {
+  const params: Record<string, string> = {
     input: `${businessName} ${address}`,
     inputtype: 'textquery',
     fields: FIND_PLACE_FIELDS,
-  });
+  };
+  if (location && location.latitude !== null && location.longitude !== null) {
+    params.locationbias = `circle:${MATCH_RADIUS_M}@${location.latitude},${location.longitude}`;
+  }
+  const url = await buildSignedUrl(env, '/maps/api/place/findplacefromtext/json', params);
 
   const data = await fetchJson<{ candidates?: PlaceCandidate[] } & PlacesEnvelope>(url);
   if (placesUnavailable(data, health, { name: businessName })) return null;

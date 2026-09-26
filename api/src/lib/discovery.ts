@@ -1,14 +1,18 @@
 // =py pipeline/discovery
 import { locateCorridor } from './corridors';
 import { computeDigitalDeficit } from './scoring';
+import { nameCorroborates } from './name-match';
 import {
+  MATCH_RADIUS_M,
+  distanceMeters,
   extractEnrichment,
   findPlace,
-  newFoursquareHealth,
-  type FoursquareEnv,
-  type FoursquareEnrichment,
-  type FoursquareHealth,
-} from '../scrapers/foursquare';
+  getPlaceDetails,
+  newPlacesHealth,
+  type PlaceEnrichment,
+  type PlacesEnv,
+  type PlacesHealth,
+} from '../scrapers/google-places';
 import {
   dedupeLicenseRows,
   normalizeResult,
@@ -19,7 +23,7 @@ import {
 } from '../scrapers/socrata';
 import { nowIso } from '../db/serialize';
 
-export type DiscoveryEnv = { DB: D1Database } & SocrataEnv & FoursquareEnv;
+export type DiscoveryEnv = { DB: D1Database } & SocrataEnv & PlacesEnv;
 
 // Licence rows per business in the result window. Measured against the live dataset, a
 // barbershop/salon query averages 3.0 rows per business (508 rows, 168 businesses in 60619),
@@ -36,13 +40,13 @@ export interface DiscoveredBusiness {
   nof_corridor: string | null;
 }
 
-// =py run_discovery — Socrata → Foursquare → score → persist
+// =py run_discovery — Socrata → Google Places → score → persist (ADR 030)
 export async function runDiscovery(
   env: DiscoveryEnv,
   zipCode: string,
   niche: Niche,
   limit?: number,
-  health?: FoursquareHealth,
+  health?: PlacesHealth,
 ): Promise<DiscoveredBusiness[]> {
   console.log('pipeline_start', { zip_code: zipCode, niche, limit });
 
@@ -81,12 +85,12 @@ export async function runDiscovery(
   return persisted;
 }
 
-// =py _enrich_and_persist — enrich one business via Foursquare, dedup, score, and persist
+// =py _enrich_and_persist — dedup, enrich one business via Google Places, score, and persist
 async function enrichAndPersist(
   env: DiscoveryEnv,
   bizData: NormalizedBusiness,
   niche: Niche,
-  health?: FoursquareHealth,
+  health?: PlacesHealth,
 ): Promise<DiscoveredBusiness | null> {
   const name = bizData.name.trim();
   if (!name) return null;
@@ -94,37 +98,69 @@ async function enrichAndPersist(
   const address = bizData.address;
   const zipCode = bizData.zip_code;
 
-  let enrichment: Partial<FoursquareEnrichment> = {};
-  // Tally this business's lookups separately, then fold into the run's. Whether *this* business
-  // was actually looked up decides whether its deficit is a measurement or a guess.
-  const lookups = newFoursquareHealth();
-  const place = await findPlace(
-    env,
-    { name, address, zip_code: zipCode, latitude: bizData.latitude, longitude: bizData.longitude },
-    lookups,
-  );
-
-  if (place) {
-    const placeId = place.fsq_place_id;
-    if (placeId) {
-      // Dedup check: does a business with this fsq_place_id already exist?
-      const existing = await env.DB.prepare('SELECT id FROM businesses WHERE fsq_place_id = ?').bind(placeId).first();
-      if (existing) {
-        console.log('dedup_fsq_place_id', { name, place_id: placeId });
-        return null;
-      }
+  // Dedup FIRST, before anything billable. Identity is the city's licence account (ADR 030), which
+  // arrives with the Socrata row, so a business already stored costs zero Places calls on a re-run.
+  // Under the previous design the key came out of the lookup response, so the call had to be paid
+  // for before the duplicate could be recognised.
+  if (bizData.account_number) {
+    const existing = await env.DB.prepare(
+      'SELECT id FROM businesses WHERE account_number = ? AND site_number IS ?',
+    )
+      .bind(bizData.account_number, bizData.site_number)
+      .first();
+    if (existing) {
+      console.log('dedup_licence_account', {
+        name,
+        account_number: bizData.account_number,
+        site_number: bizData.site_number,
+      });
+      return null;
     }
-    // The search response already carries every field a details call would add, so there is no
-    // second lookup: where Google cost two subrequests per business, Foursquare costs one.
-    enrichment = extractEnrichment(place);
   } else {
-    // Fallback dedup: name + zip
+    // Measured 157/157 licences carry an account number, so this is a guard, not a path with data
+    // behind it. Name+zip is what the licence dedup already falls back to in scrapers/socrata.ts.
     const existing = await env.DB.prepare('SELECT id FROM businesses WHERE name = ? AND zip_code = ?')
       .bind(name, zipCode)
       .first();
     if (existing) {
       console.log('dedup_name_zip', { name, zip_code: zipCode });
       return null;
+    }
+  }
+
+  let enrichment: Partial<PlaceEnrichment> = {};
+  // Tally this business's lookups separately, then fold into the run's. Whether *this* business
+  // was actually looked up decides whether its deficit is a measurement or a guess.
+  const lookups = newPlacesHealth();
+  const candidate = await findPlace(env, name, address, lookups, {
+    latitude: bizData.latitude,
+    longitude: bizData.longitude,
+  });
+
+  // Corroborate the Find Place answer BEFORE paying for Details. Find Place already returns the name
+  // and the geometry, which is everything the check needs, and Details is the call that carries the
+  // dear SKU. Measured: 102 candidates inside the radius, 77 of them the business actually asked
+  // for — so this skips 25 Details calls per 157 businesses and, more importantly, keeps the other
+  // business's website out of this business's row. A false match is worse than no match: it flips
+  // the deficit's 30-point website term on evidence belonging to someone else.
+  if (candidate) {
+    const location = candidate.geometry?.location;
+    const far =
+      bizData.latitude !== null &&
+      bizData.longitude !== null &&
+      location?.lat !== undefined &&
+      location?.lng !== undefined &&
+      distanceMeters(bizData.latitude, bizData.longitude, location.lat, location.lng) > MATCH_RADIUS_M;
+
+    if (far) {
+      // locationbias is a bias, not a filter, so Google answers outside the circle rather than
+      // returning nothing. The cut is ours to enforce.
+      console.log('place_rejected_out_of_radius', { name, candidate: candidate.name ?? null });
+    } else if (!nameCorroborates(name, candidate.name ?? '')) {
+      console.log('place_rejected_name', { name, candidate: candidate.name ?? null });
+    } else if (candidate.place_id) {
+      const details = await getPlaceDetails(env, candidate.place_id, lookups);
+      if (details) enrichment = extractEnrichment(details);
     }
   }
 
@@ -138,12 +174,28 @@ async function enrichAndPersist(
   const scoreId = crypto.randomUUID();
 
   const hasWebsite = enrichment.has_website ?? false;
-  // null, not 0: the free Foursquare plan does not entitle `stats`, and computeDigitalDeficit
-  // charges +10 for a zero review count while skipping the term entirely on null.
+  // null when no corroborated match was found, 0 when Google returned a place that genuinely has no
+  // reviews. The distinction is load-bearing: computeDigitalDeficit charges +10 for a zero review
+  // count and skips the term entirely on null, and only a business we actually looked up has earned
+  // that charge. Under Foursquare this always had to be null because the free plan never entitled
+  // `stats` at all; Google's Details response makes it a real measurement (ADR 030).
   const googleReviewCount = enrichment.google_review_count ?? null;
   const hasGbp = enrichment.has_google_business_profile ?? false;
-  const hasFacebook = enrichment.has_facebook_page ?? false;
-  const hasInstagram = enrichment.has_instagram ?? false;
+  // 0 here means "this source does not measure social presence", NOT "this business has none".
+  // Google returns no social fields at all. The columns are INTEGER NOT NULL DEFAULT 0 (mirroring the
+  // SQLAlchemy model per ADR 026), so they cannot express "unknown", and making them nullable would
+  // fork the schema from Python for no gain: computeDigitalDeficit tests them for falsiness, so null
+  // and 0 both charge the +12 "no social presence" term, and that function is pinned to Python by
+  // scoring-parity.test.ts.
+  //
+  // The consequence is worth naming rather than burying. Foursquare's `social_media` made these real
+  // signal; this loses it again until Overture is composed in, where 60 of 74 matches carry a social
+  // link (ADR 030). Until then every business pays the same +12, which leaves *ranking* intact — it
+  // is a uniform constant — but inflates every absolute deficit by 12 and can trip
+  // computeNofEligibility's `deficit > 60` property-need bonus on no evidence. That is the strongest
+  // reason to land the Overture slice promptly.
+  const hasFacebook = false;
+  const hasInstagram = false;
 
   // A failed lookup is not a finding. With the source unavailable every input below is absent and
   // computeDigitalDeficit returns the same constant for every business on earth — one that would
@@ -181,9 +233,9 @@ async function enrichAndPersist(
   await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO businesses (id, name, address, zip_code, phone, niche, license_number, license_status,
-         license_issue_date, fsq_place_id, latitude, longitude, in_nof_corridor, nof_corridor_name,
-         created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         license_issue_date, account_number, site_number, google_place_id, latitude, longitude,
+         in_nof_corridor, nof_corridor_name, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
       businessId,
       // Python passes enrichment.get("name", name), which yields None when Google returns a null
@@ -197,7 +249,11 @@ async function enrichAndPersist(
       bizData.license_status,
       // Python's normalizer extracts this and then discovery drops it; the column exists, so it is stored.
       bizData.license_issue_date ? bizData.license_issue_date.slice(0, 10) : null,
-      enrichment.fsq_place_id ?? null,
+      // Identity (ADR 030). Stored on every row so a re-run dedups before it pays for a lookup.
+      bizData.account_number,
+      bizData.site_number,
+      // An enrichment attribute, not identity — which is why a NULL here no longer breaks dedup.
+      enrichment.google_place_id ?? null,
       // The city geocodes the licence address, so its coordinates lead and Google's only fill gaps.
       latitude,
       longitude,

@@ -1,9 +1,13 @@
-// Mirrors src/leadforge/pipeline/discovery.py: Socrata → Foursquare → dedup → score → persist.
-// Python enriches from Google Places; Workers diverges because that account is dead indefinitely.
+// Mirrors src/leadforge/pipeline/discovery.py: Socrata → Google Places → dedup → score → persist.
+//
+// Two deliberate divergences from Python, both ADR 030. Identity is the city's licence account, so
+// dedup happens before anything billable rather than out of the lookup response; and the Find Place
+// answer must corroborate the licence name before the Details call is paid for, because Google
+// returns the nearest candidate whatever its name.
 import { env } from 'cloudflare:workers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runDiscovery, type DiscoveryEnv } from '../src/lib/discovery';
-import { newFoursquareHealth } from '../src/scrapers/foursquare';
+import { newPlacesHealth } from '../src/scrapers/google-places';
 import { accessToken, adminUser, api, createBusiness, jsonResponse, resetDb, stubFetch, viewerUser } from './helpers';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -26,43 +30,58 @@ const SOCRATA_ROW = {
   business_activity: 'Barber Shop',
 };
 
-// One search response carries everything Google needed a second details call for.
-const FSQ_SEARCH = {
-  results: [
+// Find Place carries only the Basic fields — which is exactly enough to corroborate the name and
+// apply the radius cut before paying for Details.
+const FIND_PLACE = {
+  status: 'OK',
+  candidates: [
     {
-      fsq_place_id: 'fsq_sample_place_id_123',
+      place_id: 'ChIJ_sample_place_id_123',
       name: "John's Barbershop",
-      location: { formatted_address: '123 E 75th St, Chicago, IL 60619' },
-      latitude: 41.758,
-      longitude: -87.6055,
-      tel: '(773) 555-1234',
-      website: 'http://johnsbarbershop.com',
-      rating: 9.0,
-      stats: { total_ratings: 47 },
-      social_media: { facebook_id: '1234567890' },
+      formatted_address: '123 E 75th St, Chicago, IL 60619',
+      geometry: { location: { lat: 41.7515, lng: -87.6044 } },
     },
   ],
 };
 
-const keyed: DiscoveryEnv = { DB: env.DB, FOURSQUARE_API_KEY: 'TEST_KEY' };
+const DETAILS = {
+  status: 'OK',
+  result: {
+    place_id: 'ChIJ_sample_place_id_123',
+    name: "John's Barbershop",
+    formatted_address: '123 E 75th St, Chicago, IL 60619',
+    geometry: { location: { lat: 41.758, lng: -87.6055 } },
+    formatted_phone_number: '(773) 555-1234',
+    website: 'http://johnsbarbershop.com',
+    rating: 4.5,
+    user_ratings_total: 47,
+    business_status: 'OPERATIONAL',
+  },
+};
+
+const keyed: DiscoveryEnv = { DB: env.DB, GOOGLE_PLACES_API_KEY: 'TEST_KEY' };
 const keyless: DiscoveryEnv = { DB: env.DB };
 
-function routeFoursquare(rows: unknown[] = [SOCRATA_ROW], fsq: unknown = FSQ_SEARCH) {
+type Stub = unknown | (() => Response);
+function routeGoogle(rows: unknown[] = [SOCRATA_ROW], find: Stub = FIND_PLACE, details: Stub = DETAILS) {
+  const answer = (stub: Stub) => (typeof stub === 'function' ? (stub as () => Response)() : jsonResponse(stub));
   return stubFetch((url) => {
     if (url.startsWith('https://data.cityofchicago.org')) return jsonResponse(rows);
-    if (url.startsWith('https://places-api.foursquare.com')) {
-      return typeof fsq === 'function' ? (fsq as () => Response)() : jsonResponse(fsq);
-    }
+    if (url.includes('/place/findplacefromtext/json')) return answer(find);
+    if (url.includes('/place/details/json')) return answer(details);
     throw new Error(`unrouted request: ${url}`);
   });
 }
+
+const findCalls = (calls: string[]) => calls.filter((u) => u.includes('findplacefromtext'));
+const detailCalls = (calls: string[]) => calls.filter((u) => u.includes('/place/details/'));
 
 const businessRow = (id: string) =>
   env.DB.prepare('SELECT * FROM businesses WHERE id = ?').bind(id).first<Record<string, unknown>>();
 
 describe('runDiscovery', () => {
   it('persists the business, its digital presence and a first score', async () => {
-    routeFoursquare();
+    routeGoogle();
     const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
     expect(discovered).toHaveLength(1);
 
@@ -76,8 +95,12 @@ describe('runDiscovery', () => {
       license_number: '2874631',
       license_status: 'active',
       license_issue_date: '2019-05-15',
-      fsq_place_id: 'fsq_sample_place_id_123',
-      // Socrata's own geocode wins over the Foursquare fixture's 41.758/-87.6055
+      // Identity, stored so the next run dedups before it pays for a lookup
+      account_number: '478849',
+      site_number: '1',
+      // An enrichment attribute now, not identity
+      google_place_id: 'ChIJ_sample_place_id_123',
+      // Socrata's own geocode wins over the Details fixture's 41.758/-87.6055
       latitude: 41.7514067334,
       longitude: -87.6043524136,
     });
@@ -90,76 +113,185 @@ describe('runDiscovery', () => {
       website_url: 'http://johnsbarbershop.com',
       has_google_business_profile: 1,
       google_review_count: 47,
-      // Foursquare's 9.0 on a 0-10 scale, stored on the 0-5 scale the scorers read
+      // Google rates 0.0-5.0 already, so unlike Foursquare's 0.0-10.0 nothing is halved here
       google_avg_rating: 4.5,
-      has_facebook_page: 1,
+      // 0 means "Google does not report social presence", not "this shop has none" — see ADR 030
+      has_facebook_page: 0,
       has_instagram: 0,
     });
 
-    // website (0) + GBP (0) + 47 reviews (0) + has a Facebook page (0) + no ads (7) = 7.
-    // The Google port scored this same business 19: it hardcoded both social flags to 0 and so
-    // charged every business on earth the same 12-point social penalty.
+    // website (0) + GBP (0) + 47 reviews (0) + no social signal (12) + no ads (7) = 19.
+    // Foursquare scored this same business 7, because social_media made those flags real signal.
+    // The 12 is the cost of the Google-only interval and it lands on every business equally.
     const score = await env.DB.prepare('SELECT * FROM lead_scores WHERE business_id = ?')
       .bind(discovered[0].id)
       .first<Record<string, unknown>>();
     expect(score).toMatchObject({
       score_version: 1,
-      digital_deficit_score: 7,
-      composite_acquisition_score: 7,
+      digital_deficit_score: 19,
+      composite_acquisition_score: 19,
     });
   });
 
-  // The free Foursquare plan returns 429 limit=0 for `stats`, so a real free-tier response has no
-  // review count at all. Storing 0 would charge every business computeDigitalDeficit's +10 "zero
-  // reviews" penalty — a constant, the same bug as the 74. Null makes the scorer skip the term.
-  it('records no review count rather than zero when the plan cannot see reviews', async () => {
-    routeFoursquare([SOCRATA_ROW], {
-      results: [
+  it('charges the zero-review penalty only for a business it actually looked up', async () => {
+    // Google omits user_ratings_total for a place with no reviews, and having called Details we know
+    // that is a measurement rather than an absence — so +10 is earned here, unlike under Foursquare
+    // where `stats` was never entitled and the term had to be skipped for everyone.
+    routeGoogle([SOCRATA_ROW], FIND_PLACE, {
+      status: 'OK',
+      result: { place_id: 'ChIJ_sample_place_id_123', name: "John's Barbershop", website: 'http://x.com' },
+    });
+
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    const presence = await env.DB.prepare(
+      'SELECT google_review_count, google_avg_rating FROM digital_presences WHERE business_id = ?',
+    )
+      .bind(discovered[0].id)
+      .first();
+    expect(presence).toEqual({ google_review_count: 0, google_avg_rating: null });
+    // website (0) + GBP (0) + zero reviews (10) + no social (12) + no ads (7) = 29
+    expect(discovered[0].digital_deficit_score).toBe(29);
+  });
+});
+
+describe('corroboration before the Details call', () => {
+  it('does not pay for Details when the nearest place is a different business', async () => {
+    // The failure mode this prevents: Google answers a text query with whatever is closest, so a
+    // law firm at the salon's address would otherwise have its website imported as the salon's and
+    // flip the deficit's 30-point website term on another business's evidence.
+    const calls = routeGoogle([SOCRATA_ROW], {
+      status: 'OK',
+      candidates: [
         {
-          fsq_place_id: 'fsq_free_plan',
-          name: "John's Barbershop",
-          location: { formatted_address: '123 E 75th St, Chicago, IL 60619' },
-          website: 'http://johnsbarbershop.com',
-          // no `stats`, no `rating`, no `social_media` — exactly what the entitled field set returns
+          place_id: 'ChIJ_unrelated',
+          name: 'Goldberg Weisman Cairo Law Offices',
+          geometry: { location: { lat: 41.7515, lng: -87.6044 } },
         },
       ],
     });
 
     const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
 
-    const presence = await env.DB.prepare(
-      'SELECT google_review_count, google_avg_rating FROM digital_presences WHERE business_id = ?',
-    )
-      .bind(discovered[0].id)
-      .first();
-    expect(presence).toEqual({ google_review_count: null, google_avg_rating: null });
-
-    // website (0) + GBP (0) + reviews SKIPPED + no social (12) + no ads (7) = 19.
-    // A zero review count instead of null would make this 29.
-    expect(discovered[0].digital_deficit_score).toBe(19);
+    expect(findCalls(calls)).toHaveLength(1);
+    expect(detailCalls(calls)).toHaveLength(0);
+    const business = await businessRow(discovered[0].id);
+    expect(business).toMatchObject({ google_place_id: null, name: "John's Barbershop" });
+    // Scored as a genuine no-match: website (30) + GBP (15) + no social (12) + no ads (7) = 64
+    expect(discovered[0].digital_deficit_score).toBe(64);
   });
 
-  it('skips a business already stored under the same fsq_place_id', async () => {
-    await env.DB.prepare('INSERT INTO businesses (id, name, zip_code, niche, fsq_place_id) VALUES (?, ?, ?, ?, ?)')
-      .bind(crypto.randomUUID(), 'Existing', '60619', 'barbershops', 'fsq_sample_place_id_123')
+  it('does not pay for Details when the candidate is outside the radius', async () => {
+    // locationbias is a bias, not a filter: Google answers outside the circle rather than returning
+    // nothing, so the cut has to be enforced here. This candidate carries the right name but sits
+    // in the Loop, ~15 km from the licence address.
+    const calls = routeGoogle([SOCRATA_ROW], {
+      status: 'OK',
+      candidates: [
+        {
+          place_id: 'ChIJ_far_away',
+          name: "John's Barbershop",
+          geometry: { location: { lat: 41.8789, lng: -87.6359 } },
+        },
+      ],
+    });
+
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+
+    expect(detailCalls(calls)).toHaveLength(0);
+    expect(discovered[0].digital_deficit_score).toBe(64);
+  });
+
+  it('accepts a candidate whose name carries extra words', async () => {
+    const calls = routeGoogle([SOCRATA_ROW], {
+      status: 'OK',
+      candidates: [
+        {
+          place_id: 'ChIJ_sample_place_id_123',
+          name: "John's Barbershop and Beauty Supply",
+          geometry: { location: { lat: 41.7515, lng: -87.6044 } },
+        },
+      ],
+    });
+
+    await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(detailCalls(calls)).toHaveLength(1);
+  });
+
+  it('sends the licence coordinates as a location bias', async () => {
+    const calls = routeGoogle();
+    await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(findCalls(calls)[0]).toContain('locationbias=circle%3A200%4041.7514067334%2C-87.6043524136');
+  });
+
+  it('still looks up a business the city failed to geocode', async () => {
+    // ~8% of licence rows have no coordinates. Without them there is no bias to send and no distance
+    // to check, so name corroboration carries the decision alone rather than the business being skipped.
+    const calls = routeGoogle([{ ...SOCRATA_ROW, latitude: undefined, longitude: undefined }]);
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+
+    expect(findCalls(calls)[0]).not.toContain('locationbias');
+    expect(detailCalls(calls)).toHaveLength(1);
+    expect(discovered[0].digital_deficit_score).toBe(19);
+  });
+});
+
+describe('dedup on the licence account', () => {
+  it('skips a business already stored under the same licence account', async () => {
+    await env.DB.prepare(
+      'INSERT INTO businesses (id, name, zip_code, niche, account_number, site_number) VALUES (?, ?, ?, ?, ?, ?)',
+    )
+      .bind(crypto.randomUUID(), 'Existing', '60619', 'barbershops', '478849', '1')
       .run();
-    routeFoursquare();
+    routeGoogle();
     expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toHaveLength(0);
     const { count } = (await env.DB.prepare('SELECT COUNT(*) AS count FROM businesses').first<{ count: number }>())!;
     expect(count).toBe(1);
   });
 
-  it('falls back to name and zip dedup when Foursquare finds nothing', async () => {
-    await createBusiness({ name: "John's Barbershop", zip_code: '60619' });
-    routeFoursquare([SOCRATA_ROW], { results: [] });
-    expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toHaveLength(0);
+  it('recognises the duplicate before spending a single Places call', async () => {
+    // The point of moving identity off the place id. Under the old key the lookup had to be paid for
+    // before the response could reveal that the business was already stored.
+    await env.DB.prepare(
+      'INSERT INTO businesses (id, name, zip_code, niche, account_number, site_number) VALUES (?, ?, ?, ?, ?, ?)',
+    )
+      .bind(crypto.randomUUID(), 'Existing', '60619', 'barbershops', '478849', '1')
+      .run();
+    const calls = routeGoogle();
+    await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(findCalls(calls)).toHaveLength(0);
+    expect(detailCalls(calls)).toHaveLength(0);
   });
 
+  it('dedups a business first stored without any place id, rather than duplicating it', async () => {
+    // The trap ADR 030 exists to close. Dedup on a source id put a NULL in a UNIQUE index for every
+    // business whose lookup missed, and NULLs stay distinct — so the next run inserted the business a
+    // second time and nothing backfilled the first copy. The licence account is never NULL.
+    routeGoogle();
+    expect(await runDiscovery(keyless, '60619', 'barbershops', 5)).toHaveLength(1);
+    expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toHaveLength(0);
+
+    const rows = await env.DB.prepare('SELECT google_place_id FROM businesses WHERE name = ?')
+      .bind("John's Barbershop")
+      .all<{ google_place_id: string | null }>();
+    expect(rows.results).toHaveLength(1);
+    // Still unenriched: dedup protects identity, it does not backfill. lib/enrichment.ts has no
+    // caller, so the first run's null place id persists until one exists.
+    expect(rows.results[0].google_place_id).toBeNull();
+  });
+
+  it('falls back to name and zip when a licence carries no account number', async () => {
+    await createBusiness({ name: "John's Barbershop", zip_code: '60619' });
+    routeGoogle([{ ...SOCRATA_ROW, account_number: undefined }]);
+    expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toHaveLength(0);
+  });
+});
+
+describe('runDiscovery, unchanged behaviour', () => {
   it('stores no deficit at all for a business it never looked up', async () => {
-    const calls = routeFoursquare();
+    const calls = routeGoogle();
     const discovered = await runDiscovery(keyless, '60619', 'barbershops', 5);
 
-    expect(calls.some((url) => url.includes('places-api.foursquare.com'))).toBe(false);
+    expect(findCalls(calls)).toHaveLength(0);
     // Scoring this 74 (see scoring.test.ts) would put a constant in lead_scores that looks like a
     // measurement, ranks nothing, and earns the business a NOF property-need bonus on no evidence.
     expect(discovered[0].digital_deficit_score).toBeNull();
@@ -174,7 +306,7 @@ describe('runDiscovery', () => {
     expect(business).toMatchObject({
       name: "John's Barbershop",
       address: '123 E 75TH ST',
-      fsq_place_id: null,
+      google_place_id: null,
       // Coordinates survive with no API key at all, because the city supplies them
       latitude: 41.7514067334,
       longitude: -87.6043524136,
@@ -182,17 +314,16 @@ describe('runDiscovery', () => {
   });
 
   it('records corridor membership at ingest, which Python never did', async () => {
-    routeFoursquare();
+    routeGoogle();
     const discovered = await runDiscovery(keyless, '60619', 'barbershops', 5);
 
-    // 41.7514/-87.6044 is the city's own geocode for this licence, and it falls on a corridor
     expect(discovered[0].nof_corridor).toMatch(/corridor \d+$/);
     const business = await businessRow(discovered[0].id);
     expect(business).toMatchObject({ in_nof_corridor: 1, nof_corridor_name: discovered[0].nof_corridor });
   });
 
   it('leaves a business off-corridor when its coordinates are downtown', async () => {
-    routeFoursquare([{ ...SOCRATA_ROW, latitude: '41.8789', longitude: '-87.6359' }]);
+    routeGoogle([{ ...SOCRATA_ROW, latitude: '41.8789', longitude: '-87.6359' }]);
     const discovered = await runDiscovery(keyless, '60619', 'barbershops', 5);
 
     expect(discovered[0].nof_corridor).toBeNull();
@@ -206,43 +337,31 @@ describe('runDiscovery', () => {
       { ...SOCRATA_ROW, license_number: '333', license_start_date: '2025-11-16T00:00:00.000', license_status: 'AAI' },
       { ...SOCRATA_ROW, license_number: '222', license_start_date: '2022-07-01T00:00:00.000', license_status: 'AAC' },
     ];
-    const calls = routeFoursquare(renewals);
+    const calls = routeGoogle(renewals);
     const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
 
     expect(discovered).toHaveLength(1);
-    // One subrequest per business, where the Google port cost two: find-place *and* details
-    expect(calls.filter((url) => url.includes('places-api.foursquare.com'))).toHaveLength(1);
+    expect(findCalls(calls)).toHaveLength(1);
+    expect(detailCalls(calls)).toHaveLength(1);
     // The most recent licence describes the business today
     const business = await businessRow(discovered[0].id);
     expect(business).toMatchObject({ license_number: '333', license_status: 'active', license_issue_date: '2025-11-16' });
   });
 
   it('treats limit as a count of businesses rather than licence rows', async () => {
-    const other = {
-      ...SOCRATA_ROW,
-      account_number: '999999',
-      doing_business_as_name: 'Fresh Cuts',
-      license_number: '2987654',
-    };
-    // Six rows, two businesses; a limit of 2 must yield both rather than stopping inside the renewals
-    routeFoursquare([SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, other]);
+    const other = { ...SOCRATA_ROW, account_number: '999999', doing_business_as_name: 'Fresh Cuts', license_number: '2987654' };
+    routeGoogle([SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, SOCRATA_ROW, other]);
     const discovered = await runDiscovery(keyless, '60619', 'barbershops', 2);
     expect(discovered.map((b) => b.name).sort()).toEqual(['Fresh Cuts', "John's Barbershop"]);
   });
 
   it('keeps going when one business fails', async () => {
-    // A distinct account number, or dedup would fold this into the row above
-    const second = {
-      ...SOCRATA_ROW,
-      account_number: '999999',
-      doing_business_as_name: 'Fresh Cuts',
-      license_number: '2987654',
-    };
+    const second = { ...SOCRATA_ROW, account_number: '999999', doing_business_as_name: 'Fresh Cuts', license_number: '2987654' };
     stubFetch((url) => {
       if (url.startsWith('https://data.cityofchicago.org')) return jsonResponse([SOCRATA_ROW, second]);
       // A body that claims to be JSON and is not: response.json() throws inside the client
-      if (url.includes('John%27s')) return new Response('<html>gateway</html>', { status: 200 });
-      if (url.startsWith('https://places-api.foursquare.com')) return jsonResponse({ results: [] });
+      if (url.includes('John')) return new Response('<html>gateway</html>', { status: 200 });
+      if (url.includes('/place/findplacefromtext/json')) return jsonResponse({ status: 'ZERO_RESULTS', candidates: [] });
       throw new Error(`unrouted request: ${url}`);
     });
 
@@ -251,81 +370,52 @@ describe('runDiscovery', () => {
   });
 
   it('returns nothing when Socrata has no rows', async () => {
-    routeFoursquare([]);
+    routeGoogle([]);
     expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toEqual([]);
   });
 
-  // A run against a revoked key stores exactly what a run against shops Foursquare has never heard
-  // of stores. The tally is the only thing that tells an operator which of those two happened.
+  // Google answers a denied key, an exhausted quota and a malformed request with HTTP 200 plus a
+  // `status` field, so nothing throws and the payload merely lacks its results key. Without the
+  // status check every such reply would read as "no such business" and store a maximal deficit for a
+  // shop that was never actually looked up. The tally is what tells an operator which happened.
   it('reports a denied key rather than passing off an unlooked-up business as researched', async () => {
-    const health = newFoursquareHealth();
-    routeFoursquare([SOCRATA_ROW], () => jsonResponse({ message: 'invalid token' }, 401));
+    const health = newPlacesHealth();
+    routeGoogle([SOCRATA_ROW], { status: 'REQUEST_DENIED', error_message: 'The provided API key is invalid.' });
 
     const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5, health);
 
     expect(discovered[0].digital_deficit_score).toBeNull();
-    expect(health).toEqual({ unavailable: 1, last_status: 'UNAUTHORIZED' });
+    expect(health).toEqual({ unavailable: 1, last_status: 'REQUEST_DENIED' });
   });
 
   it('reports an exhausted quota separately from a denied key', async () => {
-    const health = newFoursquareHealth();
-    routeFoursquare([SOCRATA_ROW], () => jsonResponse({ message: 'rate limited' }, 429));
+    const health = newPlacesHealth();
+    routeGoogle([SOCRATA_ROW], { status: 'OVER_QUERY_LIMIT' });
 
     await runDiscovery(keyed, '60619', 'barbershops', 5, health);
 
-    expect(health).toEqual({ unavailable: 1, last_status: 'RATE_LIMITED' });
+    expect(health).toEqual({ unavailable: 1, last_status: 'OVER_QUERY_LIMIT' });
   });
 
-  // Unlike Google, Foursquare fails with a real HTTP status. base.ts's fetchJson throws on those,
-  // and the throw would unwind past the health tally into the per-business catch above — dropping
-  // the business AND reporting a clean run. The client reads status itself so neither happens.
-  it('stores a business the source could not answer for instead of dropping it', async () => {
-    const health = newFoursquareHealth();
-    routeFoursquare([SOCRATA_ROW], () => jsonResponse({ message: 'upstream down' }, 500));
-
-    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5, health);
-
-    expect(discovered).toHaveLength(1);
-    expect(discovered[0].digital_deficit_score).toBeNull();
-    expect(health).toEqual({ unavailable: 1, last_status: 'SERVER_ERROR' });
-  });
-
-  // Why a discovery run with a dead key must not be pointed at production: the rows it writes carry
-  // a null fsq_place_id, and the next run dedups on that column, so it matches nothing and inserts
-  // the business a second time. Nothing backfills the first copy — lib/enrichment.ts has no caller
-  // — so the unmeasured row and the enriched row coexist.
-  it('duplicates rather than backfills a business first stored without a key', async () => {
-    routeFoursquare();
-    expect(await runDiscovery(keyless, '60619', 'barbershops', 5)).toHaveLength(1);
-
-    expect(await runDiscovery(keyed, '60619', 'barbershops', 5)).toHaveLength(1);
-
-    const rows = await env.DB.prepare('SELECT fsq_place_id FROM businesses WHERE name = ?')
-      .bind("John's Barbershop")
-      .all<{ fsq_place_id: string | null }>();
-    expect(rows.results.map((r) => r.fsq_place_id)).toEqual([null, 'fsq_sample_place_id_123']);
-  });
-
-  it('reports a healthy run when Foursquare answers every lookup', async () => {
-    const health = newFoursquareHealth();
-    routeFoursquare();
+  it('reports a healthy run when Google answers every lookup', async () => {
+    const health = newPlacesHealth();
+    routeGoogle();
 
     await runDiscovery(keyed, '60619', 'barbershops', 5, health);
 
     expect(health).toEqual({ unavailable: 0, last_status: null });
   });
 
-  // A shop Foursquare genuinely does not list is a measurement, not an outage: the deficit is
-  // computed from its absence rather than withheld. 64, not 74: the review term is unobservable on
-  // this plan for every business, so counting a no-match as "zero reviews" would hand unmatched
-  // businesses +10 that matched ones can never receive — a bias from the entitlement, not the shop.
-  it('scores a business Foursquare has no record of rather than leaving it unmeasured', async () => {
-    const health = newFoursquareHealth();
-    routeFoursquare([SOCRATA_ROW], { results: [] });
+  // A shop Google genuinely does not list is a measurement, not an outage: the deficit is computed
+  // from its absence rather than withheld.
+  it('scores a business Google has no record of rather than leaving it unmeasured', async () => {
+    const health = newPlacesHealth();
+    routeGoogle([SOCRATA_ROW], { status: 'ZERO_RESULTS', candidates: [] });
 
     const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5, health);
 
     expect(health).toEqual({ unavailable: 0, last_status: null });
+    // website (30) + GBP (15) + reviews SKIPPED + no social (12) + no ads (7) = 64
     expect(discovered[0].digital_deficit_score).toBe(64);
   });
 });
@@ -355,7 +445,7 @@ describe('POST /api/discovery/run', () => {
 
   it('runs the pipeline for an admin and reports what it stored', async () => {
     const token = await accessToken(await adminUser());
-    routeFoursquare();
+    routeGoogle();
     const res = await api('POST', '/discovery/run', {
       token,
       json: { zip_code: '60619', niche: 'barbershops', limit: 5 },
@@ -367,11 +457,11 @@ describe('POST /api/discovery/run', () => {
     expect(body.businesses[0].name).toBe("John's Barbershop");
   });
 
-  // The Worker env under test has no FOURSQUARE_API_KEY, which is also the deployed Worker's state:
-  // the route must say so rather than return a 200 that looks like a successful run.
+  // The Worker env under test has no GOOGLE_PLACES_API_KEY, which is also the deployed Worker's
+  // state: the route must say so rather than return a 200 that looks like a successful run.
   it('tells the operator the lookups never happened instead of reporting a clean run', async () => {
     const token = await accessToken(await adminUser());
-    routeFoursquare();
+    routeGoogle();
 
     const res = await api('POST', '/discovery/run', {
       token,
