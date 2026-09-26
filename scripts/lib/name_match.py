@@ -27,7 +27,17 @@ def load_idf(path: str = "api/src/data/name-idf.json"):
 
 
 def build_idf(names, stop, extra=()):
-    """Compute an idf table over an arbitrary corpus, for measurement scripts."""
+    """Compute an idf table over an arbitrary corpus, for measurement scripts.
+
+    Filters empty tokenised documents before counting n, and defaults an unseen token's weight to
+    log(n) rather than 0. Both differ from the two inline copies this replaced, which counted every
+    document (including empty ones) toward n and defaulted unseen tokens to 0. On the current
+    measurement corpus (9352 Overture rows + 157 licence names, none of which tokenise to nothing)
+    this is a no-op: n and every idf weight come out identical either way. That equivalence is
+    corpus-dependent, not structural -- a corpus containing a name made entirely of stopwords or
+    sub-3-character tokens would drop a document here, shifting n and moving every score by a small
+    uniform amount.
+    """
     from collections import Counter
     docs = [tokenize(n, stop) for n in names] + [tokenize(n, stop) for n in extra]
     docs = [d for d in docs if d]

@@ -9,10 +9,21 @@ Run:  node scripts/fetch_places_candidates.mjs licences   <dir>
       node scripts/fetch_places_candidates.mjs foursquare <dir>
       uv run --with duckdb python scripts/measure_places_sources.py <dir>
 
-The scorer is reconciled with scripts/measure_overture_match.py: toks, bigrams, charsim, tokmatch
-and score are behaviourally identical (that file routes '&' to the STOP-listed token "and" where
-this one drops it as a separator, and its empty-bigram branch is unreachable because tokens are
-always >= 3 chars). On this corpus it reproduces that script's headline 74 at both 150 m and 200 m.
+The scorer here is scripts/lib/name_match.py's shared make_scorer -- the same implementation
+gen_name_match_vectors.py uses to pin api/src/lib/name-match.ts. It is reconciled with
+scripts/measure_overture_match.py's inline copy on tokenizing, bigrams, char similarity and token
+matching (that file routes '&' to the STOP-listed token "and" where this one drops it as a
+separator, and its empty-bigram branch is unreachable because tokens are always >= 3 chars) but NOT
+on the head-token tie-break: this scorer breaks ties lexicographically over an ordered token list --
+deliberately, because that is what makes the gate deterministic and matches the TypeScript port and
+the pinned fixture -- while measure_overture_match.py's inline copy still picks via max() over a
+hash-ordered Python set. Ties are not rare: every token with document frequency 1 shares the same
+log(N/1) weight, and 6 of the 157 licence names in this corpus have a tied max-weight head token.
+Checked per business key on this corpus (2026-09-25, against the cached scratchpad measurement): the
+corroborated google/fsq/overture sets are identical either way -- none of the 77/57/74 moved -- so
+the two tie-break rules diverge but did not change which businesses corroborate here. That is a
+property of this corpus, not a guarantee elsewhere; the lexicographic rule is the one to trust.
+On this corpus it still reproduces measure_overture_match.py's headline 74 at both 150 m and 200 m.
 
 Businesses are keyed by the city's account_number/site_number, NOT by name. Five names in the 157
 are held by two or three different licence accounts, so keying by name silently merged 6 businesses
@@ -53,7 +64,7 @@ rows = con.execute(f"""
     AND bbox.xmin BETWEEN {min(lo)-M} AND {max(lo)+M} AND names.primary IS NOT NULL""").fetchall()
 
 sys.path.insert(0, "scripts")
-from lib.name_match import build_idf, make_scorer, tokenize   # noqa: E402
+from lib.name_match import build_idf, make_scorer   # noqa: E402
 
 STOP = {'llc','inc','corp','corporation','ltd','the','and','dba','co','company','incorporated','of','by','at'}
 idf, default_idf = build_idf([r[0] for r in rows], STOP, extra=[b["name"] for b in biz])
