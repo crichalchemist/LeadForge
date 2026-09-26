@@ -79,6 +79,16 @@ function placesUnavailable(data: PlacesEnvelope, health: PlacesHealth | undefine
   return true;
 }
 
+/**
+ * `fetchJson` (base.ts) puts the status in its message as `HTTP <status> <statusText>` for a
+ * non-2xx response. A transport failure (DNS, timeout) or a 200 whose body isn't JSON at all
+ * (a proxy or CDN error page, say) carries no such status, and falls back to this label.
+ */
+function httpStatusLabel(error: unknown): string {
+  const match = /^HTTP (\d{3})\b/.exec(error instanceof Error ? error.message : String(error));
+  return match ? `HTTP_${match[1]}` : 'TRANSPORT_ERROR';
+}
+
 export interface PlaceCandidate {
   place_id?: string;
   name?: string;
@@ -166,7 +176,23 @@ export async function findPlace(
   }
   const url = await buildSignedUrl(env, '/maps/api/place/findplacefromtext/json', params);
 
-  const data = await fetchJson<{ candidates?: PlaceCandidate[] } & PlacesEnvelope>(url);
+  let data: { candidates?: PlaceCandidate[] } & PlacesEnvelope;
+  try {
+    data = await fetchJson<{ candidates?: PlaceCandidate[] } & PlacesEnvelope>(url);
+  } catch (error) {
+    // Google normally answers a denied key or an exhausted quota with HTTP 200 plus a `status`
+    // field, which placesUnavailable (below) already handles. fetchJson throws on anything else --
+    // a non-2xx response, a transport failure, or a 200 whose body isn't JSON at all -- and letting
+    // that throw escape would drop the business in runDiscovery's per-business catch while leaving
+    // this tally at 0: a run that reads as clean while storing nothing. Whether Google's own quota
+    // path ever answers non-2xx is unverified; this guards the case regardless of cause.
+    console.error('google_places_transport_error', { name: businessName, error: String(error) });
+    if (health) {
+      health.unavailable += 1;
+      health.last_status = httpStatusLabel(error);
+    }
+    return null;
+  }
   if (placesUnavailable(data, health, { name: businessName })) return null;
 
   const candidates = data.candidates ?? [];
@@ -190,7 +216,19 @@ export async function getPlaceDetails(
     fields: DETAIL_FIELDS,
   });
 
-  const data = await fetchJson<{ result?: PlaceDetails } & PlacesEnvelope>(url);
+  let data: { result?: PlaceDetails } & PlacesEnvelope;
+  try {
+    data = await fetchJson<{ result?: PlaceDetails } & PlacesEnvelope>(url);
+  } catch (error) {
+    // Same guard as findPlace above: a non-2xx or transport failure here would otherwise unwind
+    // past this tally and drop the business while places.unavailable stayed 0.
+    console.error('google_places_transport_error', { place_id: placeId, error: String(error) });
+    if (health) {
+      health.unavailable += 1;
+      health.last_status = httpStatusLabel(error);
+    }
+    return null;
+  }
   if (placesUnavailable(data, health, { place_id: placeId })) return null;
 
   if (!data.result) {

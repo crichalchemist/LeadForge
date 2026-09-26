@@ -355,7 +355,12 @@ describe('runDiscovery, unchanged behaviour', () => {
     expect(discovered.map((b) => b.name).sort()).toEqual(['Fresh Cuts', "John's Barbershop"]);
   });
 
-  it('keeps going when one business fails', async () => {
+  // A body that claims to be JSON and is not: response.json() throws inside fetchJson. A 200 with
+  // an HTML body passes assertOk and only fails at JSON parsing, so it carries no HTTP status to
+  // recover and takes the TRANSPORT_ERROR fallback rather than an HTTP_<status> label.
+  // This test previously asserted that the business whose lookup broke vanished from the run
+  // entirely -- the exact silent-drop bug this task removes -- rather than being stored unmeasured.
+  it('stores a business whose lookup broke rather than dropping it, and keeps going', async () => {
     const second = { ...SOCRATA_ROW, account_number: '999999', doing_business_as_name: 'Fresh Cuts', license_number: '2987654' };
     stubFetch((url) => {
       if (url.startsWith('https://data.cityofchicago.org')) return jsonResponse([SOCRATA_ROW, second]);
@@ -365,8 +370,14 @@ describe('runDiscovery, unchanged behaviour', () => {
       throw new Error(`unrouted request: ${url}`);
     });
 
-    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
-    expect(discovered.map((b) => b.name)).toEqual(['Fresh Cuts']);
+    const health = newPlacesHealth();
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5, health);
+
+    expect(discovered.map((b) => b.name).sort()).toEqual(['Fresh Cuts', "John's Barbershop"]);
+    expect(discovered.find((b) => b.name === "John's Barbershop")?.digital_deficit_score).toBeNull();
+    // website (30) + GBP (15) + reviews SKIPPED + no social (12) + no ads (7) = 64
+    expect(discovered.find((b) => b.name === 'Fresh Cuts')?.digital_deficit_score).toBe(64);
+    expect(health).toEqual({ unavailable: 1, last_status: 'TRANSPORT_ERROR' });
   });
 
   it('returns nothing when Socrata has no rows', async () => {

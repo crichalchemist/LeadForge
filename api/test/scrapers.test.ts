@@ -287,6 +287,50 @@ describe('TestGooglePlacesClient', () => {
     expect(await findPlace({}, 'Shop', 'Chicago', health)).toBeNull();
     expect(health).toEqual({ unavailable: 1, last_status: 'KEY_NOT_SET' });
   });
+
+  // Google normally answers a denied key or an exhausted quota with HTTP 200 plus a `status` field,
+  // which placesUnavailable (in google-places.ts) already handles. fetchJson throws on anything else
+  // -- a non-2xx response, a transport failure, or a 200 whose body isn't JSON at all -- and that
+  // throw would otherwise unwind past this tally into runDiscovery's per-business catch, dropping
+  // the business AND leaving places.unavailable at 0: a run that reads as clean while storing
+  // nothing. Whether Google's own quota path ever answers non-2xx is unverified; this guards the
+  // case regardless of cause.
+  it('tallies a non-2xx response instead of throwing past the health counter', async () => {
+    const health = newPlacesHealth();
+    stubFetch(() => new Response('rate limit exceeded', { status: 429 }));
+
+    expect(await findPlace(env, 'Shop', 'Chicago', health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'HTTP_429' });
+  });
+
+  it('tallies a transport failure the same way, with no status to recover', async () => {
+    const health = newPlacesHealth();
+    stubFetch(() => {
+      throw new TypeError('fetch failed');
+    });
+
+    expect(await findPlace(env, 'Shop', 'Chicago', health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'TRANSPORT_ERROR' });
+  });
+
+  // A 200 whose body isn't JSON at all (a proxy or CDN error page, say) throws inside fetchJson's
+  // response.json() the same way a non-2xx does, and falls back to the same label: there is no
+  // 3-digit status in a SyntaxError's message to recover.
+  it('tallies a 200 with a non-JSON body the same way', async () => {
+    const health = newPlacesHealth();
+    stubFetch(() => new Response('<html>gateway</html>', { status: 200 }));
+
+    expect(await findPlace(env, 'Shop', 'Chicago', health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'TRANSPORT_ERROR' });
+  });
+
+  it('applies the same catch to the details call', async () => {
+    const health = newPlacesHealth();
+    stubFetch(() => new Response('service unavailable', { status: 503 }));
+
+    expect(await getPlaceDetails(env, 'ChIJ_sample_place_id_123', health)).toBeNull();
+    expect(health).toEqual({ unavailable: 1, last_status: 'HTTP_503' });
+  });
 });
 
 describe('census', () => {
