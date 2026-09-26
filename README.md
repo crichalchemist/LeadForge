@@ -244,4 +244,4 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs   # skip the formatting-o
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).

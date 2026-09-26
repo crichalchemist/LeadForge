@@ -365,9 +365,6 @@ exists but now holds only `LICENSE.txt` and `NOTICE.txt` — the data is gone fr
 - ADR 008 and ADR 011 both discuss Qwen2.5-**7B**, but `.env.example` ships the **3B** instruct model,
   because the decision was to size by available VRAM and this runs on CPU. The config is right and the
   ADRs record the earlier sizing; `.env.example` is the source of truth. Not worth a new ADR.
-- `README.md` states the licence as MIT, but the repo has **no `LICENSE` file**. Either the file is
-  missing or the statement is wrong, and which one is the owner's call — do not resolve it by writing
-  a licence file.
 - There is no bootstrap command for the first Workers admin user. Python has
   `leadforge create-user`; on Workers the row has to be inserted into D1 by hand with a
   `pbkdf2$<iterations>$<salt>$<hash>` value, because bcrypt hashes from Python are not portable to the
