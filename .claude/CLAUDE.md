@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LeadForge discovers under-digitized Chicago small businesses from public data, scores them, generates LLM outreach briefs, and runs AI voice calls (Retell). A React CRM tracks outreach and a parallel NOF grant pipeline.
 
-**Two backends coexist.** The `refactor/cf-migration` branch is porting the app from self-hosted Python to Cloudflare, route by route:
+**Two backends coexist.** The Cloudflare port was developed on `refactor/cf-migration` and MERGED into
+the default branch on 2026-09-26, which was renamed `master` -> `main` at the same time (GitHub keeps a
+redirect for the old name, so stale clones still fetch). Both backends now live on `main`:
 
 | | Legacy (reference implementation) | Target (in progress) |
 |---|---|---|
@@ -66,6 +68,11 @@ npm install
 npm run dev            # Vite on :5173
 npm run build          # tsc -b && vite build; .env.production bakes VITE_API_BASE_URL into dist/
 npx wrangler pages deploy dist --project-name=leadforge-frontend --branch=master   # Pages: https://leadforge-frontend-80u.pages.dev
+# ^ `--branch=master` is DELIBERATE and outlives the git rename to `main` (2026-09-26).
+# Pages decides production-vs-preview by matching this value against the PROJECT's own production
+# branch setting, which is independent of git and was fixed as `master` when the project was created.
+# Passing `--branch=main` before changing that setting in the Pages dashboard would publish to a
+# PREVIEW url instead of production, silently. Change the dashboard setting first, then this flag.
 ```
 
 ## Architecture notes that span files
