@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 import duckdb
 
 sys.path.insert(0, "scripts")
-from lib.name_match import THRESHOLD, load_idf, make_scorer   # noqa: E402
+from lib.name_match import THRESHOLD, load_idf, make_scorer  # noqa: E402
 
 OUTDIR = sys.argv[1]
 CHUNK = 250

@@ -116,7 +116,11 @@ async def initiate_call(
         return True
 
     # Build agent prompt
-    prompt = build_agent_prompt(
+    # KNOWN DEFECT, not dead code to delete: `prompt` is built and then never passed to the Retell
+    # call below, so the agent runs without it. Deleting the assignment would silence the linter and
+    # erase the evidence; wiring it up is a behaviour change that belongs with the voice port, which
+    # is unported on Workers (see CLAUDE.md, Known discrepancies).
+    prompt = build_agent_prompt(  # noqa: F841
         business_name=business.name,
         niche=business.niche.value if business.niche else "business",
         address=f"{business.address}, {business.zip_code}",

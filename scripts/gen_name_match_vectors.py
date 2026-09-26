@@ -9,10 +9,11 @@ neither shows up as a test failure anywhere else -- the same reason scoring-pari
 Python-scored vectors. Vectors are real measured pairs plus the adversarial cases that earlier
 versions of this scorer got wrong.
 """
-import json, sys
+import json
+import sys
 
 sys.path.insert(0, "scripts")
-from lib.name_match import load_idf, make_scorer   # noqa: E402
+from lib.name_match import load_idf, make_scorer  # noqa: E402
 
 stop, IDF, DEF = load_idf()
 score = make_scorer(stop, IDF, DEF)

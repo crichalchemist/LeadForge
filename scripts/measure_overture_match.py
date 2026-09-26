@@ -12,7 +12,12 @@ Needs no credentials: the Overture S3 bucket is anonymously readable and Socrata
 token for this volume. licences.json is written by the companion pull; regenerate it from
 scrapers/socrata.ts's dedupeLicenseRows logic if it is missing.
 """
-import duckdb, json, math, random, re
+import json
+import math
+import random
+import re
+
+import duckdb
 
 con = duckdb.connect()
 con.execute("INSTALL httpfs; LOAD httpfs; INSTALL spatial; LOAD spatial; SET s3_region='us-west-2';")
@@ -42,6 +47,7 @@ def toks(s):
 
 # IDF over the whole corpus so sector words ("hair", "salon", "barber") carry ~no weight
 from collections import Counter
+
 df = Counter()
 docs = [toks(p[0]) for p in places] + [toks(b['name']) for b in lic]
 for d in docs: df.update(set(d))
@@ -112,7 +118,7 @@ for cat_only in (False, True):
         print(f"{radius:5d}m  {'cat' if cat_only else 'all':4s}  {len(a):7d}  {nc:12d}  {len(r):17d}")
 
 acc, rej, nc = run(150, 0.5, False)
-print(f"\n=== PRE-COMMITTED METRIC: name-corroborated matches at 150m, all categories ===")
+print("\n=== PRE-COMMITTED METRIC: name-corroborated matches at 150m, all categories ===")
 print(f"    {len(acc)} / {len(lic)}  ({100*len(acc)/len(lic):.0f}%)")
 w = sum(1 for a in acc if a[1][3]); t = sum(1 for a in acc if a[1][4]); s_ = sum(1 for a in acc if a[1][5])
 print(f"    among matches: website {w} ({100*w/max(len(acc),1):.0f}%)  phone {t} ({100*t/max(len(acc),1):.0f}%)  social {s_} ({100*s_/max(len(acc),1):.0f}%)")
@@ -134,10 +140,11 @@ for b, p, d, s, n in acc2[:12]:
 
 # ---- Head-to-head: the SAME scorer applied to the Foursquare API's own matches ----
 import json as _j
+
 api = [_j.loads(l) for l in open('fsq_results.jsonl') if l.strip()]
 matched = [r for r in api if r.get('place')]
 corrob = [r for r in matched if score(r['name'], r['place']['n']) >= 0.5]
-print(f"\n=== HEAD-TO-HEAD on the same 157 businesses, identical scorer, threshold 0.5 ===")
+print("\n=== HEAD-TO-HEAD on the same 157 businesses, identical scorer, threshold 0.5 ===")
 print(f"  Foursquare API (limit=1, 200m):  matched {len(matched)}  name-corroborated {len(corrob)}  "
       f"FALSE matches {len(matched)-len(corrob)}")
 aw = sum(1 for r in corrob if r['place']['w']); asoc = sum(1 for r in corrob if r['place']['fb'] or r['place']['ig'])

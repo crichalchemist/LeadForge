@@ -15,8 +15,12 @@ rare, and the reader assigns it log(N) -- exact for a token seen once, and the r
 for one never seen. That single principled default is what keeps the file to ~390 KiB instead of the
 ~1.5 MiB a full 99k-token vocabulary would need.
 """
-import duckdb, json, math, re
+import json
+import math
+import re
 from collections import Counter
+
+import duckdb
 
 con = duckdb.connect()
 con.execute("INSTALL httpfs; LOAD httpfs; INSTALL spatial; LOAD spatial; SET s3_region='us-west-2';")

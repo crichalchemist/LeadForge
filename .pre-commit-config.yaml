@@ -1,0 +1,50 @@
+# Fast gates only. The full suites (158 pytest + 601 vitest) belong in CI, not in a commit hook --
+# a hook that takes a minute gets bypassed with `--no-verify`, and a bypassed hook protects nothing.
+#
+# Install once per clone:  uvx pre-commit install
+# Run over everything:     uvx pre-commit run --all-files
+#
+# NOTHING HERE REFORMATS EXISTING CODE, and that is a deliberate constraint rather than an oversight.
+# Three tempting hooks were measured against this repo and left out for the same reason:
+#   ruff-format          would rewrite 56-76 files (the codebase has never been ruff-formatted)
+#   trailing-whitespace  would rewrite 136 files
+#   end-of-file-fixer    would rewrite 6 files
+# Any of them would turn the next commit that touches a file into a reformatting commit, burying the
+# real change and every later `git blame`. Reformatting this repo is a decision worth taking on its
+# own, with its own commit; it is not something to acquire as a side effect of adding hooks.
+#
+# `ruff --fix` below is safe on that score: `ruff check .` is already clean, so it is a no-op on
+# existing code and only touches violations somebody is introducing right now.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Read-only checks: these fail a commit, they never rewrite it.
+      - id: check-yaml
+      - id: check-json
+        # api/src/data/*.json are large generated artifacts. name-idf.json (416 KiB) is the IDF table
+        # the name scorer bundles, and name-match-vectors.json is the fixture pinning the Python
+        # scorer to its TypeScript port -- re-parsing them on every commit buys nothing.
+        exclude: ^api/src/data/|^api/test/fixtures/
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        # name-idf.json is 416 KiB and intentionally committed.
+        args: [--maxkb=600]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.13
+    hooks:
+      - id: ruff
+        args: [--fix]
+
+  - repo: local
+    hooks:
+      # tsc is the only check that catches a type error across the whole Workers app, and it is fast
+      # enough for a hook. Runs whole-project rather than per-file, because TypeScript's answer for
+      # one file depends on the others.
+      - id: workers-typecheck
+        name: Workers typecheck (tsc --noEmit)
+        entry: bash -c 'cd api && npm run --silent typecheck'
+        language: system
+        pass_filenames: false
+        files: ^api/(src|test)/.*\.(ts|json)$

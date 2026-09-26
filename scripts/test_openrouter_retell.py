@@ -7,7 +7,6 @@
 """
 
 import asyncio
-import json
 import os
 import sys
 
@@ -89,7 +88,7 @@ async def test_openrouter() -> str:
 
     message = data["choices"][0]["message"]["content"]
     usage = data.get("usage", {})
-    print(f"  Status: OK")
+    print("  Status: OK")
     print(f"  Tokens: {usage.get('prompt_tokens', '?')} in / {usage.get('completion_tokens', '?')} out")
     print(f"  Response:\n    {message[:200]}...")
     return message
@@ -162,7 +161,7 @@ async def create_retell_agent(llm_id: str) -> str:
 
     agent_id = data["agent_id"]
     print(f"  Agent ID: {agent_id}")
-    print(f"  Voice   : 11labs-Adrian")
+    print("  Voice   : 11labs-Adrian")
     return agent_id
 
 

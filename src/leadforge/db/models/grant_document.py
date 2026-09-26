@@ -40,7 +40,9 @@ class GrantDocument(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     # Document info
-    document_type: Mapped[DocumentType] = mapped_column(SAEnum(DocumentType, values_callable=lambda e: [x.value for x in e]))
+    document_type: Mapped[DocumentType] = mapped_column(
+        SAEnum(DocumentType, values_callable=lambda e: [x.value for x in e])
+    )
     is_mandatory: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[str] = mapped_column(
         String(20), default="missing"

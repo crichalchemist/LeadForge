@@ -1,7 +1,8 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum as SAEnum, String
+from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from leadforge.db.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin

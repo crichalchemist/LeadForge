@@ -35,7 +35,11 @@ Caveat that survived into the numbers: Overture's "returned" column is 157 becau
 has some POI within 200 m, and matching is exhaustive and offline, so it has no "false match"
 count comparable to the two APIs' single nearest result.
 """
-import duckdb, json, math, sys
+import json
+import math
+import sys
+
+import duckdb
 
 S = sys.argv[1]
 con = duckdb.connect()
@@ -64,7 +68,7 @@ rows = con.execute(f"""
     AND bbox.xmin BETWEEN {min(lo)-M} AND {max(lo)+M} AND names.primary IS NOT NULL""").fetchall()
 
 sys.path.insert(0, "scripts")
-from lib.name_match import build_idf, make_scorer   # noqa: E402
+from lib.name_match import build_idf, make_scorer  # noqa: E402
 
 STOP = {'llc','inc','corp','corporation','ltd','the','and','dba','co','company','incorporated','of','by','at'}
 idf, default_idf = build_idf([r[0] for r in rows], STOP, extra=[b["name"] for b in biz])

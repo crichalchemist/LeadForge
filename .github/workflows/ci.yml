@@ -1,0 +1,101 @@
+name: CI
+
+# Runs on every push to any branch, and on pull requests. Nothing here needs a secret: the Python
+# suite uses in-memory aiosqlite, the Workers suite uses miniflare with fake bindings declared in
+# api/vitest.config.ts, and `wrangler deploy --dry-run` was verified to succeed with no Cloudflare
+# credentials present. So forks and first-time contributors get a full green run.
+on:
+  push:
+  pull_request:
+
+# A second push to the same ref makes the first run pointless. Cancel it rather than pay for both.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python (ruff + pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      # `ruff check` and `ruff format` are deliberately NOT combined into `make lint` here, so that a
+      # lint failure and a formatting failure are distinguishable at a glance in the run summary.
+      #
+      # `ruff format --check` is absent on purpose: this codebase has never been ruff-formatted, and
+      # the check wants to rewrite 56-76 files. Adding it would either start CI red or force a
+      # whole-repo reformatting commit that buries every later `git blame`. That is a real decision
+      # for a human to make on its own, not a side effect of turning CI on.
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Tests
+        run: uv run pytest -q
+
+  workers:
+    name: Workers API (typecheck + vitest + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned to the version used locally. CI and the development machine disagreeing about the
+      # runtime is a reliable source of "works on my machine".
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # vitest runs on @cloudflare/vitest-plugin, which downloads and runs workerd.
+      - name: Tests
+        run: npm test
+
+      # `wrangler deploy --dry-run`. Bundles and validates bindings without publishing, and needs no
+      # credentials, so it catches a broken wrangler.jsonc before a deploy does.
+      - name: Build
+        run: npm run build
+
+  frontend:
+    name: Frontend (build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `tsc -b && vite build`. There is no frontend test suite, so this is the only gate on the
+      # React app compiling at all.
+      - name: Build
+        run: npm run build

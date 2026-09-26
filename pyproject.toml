@@ -50,9 +50,26 @@ testpaths = ["tests"]
 [tool.ruff]
 target-version = "py312"
 src = ["src"]
+# The codebase's 99th-percentile line is 97 characters; 120 leaves headroom for SQLAlchemy column
+# definitions without licensing runaway lines.
+line-length = 120
+# Alembic generates these. Linting generated code produces noise nobody acts on, and reformatting it
+# makes the next autogenerate diff unreadable.
+extend-exclude = ["migrations"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+# One-off measurement and build scripts are tools, not shipped code, and holding them to production
+# style would mean ~190 violations nobody is going to fix. Style is relaxed; the correctness rules
+# (F*) still apply, because an unused import or a dead variable is a bug wherever it lives.
+# This pattern matches direct children only, so scripts/lib/ stays FULLY linted -- name_match.py is
+# load-bearing, the canonical Python scorer that name-match-vectors.json pins the TS port against.
+"scripts/*.py" = ["E501", "E701", "E702", "E401", "E402", "E741", "N806"]
+# The LLM modules embed JSON schemas as literal prompt text. Re-wrapping those lines would change
+# what the model is actually sent, so this is a behaviour boundary rather than a style preference.
+"src/leadforge/llm/*.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

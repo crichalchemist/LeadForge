@@ -53,7 +53,9 @@ class Business(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     owner_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    niche: Mapped[NicheType] = mapped_column(SAEnum(NicheType, values_callable=lambda e: [x.value for x in e]), index=True)
+    niche: Mapped[NicheType] = mapped_column(
+        SAEnum(NicheType, values_callable=lambda e: [x.value for x in e]), index=True
+    )
 
     # License/registration
     license_number: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)

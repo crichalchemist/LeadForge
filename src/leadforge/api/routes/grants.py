@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from leadforge.api.deps import get_db, require_admin
-from leadforge.db.models.user import User
 from leadforge.api.schemas.grant import (
     GrantApplicationCreate,
     GrantApplicationResponse,
@@ -23,6 +22,7 @@ from leadforge.api.schemas.grant import (
 from leadforge.db.models.business import Business
 from leadforge.db.models.grant_application import GrantApplication, NOFStage
 from leadforge.db.models.grant_document import GrantDocument
+from leadforge.db.models.user import User
 from leadforge.grants.financial_calculator import compute_grant_financials
 
 logger = structlog.get_logger()

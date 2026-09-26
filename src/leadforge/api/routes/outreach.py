@@ -5,13 +5,13 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from leadforge.api.deps import get_db, require_admin
-from leadforge.db.models.user import User
 from leadforge.api.schemas.outreach import (
     OutreachDetail,
     OutreachListResponse,
     OutreachUpdate,
 )
 from leadforge.db.models.outreach_record import OutreachRecord
+from leadforge.db.models.user import User
 
 router = APIRouter(prefix="/outreach", tags=["outreach"])
 

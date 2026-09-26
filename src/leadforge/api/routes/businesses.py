@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from leadforge.api.deps import get_db, require_admin
-from leadforge.db.models.user import User
 from leadforge.api.schemas.business import (
     BusinessDetail,
     BusinessListItem,
@@ -18,6 +17,7 @@ from leadforge.api.schemas.business import (
 from leadforge.db.models.business import Business, NicheType
 from leadforge.db.models.lead_score import LeadScore
 from leadforge.db.models.outreach_record import OutreachRecord
+from leadforge.db.models.user import User
 
 logger = structlog.get_logger()
 
