@@ -36,9 +36,7 @@ class SocrataClient(BaseAPIClient):
     def __init__(self):
         super().__init__(base_url="https://data.cityofchicago.org")
 
-    async def search_businesses(
-        self, zip_code: str, niche: NicheType, limit: int | None = None
-    ) -> list[dict]:
+    async def search_businesses(self, zip_code: str, niche: NicheType, limit: int | None = None) -> list[dict]:
         """Search businesses by zip code and niche using SoQL."""
         page_size = settings.SOCRATA_PAGE_SIZE
         if limit and limit < page_size:
@@ -50,9 +48,7 @@ class SocrataClient(BaseAPIClient):
             return []
 
         # Build WHERE clause: zip_code match AND (term1 OR term2 OR ...)
-        term_conditions = " OR ".join(
-            f"upper(business_activity) like upper('%{term}%')" for term in search_terms
-        )
+        term_conditions = " OR ".join(f"upper(business_activity) like upper('%{term}%')" for term in search_terms)
         where_clause = f"zip_code='{zip_code}' AND ({term_conditions})"
 
         all_results = []

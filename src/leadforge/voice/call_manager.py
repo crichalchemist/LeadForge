@@ -146,7 +146,5 @@ async def initiate_call(
     outreach.call_attempts += 1
 
     await session.flush()
-    logger.info(
-        "call_initiated", business=business.name, call_id=outreach.retell_call_id
-    )
+    logger.info("call_initiated", business=business.name, call_id=outreach.retell_call_id)
     return True

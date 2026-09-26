@@ -21,9 +21,7 @@ class PageSpeedClient(BaseAPIClient):
             if api_key:
                 params["key"] = api_key
 
-            response = await client.get(
-                "/pagespeedonline/v5/runPagespeed", params=params
-            )
+            response = await client.get("/pagespeedonline/v5/runPagespeed", params=params)
             response.raise_for_status()
             data = response.json()
 

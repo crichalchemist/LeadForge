@@ -14,6 +14,7 @@ def _strip_fences(text: str) -> str:
     m = _FENCE_RE.search(text)
     return m.group(1).strip() if m else text.strip()
 
+
 SENTIMENT_PROMPT = """Analyze this call transcript between a marketing agent and a small business owner.
 
 Transcript:
@@ -32,9 +33,7 @@ Analyze and respond with ONLY a JSON object:
 """
 
 
-async def analyze_sentiment(
-    transcript: str, client: ClaudeClient | None = None
-) -> dict:
+async def analyze_sentiment(transcript: str, client: ClaudeClient | None = None) -> dict:
     """Analyze call transcript sentiment using Claude.
 
     Returns sentiment score (-1 to 1), label, objections, interest signals,

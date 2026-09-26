@@ -16,6 +16,7 @@ Emits chunked SQL rather than one file because D1 has a documented Maximum SQL s
 1.5x margin that is data-dependent: a longer POI name, website or phone in a future Overture
 release could cross it. 250 rows/chunk keeps the largest chunk around 33 KB, a 3x margin.
 """
+
 import json
 import math
 import sys
@@ -39,30 +40,39 @@ BBOX = "bbox.ymin BETWEEN 41.60 AND 42.05 AND bbox.xmin BETWEEN -87.95 AND -87.5
 
 # The 15 niches' Socrata search terms, copied from NICHE_MAPPING in api/src/scrapers/socrata.ts.
 TERMS = [
-    "hair service", "nail service", "hair, nail, and skin care", "sale and storage of tires",
-    "tavern", "tobacco", "butcher", "tow truck", "tow storage", "landscap",
-    "motor vehicle repair", "junk peddler", "plumb", "veterinar", "security service",
+    "hair service",
+    "nail service",
+    "hair, nail, and skin care",
+    "sale and storage of tires",
+    "tavern",
+    "tobacco",
+    "butcher",
+    "tow truck",
+    "tow storage",
+    "landscap",
+    "motor vehicle repair",
+    "junk peddler",
+    "plumb",
+    "veterinar",
+    "security service",
 ]
 
 
 def fetch_licences():
     """Every licence row across the 15 niches, collapsed exactly as dedupeLicenseRows does:
     key on account_number/site_number, newest license_start_date wins."""
-    where = "(" + " OR ".join(
-        f"upper(business_activity) like upper('%{t}%')" for t in TERMS) + ")"
+    where = "(" + " OR ".join(f"upper(business_activity) like upper('%{t}%')" for t in TERMS) + ")"
     latest = {}
     offset = 0
     while True:
-        params = urllib.parse.urlencode(
-            {"$where": where, "$order": ":id", "$limit": 1000, "$offset": offset})
-        with urllib.request.urlopen(
-                f"https://data.cityofchicago.org/resource/r5kz-chrr.json?{params}") as response:
+        params = urllib.parse.urlencode({"$where": where, "$order": ":id", "$limit": 1000, "$offset": offset})
+        with urllib.request.urlopen(f"https://data.cityofchicago.org/resource/r5kz-chrr.json?{params}") as response:
             page = json.load(response)
         for raw in page:
             account = raw.get("account_number")
             if not account:
-                continue   # no identity to key on; dedupeLicenseRows falls back to name+zip, which
-                           # this table cannot express. 157/157 measured rows carry one.
+                continue  # no identity to key on; dedupeLicenseRows falls back to name+zip, which
+                # this table cannot express. 157/157 measured rows carry one.
             row = {
                 "account_number": account,
                 "site_number": raw.get("site_number"),
@@ -84,8 +94,7 @@ def fetch_licences():
 def haversine(lat1, lon1, lat2, lon2):
     r, rad = 6371000.0, math.pi / 180
     dlat, dlon = (lat2 - lat1) * rad, (lon2 - lon1) * rad
-    h = (math.sin(dlat / 2) ** 2
-         + math.cos(lat1 * rad) * math.cos(lat2 * rad) * math.sin(dlon / 2) ** 2)
+    h = math.sin(dlat / 2) ** 2 + math.cos(lat1 * rad) * math.cos(lat2 * rad) * math.sin(dlon / 2) ** 2
     return 2 * r * math.asin(math.sqrt(h))
 
 
@@ -111,8 +120,7 @@ def main():
     print(f"geocoded: {len(geocoded)}")
 
     con = duckdb.connect()
-    con.execute("INSTALL httpfs; LOAD httpfs; INSTALL spatial; LOAD spatial; "
-                "SET s3_region='us-west-2';")
+    con.execute("INSTALL httpfs; LOAD httpfs; INSTALL spatial; LOAD spatial; SET s3_region='us-west-2';")
     places = con.execute(f"""
       SELECT id, names.primary AS nm, ST_Y(geometry) AS lat, ST_X(geometry) AS lon,
              coalesce(websites, [])[1] AS website,
@@ -150,15 +158,27 @@ def main():
                     if distance > RADIUS_M:
                         continue
                     value = score(biz["name"], place[1])
-                    if value >= THRESHOLD and (best is None or value > best[0]
-                                               or (value == best[0] and distance < best[2])):
+                    if value >= THRESHOLD and (
+                        best is None or value > best[0] or (value == best[0] and distance < best[2])
+                    ):
                         best = (value, place, distance)
         if best:
             value, place, distance = best
             socials = place[5] or []
-            rows.append((biz, 1, place[0], place[1], round(value, 4), round(distance),
-                         blank_to_null(place[4]), int(any('facebook' in (s or '') for s in socials)),
-                         int(any('instagram' in (s or '') for s in socials)), blank_to_null(place[6])))
+            rows.append(
+                (
+                    biz,
+                    1,
+                    place[0],
+                    place[1],
+                    round(value, 4),
+                    round(distance),
+                    blank_to_null(place[4]),
+                    int(any("facebook" in (s or "") for s in socials)),
+                    int(any("instagram" in (s or "") for s in socials)),
+                    blank_to_null(place[6]),
+                )
+            )
         else:
             rows.append((biz, 0, None, None, None, None, None, 0, 0, None))
 
@@ -168,18 +188,28 @@ def main():
     built_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     chunks = 0
     for start in range(0, len(rows), CHUNK):
-        chunk = rows[start:start + CHUNK]
+        chunk = rows[start : start + CHUNK]
         values = ",\n  ".join(
-            "(" + ", ".join([
-                sql_str(biz["account_number"]), sql_str(biz["site_number"]), str(matched_flag),
-                sql_str(gers), sql_str(name),
-                "NULL" if value is None else str(value),
-                "NULL" if distance is None else str(distance),
-                sql_str(website), str(facebook), str(instagram), sql_str(phone),
-                sql_str(built_at),
-            ]) + ")"
-            for (biz, matched_flag, gers, name, value, distance,
-                 website, facebook, instagram, phone) in chunk)
+            "("
+            + ", ".join(
+                [
+                    sql_str(biz["account_number"]),
+                    sql_str(biz["site_number"]),
+                    str(matched_flag),
+                    sql_str(gers),
+                    sql_str(name),
+                    "NULL" if value is None else str(value),
+                    "NULL" if distance is None else str(distance),
+                    sql_str(website),
+                    str(facebook),
+                    str(instagram),
+                    sql_str(phone),
+                    sql_str(built_at),
+                ]
+            )
+            + ")"
+            for (biz, matched_flag, gers, name, value, distance, website, facebook, instagram, phone) in chunk
+        )
         path = f"{OUTDIR}/overture_matches.{chunks:03d}.sql"
         with open(path, "w") as handle:
             if chunks == 0:
@@ -193,13 +223,16 @@ def main():
             handle.write(
                 "INSERT INTO overture_matches (account_number, site_number, matched, gers_id,"
                 " matched_name, score, distance_m, website, has_facebook, has_instagram, phone,"
-                f" built_at) VALUES\n  {values};\n")
+                f" built_at) VALUES\n  {values};\n"
+            )
         chunks += 1
 
     print(f"wrote {chunks} chunk files to {OUTDIR}")
     print("load with:")
-    print(f"  for f in {OUTDIR}/overture_matches.*.sql; do "
-          "(cd api && npx wrangler d1 execute leadforge-db --remote --file=\"$f\") || break; done")
+    print(
+        f"  for f in {OUTDIR}/overture_matches.*.sql; do "
+        '(cd api && npx wrangler d1 execute leadforge-db --remote --file="$f") || break; done'
+    )
 
 
 if __name__ == "__main__":

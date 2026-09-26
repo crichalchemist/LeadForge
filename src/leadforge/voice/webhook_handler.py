@@ -17,20 +17,14 @@ logger = structlog.get_logger()
 router = APIRouter(prefix="/webhooks/retell", tags=["webhooks"])
 
 
-async def _get_outreach_by_call_id(
-    session: AsyncSession, call_id: str
-) -> OutreachRecord | None:
+async def _get_outreach_by_call_id(session: AsyncSession, call_id: str) -> OutreachRecord | None:
     """Find outreach record by Retell call ID."""
-    result = await session.execute(
-        select(OutreachRecord).where(OutreachRecord.retell_call_id == call_id)
-    )
+    result = await session.execute(select(OutreachRecord).where(OutreachRecord.retell_call_id == call_id))
     return result.scalar_one_or_none()
 
 
 @router.post("/call-complete")
-async def handle_call_complete(
-    request: Request, session: AsyncSession = Depends(get_db)
-):
+async def handle_call_complete(request: Request, session: AsyncSession = Depends(get_db)):
     """Handle Retell webhook events (call_ended, call_analyzed).
 
     Retell sends webhooks with structure: {"event": "...", "call": {...}}
@@ -44,9 +38,7 @@ async def handle_call_complete(
     # Verify webhook signature if API key is configured
     if settings.RETELL_API_KEY:
         signature = request.headers.get("x-retell-signature", "")
-        if signature and not verify_retell_signature(
-            payload_bytes, signature, settings.RETELL_API_KEY
-        ):
+        if signature and not verify_retell_signature(payload_bytes, signature, settings.RETELL_API_KEY):
             raise HTTPException(status_code=401, detail="Invalid webhook signature")
 
     body = await request.json()

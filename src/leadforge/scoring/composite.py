@@ -25,11 +25,7 @@ def compute_composite_score(
     viability = compute_viability(business, dp)
     pressure = compute_competitive_pressure(business, dp, context)
 
-    composite = (
-        deficit * WEIGHT_DEFICIT
-        + viability * WEIGHT_VIABILITY
-        + pressure * WEIGHT_PRESSURE
-    )
+    composite = deficit * WEIGHT_DEFICIT + viability * WEIGHT_VIABILITY + pressure * WEIGHT_PRESSURE
     composite = min(composite, 100.0)
 
     price_tier = compute_price_tier(business, pressure)
@@ -58,11 +54,7 @@ def compute_price_tier(business: Business, competitive_pressure: float) -> int:
         return 3
 
     # Tier 1: est_revenue < $15K OR employees < 3 OR competitive_pressure < 30
-    if (
-        (revenue is not None and revenue < 15000)
-        or employees < 3
-        or competitive_pressure < 30
-    ):
+    if (revenue is not None and revenue < 15000) or employees < 3 or competitive_pressure < 30:
         return 1
 
     # Default: Tier 2

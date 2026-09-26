@@ -149,9 +149,7 @@ async def test_logout_clears_cookie(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_deactivated_user_token_rejected(
-    client: AsyncClient, db_session: AsyncSession
-):
+async def test_deactivated_user_token_rejected(client: AsyncClient, db_session: AsyncSession):
     """Token for a deactivated user is rejected on request."""
     user = User(
         id=uuid.uuid4(),

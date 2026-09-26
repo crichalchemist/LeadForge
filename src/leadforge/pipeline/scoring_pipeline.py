@@ -37,9 +37,7 @@ async def run_scoring_pipeline(
         scores = compute_composite_score(business, business.digital_presence, context)
 
         # Find or create the latest score record
-        current_version = max(
-            (s.score_version for s in business.lead_scores), default=0
-        )
+        current_version = max((s.score_version for s in business.lead_scores), default=0)
 
         # Check if score has changed significantly
         latest_score = next(
@@ -47,11 +45,7 @@ async def run_scoring_pipeline(
             None,
         )
 
-        if (
-            latest_score
-            and latest_score.composite_acquisition_score
-            == scores["composite_acquisition_score"]
-        ):
+        if latest_score and latest_score.composite_acquisition_score == scores["composite_acquisition_score"]:
             continue  # No change, skip
 
         import uuid

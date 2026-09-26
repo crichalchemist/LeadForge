@@ -23,9 +23,7 @@ class VLLMClient:
             )
         return self._client
 
-    async def complete(
-        self, prompt: str, max_tokens: int = 500, temperature: float = 0.1
-    ) -> str | None:
+    async def complete(self, prompt: str, max_tokens: int = 500, temperature: float = 0.1) -> str | None:
         """Generate a completion from the vLLM server."""
         try:
             client = await self._get_client()

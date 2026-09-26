@@ -81,9 +81,7 @@ async def _enrich_and_persist(
         place_id = place.get("place_id")
         if place_id:
             # Dedup check: does a business with this google_place_id already exist?
-            existing = await session.execute(
-                select(Business).where(Business.google_place_id == place_id)
-            )
+            existing = await session.execute(select(Business).where(Business.google_place_id == place_id))
             if existing.scalar_one_or_none():
                 logger.info("dedup_google_place_id", name=name, place_id=place_id)
                 return None
@@ -139,9 +137,7 @@ async def _enrich_and_persist(
         business_id=business.id,
         has_website=enrichment.get("has_website", False),
         website_url=enrichment.get("website"),
-        has_google_business_profile=enrichment.get(
-            "has_google_business_profile", False
-        ),
+        has_google_business_profile=enrichment.get("has_google_business_profile", False),
         google_review_count=enrichment.get("google_review_count", 0),
         google_avg_rating=enrichment.get("google_avg_rating"),
     )

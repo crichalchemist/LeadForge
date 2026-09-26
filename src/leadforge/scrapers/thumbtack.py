@@ -37,12 +37,8 @@ class ThumbtackClient(BaseAPIClient):
                     ld_json = json.loads(script_match.group(1))
                     return {
                         "thumbtack_name": ld_json.get("name"),
-                        "thumbtack_rating": ld_json.get("aggregateRating", {}).get(
-                            "ratingValue"
-                        ),
-                        "thumbtack_review_count": ld_json.get(
-                            "aggregateRating", {}
-                        ).get("reviewCount"),
+                        "thumbtack_rating": ld_json.get("aggregateRating", {}).get("ratingValue"),
+                        "thumbtack_review_count": ld_json.get("aggregateRating", {}).get("reviewCount"),
                         "thumbtack_hires": None,  # Not in LD+JSON, needs deeper parsing
                     }
                 except json.JSONDecodeError:

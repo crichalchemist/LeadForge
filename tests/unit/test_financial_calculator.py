@@ -1,6 +1,5 @@
 """Tests for NOF grant financial calculator."""
 
-
 from leadforge.grants.financial_calculator import compute_grant_financials
 
 
@@ -51,9 +50,7 @@ def test_negative_project_cost():
 
 
 def test_with_acquisition_cost():
-    f = compute_grant_financials(
-        total_project_cost=200_000.0, acquisition_cost=50_000.0
-    )
+    f = compute_grant_financials(total_project_cost=200_000.0, acquisition_cost=50_000.0)
     assert f.acquisition_cost == 50_000.0
     # Base grant calculation unchanged
     assert f.base_grant == 150_000.0

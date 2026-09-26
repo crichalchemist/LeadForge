@@ -15,6 +15,7 @@ def _strip_fences(text: str) -> str:
     m = _FENCE_RE.search(text)
     return m.group(1).strip() if m else text.strip()
 
+
 GBP_ASSESSMENT_PROMPT = """Assess the Google Business Profile completeness for this business.
 
 Business data:
@@ -30,9 +31,7 @@ Respond with ONLY a JSON object:
 """
 
 
-async def assess_gbp(
-    dp: DigitalPresence, has_phone: bool = False, client: ClaudeClient | None = None
-) -> dict:
+async def assess_gbp(dp: DigitalPresence, has_phone: bool = False, client: ClaudeClient | None = None) -> dict:
     """Assess Google Business Profile completeness using Claude."""
     prompt = GBP_ASSESSMENT_PROMPT.format(
         has_gbp=dp.has_google_business_profile,

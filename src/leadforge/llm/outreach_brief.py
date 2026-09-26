@@ -16,6 +16,7 @@ def _strip_fences(text: str) -> str:
     m = _FENCE_RE.search(text)
     return m.group(1).strip() if m else text.strip()
 
+
 OUTREACH_BRIEF_PROMPT = """Generate an outreach brief for calling this small \
 business owner about digital marketing services.
 
@@ -154,23 +155,16 @@ def _fallback_brief(business: Business, nof_eligible: bool = False) -> dict:
     if nof_eligible:
         return {
             "talking_points": [
-                f"{business.name} may qualify for City of Chicago "
-                "Neighborhood Opportunity Fund grants",
-                "Grants can cover up to $250,000 for facade improvements, "
-                "equipment, and expansion",
+                f"{business.name} may qualify for City of Chicago Neighborhood Opportunity Fund grants",
+                "Grants can cover up to $250,000 for facade improvements, equipment, and expansion",
                 "We help navigate the application process and digital requirements",
             ],
             "observations": [
                 "Located on an eligible NOF corridor",
-                "Strong candidate for grant funding based on location and "
-                "business type",
+                "Strong candidate for grant funding based on location and business type",
             ],
-            "pitch_angle": (
-                "Help secure City grant funding to grow and improve your business"
-            ),
-            "opening_line": (
-                f"Hi, I'm calling about a grant opportunity for {business.name}"
-            ),
+            "pitch_angle": ("Help secure City grant funding to grow and improve your business"),
+            "opening_line": (f"Hi, I'm calling about a grant opportunity for {business.name}"),
             "voicemail_script": (
                 f"Hi, this is a call about {business.name}. The City has grant "
                 "funding available for businesses on your corridor—up to $250,000. "
@@ -178,28 +172,19 @@ def _fallback_brief(business: Business, nof_eligible: bool = False) -> dict:
             ),
             "objection_responses": {
                 "too_complicated": (
-                    "We handle the paperwork and guide you through every step. "
-                    "It's simpler than you'd think."
+                    "We handle the paperwork and guide you through every step. It's simpler than you'd think."
                 ),
                 "dont_need_grants": (
                     "I understand. This is free money from the City to invest "
                     "in your business. No obligation to explore."
                 ),
-                "already_applied": (
-                    "Great! We can help with future rounds or other funding "
-                    "opportunities."
-                ),
-                "not_interested": (
-                    "No problem. Can I follow up in a month with more details?"
-                ),
+                "already_applied": ("Great! We can help with future rounds or other funding opportunities."),
+                "not_interested": ("No problem. Can I follow up in a month with more details?"),
             },
         }
     else:
         return {
-            "talking_points": [
-                f"We noticed {business.name} could benefit from increased "
-                "online visibility"
-            ],
+            "talking_points": [f"We noticed {business.name} could benefit from increased online visibility"],
             "observations": ["Limited digital presence compared to competitors"],
             "pitch_angle": "Help increase local visibility and customer discovery",
             "opening_line": f"Hi, I'm calling about {business.name}",
@@ -209,12 +194,9 @@ def _fallback_brief(business: Business, nof_eligible: bool = False) -> dict:
             ),
             "objection_responses": {
                 "price": "We have flexible plans starting at $150/month",
-                "not_interested": (
-                    "I understand. Would it be okay to check back in a month?"
-                ),
+                "not_interested": ("I understand. Would it be okay to check back in a month?"),
                 "already_have_agency": (
-                    "Great to hear you're investing in marketing. We specialize "
-                    "in hyper-local businesses."
+                    "Great to hear you're investing in marketing. We specialize in hyper-local businesses."
                 ),
             },
         }

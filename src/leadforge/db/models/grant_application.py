@@ -35,9 +35,7 @@ class NOFStage(str, enum.Enum):
 class GrantApplication(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "grant_applications"
 
-    business_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("businesses.id", ondelete="CASCADE"), index=True
-    )
+    business_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("businesses.id", ondelete="CASCADE"), index=True)
 
     # Status
     status: Mapped[NOFStage] = mapped_column(
@@ -55,9 +53,7 @@ class GrantApplication(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     total_project_cost: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     base_grant_amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     acquisition_cost: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    acquisition_coverage_pct: Mapped[Optional[float]] = mapped_column(
-        Float, nullable=True
-    )
+    acquisition_coverage_pct: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     taf_amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     owner_contribution: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     financing_amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)

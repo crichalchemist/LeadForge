@@ -55,9 +55,7 @@ class MeetingType(str, enum.Enum):
 class OutreachRecord(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "outreach_records"
 
-    business_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("businesses.id", ondelete="CASCADE"), index=True
-    )
+    business_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("businesses.id", ondelete="CASCADE"), index=True)
 
     # Pipeline status
     status: Mapped[PipelineStage] = mapped_column(
@@ -68,21 +66,13 @@ class OutreachRecord(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     retell_call_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Contact info
-    first_contact_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    last_contact_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    contact_method: Mapped[Optional[str]] = mapped_column(
-        String(20), nullable=True
-    )  # voice/email/sms/in_person
+    first_contact_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_contact_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    contact_method: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)  # voice/email/sms/in_person
 
     # Call data
     call_transcript: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    call_sentiment_score: Mapped[Optional[float]] = mapped_column(
-        Float, nullable=True
-    )  # -1 to 1
+    call_sentiment_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # -1 to 1
     call_disposition: Mapped[Optional[CallDisposition]] = mapped_column(
         SAEnum(CallDisposition, values_callable=lambda e: [x.value for x in e]), nullable=True
     )
@@ -93,9 +83,7 @@ class OutreachRecord(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     meeting_type: Mapped[Optional[MeetingType]] = mapped_column(
         SAEnum(MeetingType, values_callable=lambda e: [x.value for x in e]), nullable=True
     )
-    meeting_datetime: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    meeting_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Follow-up
     follow_up_count: Mapped[int] = mapped_column(Integer, default=0)

@@ -92,9 +92,7 @@ async def get_ranked_leads(
                 .label("rn"),
             ).where(OutreachRecord.business_id.in_(biz_ids))
         ).subquery()
-        outreach_q = select(lo_sub.c.business_id, lo_sub.c.status).where(
-            lo_sub.c.rn == 1
-        )
+        outreach_q = select(lo_sub.c.business_id, lo_sub.c.status).where(lo_sub.c.rn == 1)
         outreach_rows = (await session.execute(outreach_q)).all()
         outreach_map = {r[0]: r[1] for r in outreach_rows}
 
@@ -115,14 +113,10 @@ async def get_ranked_leads(
 
 
 @router.get("/{business_id}/score", response_model=list[ScoreBreakdown])
-async def get_score_history(
-    business_id: uuid.UUID, session: AsyncSession = Depends(get_db)
-):
+async def get_score_history(business_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
     """Get all score versions for a business (audit trail)."""
     result = await session.execute(
-        select(LeadScore)
-        .where(LeadScore.business_id == business_id)
-        .order_by(LeadScore.score_version.desc())
+        select(LeadScore).where(LeadScore.business_id == business_id).order_by(LeadScore.score_version.desc())
     )
     scores = result.scalars().all()
     if not scores:

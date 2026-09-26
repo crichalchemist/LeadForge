@@ -25,9 +25,7 @@ class ClaudeClient:
                 self._client = AsyncAnthropic()
         return self._client
 
-    async def complete(
-        self, prompt: str, max_tokens: int = 1000, temperature: float = 0.3
-    ) -> str | None:
+    async def complete(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.3) -> str | None:
         """Generate completion via Claude API."""
         try:
             client = self._get_client()

@@ -36,18 +36,14 @@ class TestDiscoveryPipelineIntegration:
                                 "place_id": "ChIJ_sample_place_id_456",
                                 "name": "Fresh Cuts Barbershop",
                                 "formatted_address": "456 S Cottage Grove Ave, Chicago, IL 60619",
-                                "geometry": {
-                                    "location": {"lat": 41.7590, "lng": -87.6065}
-                                },
+                                "geometry": {"location": {"lat": 41.7590, "lng": -87.6065}},
                             }
                         ],
                         "status": "OK",
                     },
                 ),
             ]
-            find_route = respx.get(
-                "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
-            )
+            find_route = respx.get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json")
             find_route.side_effect = find_place_responses
 
             # Mock Google Place Details
@@ -70,9 +66,7 @@ class TestDiscoveryPipelineIntegration:
                     },
                 ),
             ]
-            details_route = respx.get(
-                "https://maps.googleapis.com/maps/api/place/details/json"
-            )
+            details_route = respx.get("https://maps.googleapis.com/maps/api/place/details/json")
             details_route.side_effect = details_responses
 
             # Use in-memory SQLite for test (no PostGIS, so skip geometry)
@@ -87,9 +81,7 @@ class TestDiscoveryPipelineIntegration:
             session.add = MagicMock()
             session.commit = AsyncMock()
 
-            businesses = await run_discovery(
-                session, "60619", NicheType.BARBERSHOPS, limit=2
-            )
+            businesses = await run_discovery(session, "60619", NicheType.BARBERSHOPS, limit=2)
 
             # Verify businesses were created
             assert len(businesses) == 2

@@ -19,9 +19,7 @@ def enrich_business_task(self, business_id: str):
         from leadforge.pipeline.enrichment import enrich_business
 
         async with async_session() as session:
-            result = await session.execute(
-                select(Business).where(Business.id == business_id)
-            )
+            result = await session.execute(select(Business).where(Business.id == business_id))
             business = result.scalar_one_or_none()
             if not business:
                 logger.warning("business_not_found", business_id=business_id)
@@ -54,9 +52,7 @@ def compute_all_contexts_task(self, zip_code: str, niche: str):
     try:
         asyncio.run(_run())
     except Exception as exc:
-        logger.error(
-            "context_task_failed", zip_code=zip_code, niche=niche, error=str(exc)
-        )
+        logger.error("context_task_failed", zip_code=zip_code, niche=niche, error=str(exc))
         raise self.retry(exc=exc)
 
 
@@ -72,14 +68,10 @@ def full_scoring_task(self, zip_code: str, niche: str):
         niche_enum = NicheType(niche)
         async with async_session() as session:
             count = await run_scoring_pipeline(session, zip_code, niche_enum)
-            logger.info(
-                "scoring_task_complete", zip_code=zip_code, niche=niche, scored=count
-            )
+            logger.info("scoring_task_complete", zip_code=zip_code, niche=niche, scored=count)
 
     try:
         asyncio.run(_run())
     except Exception as exc:
-        logger.error(
-            "scoring_task_failed", zip_code=zip_code, niche=niche, error=str(exc)
-        )
+        logger.error("scoring_task_failed", zip_code=zip_code, niche=niche, error=str(exc))
         raise self.retry(exc=exc)

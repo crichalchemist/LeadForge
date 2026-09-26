@@ -58,8 +58,7 @@ async def compute_competitive_context(
         .where(
             Business.zip_code == zip_code,
             Business.niche == niche,
-            DigitalPresence.has_google_ads.is_(True)
-            | DigitalPresence.has_meta_ads.is_(True),
+            DigitalPresence.has_google_ads.is_(True) | DigitalPresence.has_meta_ads.is_(True),
         )
     )
     ads_count = ads_count_result.scalar() or 0
@@ -91,9 +90,7 @@ async def compute_competitive_context(
         async with CensusClient() as census:
             demographics = await census.get_zip_demographics(zip_code)
             if demographics:
-                ctx.median_household_income = demographics.get(
-                    "median_household_income"
-                )
+                ctx.median_household_income = demographics.get("median_household_income")
                 ctx.population_density = demographics.get("population_density")
 
     await session.flush()

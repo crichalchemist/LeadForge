@@ -9,6 +9,7 @@ neither shows up as a test failure anywhere else -- the same reason scoring-pari
 Python-scored vectors. Vectors are real measured pairs plus the adversarial cases that earlier
 versions of this scorer got wrong.
 """
+
 import json
 import sys
 

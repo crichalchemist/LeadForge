@@ -15,6 +15,7 @@ def _strip_fences(text: str) -> str:
     m = _FENCE_RE.search(text)
     return m.group(1).strip() if m else text.strip()
 
+
 ENTITY_RESOLUTION_PROMPT = """Compare these two business records and determine if they are the same business.
 
 Business A:
@@ -36,9 +37,7 @@ Respond with ONLY a JSON object:
 MERGE_THRESHOLD = 0.8
 
 
-async def resolve_entities(
-    record_a: dict, record_b: dict, client: VLLMClient | None = None
-) -> dict:
+async def resolve_entities(record_a: dict, record_b: dict, client: VLLMClient | None = None) -> dict:
     """Compare two business records using LLM and return match result.
 
     Returns: {"is_match": bool, "confidence": float, "reason": str}
@@ -66,8 +65,7 @@ async def resolve_entities(
         # Parse JSON response
         result = json.loads(_strip_fences(response))
         return {
-            "is_match": result.get("is_match", False)
-            and result.get("confidence", 0) >= MERGE_THRESHOLD,
+            "is_match": result.get("is_match", False) and result.get("confidence", 0) >= MERGE_THRESHOLD,
             "confidence": result.get("confidence", 0.0),
             "reason": result.get("reason", ""),
         }

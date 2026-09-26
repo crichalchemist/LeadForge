@@ -67,9 +67,7 @@ def compute_nof_eligibility(
 
     # Hard gate: Not on any corridor
     if corridor_info is None:
-        logger.info(
-            "nof_eligibility_hard_gate", reason="not_on_corridor", niche=niche.value
-        )
+        logger.info("nof_eligibility_hard_gate", reason="not_on_corridor", niche=niche.value)
         return 0.0
 
     # Hard gate: Mobile-only businesses ineligible
@@ -83,9 +81,7 @@ def compute_nof_eligibility(
 
     # Hard gate: Revoked license
     if license_status == LicenseStatus.REVOKED:
-        logger.info(
-            "nof_eligibility_hard_gate", reason="revoked_license", niche=niche.value
-        )
+        logger.info("nof_eligibility_hard_gate", reason="revoked_license", niche=niche.value)
         return 0.0
 
     # Corridor scoring

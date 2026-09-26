@@ -15,6 +15,7 @@ def _strip_fences(text: str) -> str:
     m = _FENCE_RE.search(text)
     return m.group(1).strip() if m else text.strip()
 
+
 EXTRACTION_PROMPT = """Extract business information from this website content.
 Return ONLY a JSON object with these fields (use null if not found):
 
@@ -57,9 +58,7 @@ NICHE_MEDIAN_REVENUE: dict[str, float] = {
 }
 
 
-async def extract_website_data(
-    html_content: str, client: VLLMClient | None = None
-) -> dict:
+async def extract_website_data(html_content: str, client: VLLMClient | None = None) -> dict:
     """Extract structured business data from website HTML using LLM."""
     # Truncate HTML to avoid token limits
     truncated = html_content[:4000] if len(html_content) > 4000 else html_content

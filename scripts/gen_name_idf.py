@@ -15,6 +15,7 @@ rare, and the reader assigns it log(N) -- exact for a token seen once, and the r
 for one never seen. That single principled default is what keeps the file to ~390 KiB instead of the
 ~1.5 MiB a full 99k-token vocabulary would need.
 """
+
 import json
 import math
 import re
@@ -30,15 +31,33 @@ CHICAGO = "bbox.ymin BETWEEN 41.60 AND 42.05 AND bbox.xmin BETWEEN -87.95 AND -8
 rows = con.execute(f"""SELECT names.primary FROM read_parquet('{P}', filename=false, hive_partitioning=1)
   WHERE {CHICAGO} AND names.primary IS NOT NULL""").fetchall()
 
-STOP = ['llc','inc','corp','corporation','ltd','the','and','dba','co','company',
-        'incorporated','of','by','at']
+STOP = [
+    "llc",
+    "inc",
+    "corp",
+    "corporation",
+    "ltd",
+    "the",
+    "and",
+    "dba",
+    "co",
+    "company",
+    "incorporated",
+    "of",
+    "by",
+    "at",
+]
 stop = set(STOP)
+
+
 def toks(s):
     out = []
     for t in re.findall(r"[a-z0-9]+", (s or "").lower()):
-        if len(t) < 3 or t in stop: continue
-        out.append(t[:-1] if len(t) > 4 and t.endswith('s') else t)
+        if len(t) < 3 or t in stop:
+            continue
+        out.append(t[:-1] if len(t) > 4 and t.endswith("s") else t)
     return out
+
 
 df, n = Counter(), 0
 for (nm,) in rows:

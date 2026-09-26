@@ -8,9 +8,7 @@ logger = structlog.get_logger()
 
 
 @celery_app.task(bind=True, max_retries=2, default_retry_delay=120)
-def outreach_batch_task(
-    self, zip_code: str, niche: str, batch_size: int = 10, min_score: float = 30.0
-):
+def outreach_batch_task(self, zip_code: str, niche: str, batch_size: int = 10, min_score: float = 30.0):
     """Celery task to run outreach pipeline for a zip+niche batch."""
 
     async def _run():
@@ -37,9 +35,7 @@ def outreach_batch_task(
     try:
         asyncio.run(_run())
     except Exception as exc:
-        logger.error(
-            "outreach_batch_failed", zip_code=zip_code, niche=niche, error=str(exc)
-        )
+        logger.error("outreach_batch_failed", zip_code=zip_code, niche=niche, error=str(exc))
         raise self.retry(exc=exc)
 
 
@@ -58,9 +54,7 @@ def initiate_single_call_task(self, outreach_id: str):
         from leadforge.voice.retell_client import RetellClient
 
         async with async_session() as session:
-            result = await session.execute(
-                select(OutreachRecord).where(OutreachRecord.id == outreach_id)
-            )
+            result = await session.execute(select(OutreachRecord).where(OutreachRecord.id == outreach_id))
             outreach = result.scalar_one_or_none()
             if not outreach:
                 logger.warning("outreach_not_found", outreach_id=outreach_id)

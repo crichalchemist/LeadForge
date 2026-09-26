@@ -43,9 +43,7 @@ def rings_from(feature: dict, is_priority: int) -> list[dict]:
     for polygon in polygons:
         if not polygon:
             continue
-        ring = [
-            [round(x, PRECISION), round(y, PRECISION)] for x, y in polygon[0]
-        ]
+        ring = [[round(x, PRECISION), round(y, PRECISION)] for x, y in polygon[0]]
         xs = [p[0] for p in ring]
         ys = [p[1] for p in ring]
         out.append(

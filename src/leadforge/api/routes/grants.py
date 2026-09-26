@@ -74,9 +74,7 @@ BOARD_GROUPS = {
 async def get_grant_board(session: AsyncSession = Depends(get_db)):
     """Get grant Kanban board grouped by stage."""
     # Stage counts
-    count_q = select(GrantApplication.status, func.count(GrantApplication.id)).group_by(
-        GrantApplication.status
-    )
+    count_q = select(GrantApplication.status, func.count(GrantApplication.id)).group_by(GrantApplication.status)
     counts = dict((await session.execute(count_q)).all())
 
     columns = []
@@ -102,9 +100,7 @@ async def get_grant_board(session: AsyncSession = Depends(get_db)):
                     business_name=row[1],
                     corridor_name=row[0].corridor_name,
                     estimated_grant=row[0].base_grant_amount,
-                    days_in_stage=(
-                        now - row[0].updated_at.replace(tzinfo=timezone.utc)
-                    ).days
+                    days_in_stage=(now - row[0].updated_at.replace(tzinfo=timezone.utc)).days
                     if row[0].updated_at
                     else 0,
                 )
@@ -128,9 +124,7 @@ async def get_grant_financials(
     session: AsyncSession = Depends(get_db),
 ):
     """Compute grant financials for an application."""
-    result = await session.execute(
-        select(GrantApplication).where(GrantApplication.id == grant_id)
-    )
+    result = await session.execute(select(GrantApplication).where(GrantApplication.id == grant_id))
     grant = result.scalar_one_or_none()
     if not grant:
         raise HTTPException(status_code=404, detail="Grant application not found")
@@ -208,9 +202,7 @@ async def create_grant(
 ):
     """Create a new grant application."""
     # Verify business exists
-    biz_result = await session.execute(
-        select(Business).where(Business.id == body.business_id)
-    )
+    biz_result = await session.execute(select(Business).where(Business.id == body.business_id))
     if not biz_result.scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Business not found")
 
@@ -236,9 +228,7 @@ async def update_grant(
     current_user: User = Depends(require_admin),
 ):
     """Partially update a grant application."""
-    result = await session.execute(
-        select(GrantApplication).where(GrantApplication.id == grant_id)
-    )
+    result = await session.execute(select(GrantApplication).where(GrantApplication.id == grant_id))
     grant = result.scalar_one_or_none()
     if not grant:
         raise HTTPException(status_code=404, detail="Grant application not found")
@@ -261,9 +251,7 @@ async def transition_grant_stage(
     current_user: User = Depends(require_admin),
 ):
     """Transition a grant application to a new stage."""
-    result = await session.execute(
-        select(GrantApplication).where(GrantApplication.id == grant_id)
-    )
+    result = await session.execute(select(GrantApplication).where(GrantApplication.id == grant_id))
     grant = result.scalar_one_or_none()
     if not grant:
         raise HTTPException(status_code=404, detail="Grant application not found")
@@ -307,15 +295,11 @@ async def list_grant_documents(
 ):
     """Get document checklist for a grant application."""
     # Verify grant exists
-    grant_result = await session.execute(
-        select(GrantApplication).where(GrantApplication.id == grant_id)
-    )
+    grant_result = await session.execute(select(GrantApplication).where(GrantApplication.id == grant_id))
     if not grant_result.scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Grant application not found")
 
-    result = await session.execute(
-        select(GrantDocument).where(GrantDocument.grant_application_id == grant_id)
-    )
+    result = await session.execute(select(GrantDocument).where(GrantDocument.grant_application_id == grant_id))
     return result.scalars().all()
 
 

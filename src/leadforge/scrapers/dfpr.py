@@ -47,7 +47,5 @@ class DFPRClient(BaseAPIClient):
                 "name": result.get("name"),
             }
         except Exception as e:
-            logger.warning(
-                "dfpr_lookup_failed", error=str(e), license_number=license_number
-            )
+            logger.warning("dfpr_lookup_failed", error=str(e), license_number=license_number)
             return None

@@ -24,7 +24,5 @@ class CompetitiveContext(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     avg_rating: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     # Demographics (from Census API)
-    median_household_income: Mapped[Optional[float]] = mapped_column(
-        Float, nullable=True
-    )
+    median_household_income: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     population_density: Mapped[Optional[float]] = mapped_column(Float, nullable=True)

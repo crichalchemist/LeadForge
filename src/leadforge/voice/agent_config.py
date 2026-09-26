@@ -98,9 +98,7 @@ def build_agent_prompt(
 
     if nof_context:
         # Use NOF grant-focused template
-        grant_talking_points = "\n".join(
-            f"- {tp}" for tp in nof_context.get("grant_talking_points", [])
-        )
+        grant_talking_points = "\n".join(f"- {tp}" for tp in nof_context.get("grant_talking_points", []))
 
         return NOF_VOICE_AGENT_SYSTEM_PROMPT.format(
             business_name=business_name,
@@ -116,9 +114,7 @@ def build_agent_prompt(
         )
     else:
         # Use standard marketing template
-        talking_points = "\n".join(
-            f"- {tp}" for tp in outreach_brief.get("talking_points", [])
-        )
+        talking_points = "\n".join(f"- {tp}" for tp in outreach_brief.get("talking_points", []))
 
         return VOICE_AGENT_SYSTEM_PROMPT.format(
             business_name=business_name,

@@ -54,6 +54,4 @@ class GrantDocument(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     reviewed_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Relationship
-    grant_application: Mapped["GrantApplication"] = relationship(
-        back_populates="documents"
-    )
+    grant_application: Mapped["GrantApplication"] = relationship(back_populates="documents")

@@ -36,12 +36,8 @@ class AngiClient(BaseAPIClient):
                     ld_json = json.loads(script_match.group(1))
                     return {
                         "angi_name": ld_json.get("name"),
-                        "angi_rating": ld_json.get("aggregateRating", {}).get(
-                            "ratingValue"
-                        ),
-                        "angi_review_count": ld_json.get("aggregateRating", {}).get(
-                            "reviewCount"
-                        ),
+                        "angi_rating": ld_json.get("aggregateRating", {}).get("ratingValue"),
+                        "angi_review_count": ld_json.get("aggregateRating", {}).get("reviewCount"),
                     }
                 except json.JSONDecodeError:
                     pass

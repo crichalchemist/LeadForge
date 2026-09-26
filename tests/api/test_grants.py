@@ -45,9 +45,7 @@ async def test_list_grants(client, auth_headers, sample_business):
 
 
 @pytest.mark.asyncio
-async def test_list_grants_filter_status(
-    client, auth_headers, sample_business, db_session
-):
+async def test_list_grants_filter_status(client, auth_headers, sample_business, db_session):
     # Create a grant via API (starts as eligibility_assessed)
     resp1 = await client.post(
         "/grants/",
@@ -71,9 +69,7 @@ async def test_list_grants_filter_status(
     )
 
     # Filter by intake
-    resp = await client.get(
-        "/grants/", params={"status": "intake"}, headers=auth_headers
-    )
+    resp = await client.get("/grants/", params={"status": "intake"}, headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert len(data) == 1
@@ -172,9 +168,7 @@ async def test_get_grant_board(client, auth_headers, sample_business):
     # Should have columns for all stages
     assert len(data["columns"]) > 0
     # The eligibility_assessed column should have 1 card
-    ea_col = next(
-        (c for c in data["columns"] if c["stage"] == "eligibility_assessed"), None
-    )
+    ea_col = next((c for c in data["columns"] if c["stage"] == "eligibility_assessed"), None)
     assert ea_col is not None
     assert ea_col["count"] == 1
     assert len(ea_col["cards"]) == 1

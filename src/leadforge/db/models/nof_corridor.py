@@ -24,14 +24,8 @@ class NOFCorridor(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     # PostGIS geometry
-    geometry: Mapped[Optional[str]] = mapped_column(
-        Geometry("MULTILINESTRING", srid=4326), nullable=True
-    )
+    geometry: Mapped[Optional[str]] = mapped_column(Geometry("MULTILINESTRING", srid=4326), nullable=True)
 
     # Source tracking
-    source_updated_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    fetched_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    source_updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    fetched_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

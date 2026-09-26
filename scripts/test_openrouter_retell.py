@@ -48,6 +48,7 @@ grant eligibility automatically.
 
 # ── Step 1: OpenRouter ──────────────────────────────────────────────
 
+
 async def test_openrouter() -> str:
     """Hit OpenRouter to rewrite the build update in a warm, conversational tone."""
     print("\n=== Step 1: OpenRouter LLM Routing ===")
@@ -96,6 +97,7 @@ async def test_openrouter() -> str:
 
 # ── Step 2: Retell – create LLM ────────────────────────────────────
 
+
 async def create_retell_llm(update_text: str) -> str:
     """Create a Retell LLM with the build update as its system prompt."""
     print("\n=== Step 2: Create Retell LLM ===")
@@ -121,8 +123,7 @@ async def create_retell_llm(update_text: str) -> str:
             json={
                 "general_prompt": system_prompt,
                 "begin_message": (
-                    "Hey! This is the LeadForge AI assistant calling with a "
-                    "quick project update. Got a minute?"
+                    "Hey! This is the LeadForge AI assistant calling with a quick project update. Got a minute?"
                 ),
             },
         )
@@ -135,6 +136,7 @@ async def create_retell_llm(update_text: str) -> str:
 
 
 # ── Step 3: Retell – create Agent ───────────────────────────────────
+
 
 async def create_retell_agent(llm_id: str) -> str:
     """Create a Retell voice agent backed by the LLM."""
@@ -166,6 +168,7 @@ async def create_retell_agent(llm_id: str) -> str:
 
 
 # ── Step 4: Retell – initiate call ──────────────────────────────────
+
 
 async def initiate_call(agent_id: str) -> dict:
     """Place the outbound call."""
@@ -212,6 +215,7 @@ async def initiate_call(agent_id: str) -> dict:
 
 
 # ── Main ────────────────────────────────────────────────────────────
+
 
 async def main():
     print("=" * 60)

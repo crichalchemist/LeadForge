@@ -29,9 +29,7 @@ async def get_outreach_history(
     )
     records = result.scalars().all()
     count_result = await session.execute(
-        select(func.count(OutreachRecord.id)).where(
-            OutreachRecord.business_id == business_id
-        )
+        select(func.count(OutreachRecord.id)).where(OutreachRecord.business_id == business_id)
     )
     total = count_result.scalar() or 0
     return OutreachListResponse(items=records, total=total)
@@ -40,9 +38,7 @@ async def get_outreach_history(
 @router.get("/{outreach_id}", response_model=OutreachDetail)
 async def get_outreach(outreach_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
     """Get a single outreach record with full details including transcript."""
-    result = await session.execute(
-        select(OutreachRecord).where(OutreachRecord.id == outreach_id)
-    )
+    result = await session.execute(select(OutreachRecord).where(OutreachRecord.id == outreach_id))
     record = result.scalar_one_or_none()
     if not record:
         raise HTTPException(status_code=404, detail="Outreach record not found")
@@ -50,14 +46,10 @@ async def get_outreach(outreach_id: uuid.UUID, session: AsyncSession = Depends(g
 
 
 @router.get("/{outreach_id}/transcript")
-async def get_transcript(
-    outreach_id: uuid.UUID, session: AsyncSession = Depends(get_db)
-):
+async def get_transcript(outreach_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
     """Get the call transcript for an outreach record."""
     result = await session.execute(
-        select(OutreachRecord.call_transcript, OutreachRecord.retell_call_id).where(
-            OutreachRecord.id == outreach_id
-        )
+        select(OutreachRecord.call_transcript, OutreachRecord.retell_call_id).where(OutreachRecord.id == outreach_id)
     )
     row = result.one_or_none()
     if not row:
@@ -73,9 +65,7 @@ async def update_outreach(
     current_user: User = Depends(require_admin),
 ):
     """Update notes or assignment for an outreach record."""
-    result = await session.execute(
-        select(OutreachRecord).where(OutreachRecord.id == outreach_id)
-    )
+    result = await session.execute(select(OutreachRecord).where(OutreachRecord.id == outreach_id))
     record = result.scalar_one_or_none()
     if not record:
         raise HTTPException(status_code=404, detail="Outreach record not found")

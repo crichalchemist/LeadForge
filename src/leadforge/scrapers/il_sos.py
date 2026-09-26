@@ -28,9 +28,7 @@ class ILSOSClient(BaseAPIClient):
             return {
                 "entity_name": business_name,
                 "entity_status": self._extract_field(text, "Status"),
-                "incorporation_date": self._extract_field(
-                    text, "Date of Incorporation"
-                ),
+                "incorporation_date": self._extract_field(text, "Date of Incorporation"),
                 "registered_agent": self._extract_field(text, "Agent Name"),
             }
         except Exception as e:

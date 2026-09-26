@@ -3053,4 +3053,3 @@ git commit -m "refactor(api): finish contract reconciliation; add ADR-026"
 - `api/src/lib/scoring.ts` formulas and `calcPriceTier` diverge from `src/leadforge/scoring/`. Re-port in the Phase 3 scoring task with `tests/unit/test_scoring.py`, `test_composite.py`, `test_viability.py`, `test_competitive_pressure.py` as the spec.
 - No script exports businesses, scores and outreach from PostgreSQL into D1. `scripts/precompute_corridors.py` emits only `{ id, in_nof_corridor, nof_corridor_name }`. Phase 0's "export + import" needs a full-table exporter against the new column names.
 - The remote D1 (`leadforge-db`) was created with the superseded `schema.sql`. Before `wrangler d1 migrations apply --remote`, drop the old tables or recreate the database; nothing in it is production data.
-

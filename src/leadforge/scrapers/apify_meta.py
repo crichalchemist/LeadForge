@@ -97,9 +97,7 @@ class ApifyMetaClient(BaseAPIClient):
             "ig_bio": profile.get("biography"),
         }
 
-    async def get_instagram_location_tags(
-        self, place_name: str, location_id: str | None = None
-    ) -> dict | None:
+    async def get_instagram_location_tags(self, place_name: str, location_id: str | None = None) -> dict | None:
         """Get Instagram posts tagged at a location."""
         if not location_id:
             return None
@@ -107,9 +105,7 @@ class ApifyMetaClient(BaseAPIClient):
         results = await self.run_actor(
             self.ACTORS["instagram_location"],
             {
-                "directUrls": [
-                    f"https://www.instagram.com/explore/locations/{location_id}/"
-                ],
+                "directUrls": [f"https://www.instagram.com/explore/locations/{location_id}/"],
                 "resultsLimit": 50,
             },
         )

@@ -10,9 +10,7 @@ class TestCompositeScoring:
     def test_composite_is_weighted_sum(self):
         """Verify weights are applied correctly: 0.40 + 0.35 + 0.25."""
         with (
-            patch(
-                "leadforge.scoring.composite.compute_digital_deficit", return_value=50.0
-            ),
+            patch("leadforge.scoring.composite.compute_digital_deficit", return_value=50.0),
             patch("leadforge.scoring.composite.compute_viability", return_value=60.0),
             patch(
                 "leadforge.scoring.composite.compute_competitive_pressure",
@@ -52,9 +50,7 @@ class TestCompositeScoring:
 
     def test_returns_all_sub_scores(self):
         with (
-            patch(
-                "leadforge.scoring.composite.compute_digital_deficit", return_value=50.0
-            ),
+            patch("leadforge.scoring.composite.compute_digital_deficit", return_value=50.0),
             patch("leadforge.scoring.composite.compute_viability", return_value=50.0),
             patch(
                 "leadforge.scoring.composite.compute_competitive_pressure",

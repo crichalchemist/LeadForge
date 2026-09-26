@@ -24,9 +24,7 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 async def get_conversion_funnel(session: AsyncSession = Depends(get_db)):
     """Get pipeline funnel with counts per stage."""
     result = await session.execute(
-        select(OutreachRecord.status, func.count(OutreachRecord.id)).group_by(
-            OutreachRecord.status
-        )
+        select(OutreachRecord.status, func.count(OutreachRecord.id)).group_by(OutreachRecord.status)
     )
     stage_counts = dict(result.all())
 
@@ -66,14 +64,8 @@ async def get_score_distribution(session: AsyncSession = Depends(get_db)):
     # Build 10 buckets of width 10 (0-10, 10-20, ..., 90-100)
     buckets = []
     for i in range(0, 100, 10):
-        count = (
-            sum(1 for s in scores if i <= s < i + 10)
-            if i < 90
-            else sum(1 for s in scores if i <= s <= 100)
-        )
-        buckets.append(
-            ScoreBucket(range_min=float(i), range_max=float(i + 10), count=count)
-        )
+        count = sum(1 for s in scores if i <= s < i + 10) if i < 90 else sum(1 for s in scores if i <= s <= 100)
+        buckets.append(ScoreBucket(range_min=float(i), range_max=float(i + 10), count=count))
 
     mean_val = statistics.mean(scores) if scores else None
     median_val = statistics.median(scores) if scores else None

@@ -74,15 +74,11 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        app.dependency_overrides[
-            __import__("leadforge.api.deps", fromlist=["get_db"]).get_db
-        ] = mock_get_db
+        app.dependency_overrides[__import__("leadforge.api.deps", fromlist=["get_db"]).get_db] = mock_get_db
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.post(
-                "/webhooks/retell/call-complete", json=retell_call_ended_payload
-            )
+            resp = await client.post("/webhooks/retell/call-complete", json=retell_call_ended_payload)
             assert resp.status_code == 200
             assert resp.json()["status"] == "ignored"
 
@@ -114,18 +110,12 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        with patch(
-            "leadforge.voice.webhook_handler._dispatch_sentiment_task"
-        ) as mock_dispatch:
+        with patch("leadforge.voice.webhook_handler._dispatch_sentiment_task") as mock_dispatch:
             app.dependency_overrides[get_db] = mock_get_db
 
             transport = ASGITransport(app=app)
-            async with AsyncClient(
-                transport=transport, base_url="http://test"
-            ) as client:
-                resp = await client.post(
-                    "/webhooks/retell/call-complete", json=retell_call_ended_payload
-                )
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/webhooks/retell/call-complete", json=retell_call_ended_payload)
 
             assert resp.status_code == 200
             assert resp.json()["status"] == "ok"
@@ -163,18 +153,12 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        with patch(
-            "leadforge.voice.webhook_handler._dispatch_sentiment_task"
-        ) as mock_dispatch:
+        with patch("leadforge.voice.webhook_handler._dispatch_sentiment_task") as mock_dispatch:
             app.dependency_overrides[get_db] = mock_get_db
 
             transport = ASGITransport(app=app)
-            async with AsyncClient(
-                transport=transport, base_url="http://test"
-            ) as client:
-                resp = await client.post(
-                    "/webhooks/retell/call-complete", json=retell_call_analyzed_payload
-                )
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/webhooks/retell/call-complete", json=retell_call_analyzed_payload)
 
             assert resp.status_code == 200
             assert mock_outreach.call_sentiment_score == 0.7  # "Positive"
@@ -208,18 +192,12 @@ class TestCallCompleteWebhook:
         async def mock_get_db():
             yield mock_session
 
-        with patch(
-            "leadforge.voice.webhook_handler._dispatch_sentiment_task"
-        ) as mock_dispatch:
+        with patch("leadforge.voice.webhook_handler._dispatch_sentiment_task") as mock_dispatch:
             app.dependency_overrides[get_db] = mock_get_db
 
             transport = ASGITransport(app=app)
-            async with AsyncClient(
-                transport=transport, base_url="http://test"
-            ) as client:
-                resp = await client.post(
-                    "/webhooks/retell/call-complete", json=retell_voicemail_payload
-                )
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post("/webhooks/retell/call-complete", json=retell_voicemail_payload)
 
             assert resp.status_code == 200
             assert mock_outreach.call_disposition == CallDisposition.VOICEMAIL

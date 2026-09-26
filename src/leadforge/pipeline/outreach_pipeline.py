@@ -40,9 +40,7 @@ async def run_outreach_pipeline(
     )
 
     # Step 1: Queue top leads
-    queued = await queue_leads_for_outreach(
-        session, zip_code, niche, batch_size=batch_size, min_score=min_score
-    )
+    queued = await queue_leads_for_outreach(session, zip_code, niche, batch_size=batch_size, min_score=min_score)
     if not queued:
         logger.info("no_leads_to_outreach", zip_code=zip_code, niche=niche.value)
         return []

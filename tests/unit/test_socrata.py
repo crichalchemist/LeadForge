@@ -16,9 +16,7 @@ class TestSocrataClient:
             yield
 
     @pytest.mark.asyncio
-    async def test_search_businesses_returns_results(
-        self, mock_socrata, socrata_barbershop_response
-    ):
+    async def test_search_businesses_returns_results(self, mock_socrata, socrata_barbershop_response):
         async with SocrataClient() as client:
             results = await client.search_businesses("60619", NicheType.BARBERSHOPS)
         assert len(results) == 2
@@ -27,9 +25,7 @@ class TestSocrataClient:
     @pytest.mark.asyncio
     async def test_search_businesses_with_limit(self, mock_socrata):
         async with SocrataClient() as client:
-            results = await client.search_businesses(
-                "60619", NicheType.BARBERSHOPS, limit=1
-            )
+            results = await client.search_businesses("60619", NicheType.BARBERSHOPS, limit=1)
         assert len(results) <= 1
 
     @pytest.mark.asyncio
@@ -44,9 +40,7 @@ class TestSocrataClient:
 
     def test_normalize_result(self, socrata_barbershop_response):
         client = SocrataClient()
-        normalized = client.normalize_result(
-            socrata_barbershop_response[0], NicheType.BARBERSHOPS
-        )
+        normalized = client.normalize_result(socrata_barbershop_response[0], NicheType.BARBERSHOPS)
         assert normalized["name"] == "John's Barbershop"
         assert normalized["zip_code"] == "60619"
         assert normalized["niche"] == NicheType.BARBERSHOPS
@@ -64,7 +58,5 @@ class TestSocrataClient:
         assert client._map_license_status("REV") == "revoked"
         assert client._map_license_status("REVOKED") == "revoked"
         assert client._map_license_status(None) == "unknown"
-        assert (
-            client._map_license_status("AAC") == "expired"
-        )  # Cancelled during its term; the enum has no closer value
+        assert client._map_license_status("AAC") == "expired"  # Cancelled during its term; the enum has no closer value
         assert client._map_license_status("EXPIRED") == "expired"

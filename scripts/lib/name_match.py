@@ -12,6 +12,7 @@ if the candidate does not carry it, nothing else rescues the match.
 Callers pass their own idf table so a measurement can score against a local corpus while production
 scores against the bundled city-wide one.
 """
+
 import json
 import math
 import re
@@ -39,6 +40,7 @@ def build_idf(names, stop, extra=()):
     uniform amount.
     """
     from collections import Counter
+
     docs = [tokenize(n, stop) for n in names] + [tokenize(n, stop) for n in extra]
     docs = [d for d in docs if d]
     df = Counter()
@@ -60,7 +62,7 @@ def tokenize(value: str, stop: set) -> list:
 
 
 def _bigrams(token: str) -> set:
-    return {token[i:i + 2] for i in range(len(token) - 1)}
+    return {token[i : i + 2] for i in range(len(token) - 1)}
 
 
 def _char_similarity(a: str, b: str) -> float:

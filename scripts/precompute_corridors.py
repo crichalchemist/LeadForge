@@ -10,6 +10,7 @@ matching uses ST_DWithin with a 50-metre buffer around each line feature.
 Usage:
     python scripts/precompute_corridors.py --db-url postgresql://... --output corridor_data.json
 """
+
 import argparse
 import json
 import sys
@@ -82,11 +83,13 @@ def precompute_corridors(db_url: str, output_path: str) -> None:
     # Flatten to update list — primary corridor is first match.
     updates: list[dict] = []
     for biz_id, data in businesses.items():
-        updates.append({
-            "id": biz_id,
-            "in_nof_corridor": data["in_nof_corridor"],
-            "nof_corridor_name": data["zone_names"][0] if data["zone_names"] else None,
-        })
+        updates.append(
+            {
+                "id": biz_id,
+                "in_nof_corridor": data["in_nof_corridor"],
+                "nof_corridor_name": data["zone_names"][0] if data["zone_names"] else None,
+            }
+        )
 
     output = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -109,12 +112,8 @@ def precompute_corridors(db_url: str, output_path: str) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Pre-compute NOF corridor membership for all businesses"
-    )
+    parser = argparse.ArgumentParser(description="Pre-compute NOF corridor membership for all businesses")
     parser.add_argument("--db-url", required=True, help="PostgreSQL connection URL with PostGIS")
-    parser.add_argument(
-        "--output", default="corridor_updates.json", help="Output JSON file path"
-    )
+    parser.add_argument("--output", default="corridor_updates.json", help="Output JSON file path")
     args = parser.parse_args()
     precompute_corridors(args.db_url, args.output)

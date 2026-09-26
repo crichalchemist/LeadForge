@@ -68,9 +68,7 @@ class PipelineStageCount(dict):
 async def get_pipeline_board(session: AsyncSession = Depends(get_db)):
     """Get pipeline board with counts and lead previews per stage."""
     # Stage counts
-    count_q = select(OutreachRecord.status, func.count(OutreachRecord.id)).group_by(
-        OutreachRecord.status
-    )
+    count_q = select(OutreachRecord.status, func.count(OutreachRecord.id)).group_by(OutreachRecord.status)
     counts = dict((await session.execute(count_q)).all())
 
     # Build board columns
@@ -95,9 +93,7 @@ async def get_pipeline_board(session: AsyncSession = Depends(get_db)):
                 "zip_code": row[2],
                 "niche": row[3].value if row[3] else None,
                 "call_attempts": row[0].call_attempts,
-                "last_contact": row[0].last_contact_date.isoformat()
-                if row[0].last_contact_date
-                else None,
+                "last_contact": row[0].last_contact_date.isoformat() if row[0].last_contact_date else None,
             }
             for row in results
         ]
@@ -124,9 +120,7 @@ async def transition_stage(
 
     Enforces valid transitions per VALID_TRANSITIONS map.
     """
-    result = await session.execute(
-        select(OutreachRecord).where(OutreachRecord.id == outreach_id)
-    )
+    result = await session.execute(select(OutreachRecord).where(OutreachRecord.id == outreach_id))
     outreach = result.scalar_one_or_none()
     if not outreach:
         raise HTTPException(status_code=404, detail="Outreach record not found")

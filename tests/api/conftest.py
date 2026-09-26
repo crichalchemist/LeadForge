@@ -58,9 +58,7 @@ async def db_session():
     async with engine.begin() as conn:
         await conn.run_sync(_create_tables_without_postgis)
 
-    session_factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with session_factory() as session:
         yield session
@@ -154,9 +152,7 @@ async def sample_business(db_session: AsyncSession) -> Business:
 
 
 @pytest_asyncio.fixture
-async def sample_business_with_score(
-    db_session: AsyncSession, sample_business: Business
-) -> tuple[Business, LeadScore]:
+async def sample_business_with_score(db_session: AsyncSession, sample_business: Business) -> tuple[Business, LeadScore]:
     """Insert a business with a lead score."""
     score = LeadScore(
         id=uuid.uuid4(),
@@ -174,9 +170,7 @@ async def sample_business_with_score(
 
 
 @pytest_asyncio.fixture
-async def sample_outreach(
-    db_session: AsyncSession, sample_business: Business
-) -> OutreachRecord:
+async def sample_outreach(db_session: AsyncSession, sample_business: Business) -> OutreachRecord:
     """Insert a sample outreach record."""
     outreach = OutreachRecord(
         id=uuid.uuid4(),

@@ -79,29 +79,19 @@ def recalibrate_all_businesses(self):
                     # Step 2: Recompute competitive context (once per zip+niche)
                     cache_key = (business.zip_code, business.niche.value)
                     if cache_key not in context_cache:
-                        ctx = await compute_competitive_context(
-                            session, business.zip_code, business.niche
-                        )
+                        ctx = await compute_competitive_context(session, business.zip_code, business.niche)
                         await session.flush()
                         context_cache[cache_key] = ctx
                     else:
                         ctx = context_cache[cache_key]
 
                     # Step 3: Compute new composite score
-                    scores = compute_composite_score(
-                        business, business.digital_presence, ctx
-                    )
+                    scores = compute_composite_score(business, business.digital_presence, ctx)
 
                     # Step 4: Determine current max version
-                    current_version = max(
-                        (s.score_version for s in business.lead_scores), default=0
-                    )
+                    current_version = max((s.score_version for s in business.lead_scores), default=0)
                     latest_score = next(
-                        (
-                            s
-                            for s in business.lead_scores
-                            if s.score_version == current_version
-                        ),
+                        (s for s in business.lead_scores if s.score_version == current_version),
                         None,
                     )
 
@@ -114,19 +104,14 @@ def recalibrate_all_businesses(self):
                         digital_deficit_score=scores["digital_deficit_score"],
                         viability_score=scores["viability_score"],
                         competitive_pressure_score=scores["competitive_pressure_score"],
-                        composite_acquisition_score=scores[
-                            "composite_acquisition_score"
-                        ],
+                        composite_acquisition_score=scores["composite_acquisition_score"],
                         price_tier=scores["price_tier"],
                     )
                     session.add(new_score)
                     stats["rescored"] += 1
 
                     # Step 6: Log significant changes
-                    if (
-                        latest_score
-                        and latest_score.composite_acquisition_score is not None
-                    ):
+                    if latest_score and latest_score.composite_acquisition_score is not None:
                         old_cas = latest_score.composite_acquisition_score
                         new_cas = scores["composite_acquisition_score"]
                         if old_cas > 0:

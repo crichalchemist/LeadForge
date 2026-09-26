@@ -52,11 +52,7 @@ async def list_businesses(
         query = query.where(Business.name.ilike(f"%{search}%"))
 
     # Score filtering requires join
-    if (
-        min_score is not None
-        or max_score is not None
-        or sort_by == "composite_acquisition_score"
-    ):
+    if min_score is not None or max_score is not None or sort_by == "composite_acquisition_score":
         latest_score = (
             select(
                 LeadScore.business_id,
@@ -88,9 +84,7 @@ async def list_businesses(
 
     # Sort
     if sort_by == "composite_acquisition_score" and (
-        min_score is not None
-        or max_score is not None
-        or sort_by == "composite_acquisition_score"
+        min_score is not None or max_score is not None or sort_by == "composite_acquisition_score"
     ):
         order_col = latest.c.composite_acquisition_score
     elif sort_by == "name":
@@ -165,17 +159,13 @@ async def list_businesses(
                     niche=b.niche,
                     license_status=b.license_status,
                     created_at=b.created_at,
-                    composite_acquisition_score=score.composite_acquisition_score
-                    if score
-                    else None,
+                    composite_acquisition_score=score.composite_acquisition_score if score else None,
                     price_tier=score.price_tier if score else None,
                     pipeline_stage=outreach.status.value if outreach else None,
                 )
             )
 
-    return BusinessListResponse(
-        items=items, total=total, page=page, page_size=page_size
-    )
+    return BusinessListResponse(items=items, total=total, page=page, page_size=page_size)
 
 
 @router.get("/{business_id}", response_model=BusinessDetail)

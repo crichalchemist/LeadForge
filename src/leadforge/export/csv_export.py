@@ -66,12 +66,8 @@ async def export_leads_csv(
                     business.niche.value if business.niche else "",
                     business.google_place_id or "",
                     business.license_status.value if business.license_status else "",
-                    f"{score.digital_deficit_score:.1f}"
-                    if score.digital_deficit_score
-                    else "",
-                    f"{score.composite_acquisition_score:.1f}"
-                    if score.composite_acquisition_score
-                    else "",
+                    f"{score.digital_deficit_score:.1f}" if score.digital_deficit_score else "",
+                    f"{score.composite_acquisition_score:.1f}" if score.composite_acquisition_score else "",
                     score.price_tier or "",
                 ]
             )

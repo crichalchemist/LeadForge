@@ -40,16 +40,12 @@ class TestViabilityScoring:
         assert compute_viability(biz, dp) == 0.0
 
     def test_three_years_operation_adds_20(self):
-        biz = self._make_business(
-            incorporation_date=date.today() - timedelta(days=4 * 365)
-        )
+        biz = self._make_business(incorporation_date=date.today() - timedelta(days=4 * 365))
         dp = self._make_dp()
         assert compute_viability(biz, dp) >= 20.0
 
     def test_seven_years_adds_additional_10(self):
-        biz = self._make_business(
-            incorporation_date=date.today() - timedelta(days=8 * 365)
-        )
+        biz = self._make_business(incorporation_date=date.today() - timedelta(days=8 * 365))
         dp = self._make_dp()
         assert compute_viability(biz, dp) >= 30.0
 

@@ -43,9 +43,7 @@ def fetch_corridor_geojson(app_token: str = "") -> dict:
         response.raise_for_status()
         geojson = response.json()
 
-    logger.info(
-        "fetched_corridor_geojson", feature_count=len(geojson.get("features", []))
-    )
+    logger.info("fetched_corridor_geojson", feature_count=len(geojson.get("features", [])))
 
     return geojson
 
@@ -111,9 +109,7 @@ async def upsert_corridors(session: AsyncSession, features: list[dict]) -> int:
     return count
 
 
-async def check_corridor_eligibility(
-    session: AsyncSession, latitude: float, longitude: float
-) -> dict | None:
+async def check_corridor_eligibility(session: AsyncSession, latitude: float, longitude: float) -> dict | None:
     """
     Check if a point is eligible for NOF grant (within 50m of any corridor).
 
@@ -163,7 +159,5 @@ async def check_corridor_eligibility(
             "is_priority": corridor.corridor_type == CorridorType.PRIORITY,
         }
 
-    logger.info(
-        "corridor_eligibility_not_found", latitude=latitude, longitude=longitude
-    )
+    logger.info("corridor_eligibility_not_found", latitude=latitude, longitude=longitude)
     return None
