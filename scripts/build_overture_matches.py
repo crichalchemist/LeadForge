@@ -5,7 +5,10 @@ Then: see the load command this prints at the end.
 
 Overture cannot be queried from a Worker (DuckDB) and cannot be mirrored into D1 (214,735 Chicago
 places against a 100,000 row/day free-tier write budget), so the matching happens here and only the
-result is stored -- 21,004 licence accounts, about a fifth of one day's budget. See
+result is stored -- about 23.6k rows, one per licence account/site pair across roughly 20.8k distinct
+accounts, which is about a quarter of one day's budget (a refresh costs double, because the wholesale
+DELETE counts as rows written too). Keep this figure in step with the header of
+api/migrations/0004_overture_matches.sql; they are the same claim in two files. See
 docs/superpowers/specs/2026-09-25-overture-composition-design.md.
 
 Emits chunked SQL rather than one file because D1 has a documented Maximum SQL statement length of

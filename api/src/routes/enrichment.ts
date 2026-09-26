@@ -65,6 +65,18 @@ router.post('/overture-backfill', requireAuth, requireAdmin, jsonBody(backfillSc
   // characters explicitly is what makes the SQL and TypeScript blank-checks actually agree — the
   // pair of tests below ("blank website" and "whitespace-only website") hold that agreement in place,
   // since D1 cannot call the TypeScript function to check it directly.
+  // A business whose latest score is the deliberate NULL is excluded OUTRIGHT, not merely scored
+  // differently. Its stored has_google_business_profile = 0 means "never looked up", not "no profile", so
+  // scoring it would charge computeDigitalDeficit's +15 on no evidence and overwrite the very marker
+  // recording that nobody researched it. It needs Google first; Overture cannot substitute, because the
+  // terms it cannot supply are exactly the Google-only ones.
+  //
+  // This is deliberately ASYMMETRIC with ingest, which stores the merged presence facts and withholds
+  // only the score, where this writes nothing at all. Two reasons: the route's contract is score
+  // improvement, and a business with no measured baseline is not improvable by it; and `updated` in the
+  // response would otherwise mean two different things. No evidence is lost either way -- the match stays
+  // in overture_matches, which is the source of record, and the business becomes eligible as soon as a
+  // Google enrichment gives it a measured baseline.
   const candidates = await c.env.DB.prepare(
     `SELECT b.id AS business_id, dp.id AS presence_id,
             dp.has_website AS stored_has_website, dp.website_url AS stored_website_url,
