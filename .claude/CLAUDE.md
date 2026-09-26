@@ -192,12 +192,17 @@ misses; Google covers 18 Overture misses; Google supplies a rating for 56 of Ove
 Website coverage is Overture's strength and Google's weakness — 52 against 23, 37 of them
 Overture-only — which matters because the website term is 30 of the deficit's points.
 
-Caveat on the numbers: IDF is computed over the candidate corpus, so the bbox margin shifts every
-source's score together. This run used a margin giving 9,352 POIs, a superset of the 8,470 in the
-earlier Overture-only run, on which Overture re-measures at 71 rather than that run's 74 — a
-corpus difference, not new information. The 12 lowest-scoring accepted Google pairs were
-hand-audited and all 12 read correct; `REGINA AFRICAN IMPACT → Regina African Braiding` (6 m
-apart) is the one genuinely uncertain.
+Caveat on the numbers: `measure_places_sources.py`'s scorer is **reconstructed** from
+`measure_overture_match.py`'s design and is **not verified equivalent** to it — it re-measures
+Overture at 71 where that script reported 74. The candidate set does not explain the gap: every
+200 m neighbourhood falls inside even the tightest bbox tried, so only the IDF weights move, and
+they move Overture 72 → 71 as the corpus grows 5,645 → 9,352 POIs; 8,470 lies between those. The
+two scorers therefore differ in the threshold, the tokenizer, or the best-candidate rule, and the
+repo currently holds two scripts claiming one scorer. **The three-way table is internally valid —
+all three sources go through the same function — but its figures are not comparable with the
+earlier run's 74/57/83.** The 12 lowest-scoring accepted Google pairs were hand-audited and all 12
+read correct; `REGINA AFRICAN IMPACT → Regina African Braiding` (6 m apart) is the one genuinely
+uncertain.
 
 `hf://datasets/foursquare/fsq-os-places` (Apache-2.0) remains gated: `gated: auto`, token scoped
 correctly (`canReadGatedRepos: true`), but the account is not on the authorized list and the access

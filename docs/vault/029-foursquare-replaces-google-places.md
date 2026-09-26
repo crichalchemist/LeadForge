@@ -308,10 +308,16 @@ whereas Google bills **two** calls per business (Find Place, then Details), and 
 the measurement itself cost 307 calls.
 
 The shape the evidence points at — recorded, not built — is Overture for identity, website and
-social at zero marginal cost, with Google called only for rating and review count on businesses
-already matched, plus the 18 Overture misses. That is ~89 Google businesses rather than 157, and
-name corroboration applied to the response before storing, so false matches are discarded rather
-than written.
+social at zero marginal cost, with Google supplying rating and review count.
+
+The saving is on the *expensive* call, not the cheap one. Find Place stays at 157: Overture cannot
+say which of its misses Google will catch without asking, and a rating for one of Overture's own
+matches still needs a Google `place_id`, which Overture does not carry. But Find Place already
+returns `name` and `geometry`, so applying name corroboration and the 200 m cut to *that* response
+before calling Details drops Details from the 150 this measurement paid to roughly 74 — about 231
+calls per 157 businesses instead of 307, with the cut falling entirely on the SKU that carries
+`rating`, `reviews` and `website`. Corroborating before Details also means a false match is never
+paid for and never stored.
 
 ### Blockers unchanged by this
 
@@ -323,10 +329,23 @@ exists, retained but dead.
 
 ### Provenance of the numbers
 
-IDF is computed over the candidate corpus, so the bbox margin shifts every source's score
-together. This run's margin yields 9,352 POIs, a superset of the 8,470 in the earlier
-Overture-only run; on it Overture re-measures at 71 rather than 74. That is a corpus difference,
-not new information, and the earlier run's exact box could not be reproduced. Google's
+The scorer here is **reconstructed** from `measure_overture_match.py`'s design, not reused from it —
+that file could not be read this session (see below) — and it is **not verified equivalent**: it
+re-measures Overture at 71 where the earlier run reported 74. The candidate set does not account
+for the gap. Every licence's 200 m neighbourhood lies inside even the tightest bbox tried, so the
+candidate POIs are identical across margins and only the IDF weights move; those move Overture
+72 → 71 as the corpus grows 5,645 → 9,352 POIs, and 8,470 lies between those two sizes. So the two
+scorers differ in the threshold, the tokenizer, or the best-candidate rule, and the repo now holds
+two scripts that claim the same scorer and may disagree. **Reconciling them is open work.** The
+three-way table is internally valid, because all three sources pass through one function; its
+numbers are *not* comparable with the earlier run's 74/57/83.
+
+Recorded because it is the kind of thing that gets lost: the exact-match gate ("reproduce 74 or
+stop") was written before the measurement and then loosened to a 68–80 band *after* seeing it
+return 72. That was the point to stop and reconcile, not to continue. The band is why the
+non-equivalence reached a commit before being named.
+
+Google's
 `locationbias` is a bias and not a filter, so the 200 m cut is applied at scoring time from a
 recorded distance; unrestricted, Google returns 144 and corroborates 86 at 58 false. The 12
 lowest-scoring *accepted* Google pairs were hand-audited — the tail where both earlier scorer bugs

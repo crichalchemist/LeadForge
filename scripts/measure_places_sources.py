@@ -9,11 +9,19 @@ Run:  node scripts/fetch_places_candidates.mjs licences   <dir>
       node scripts/fetch_places_candidates.mjs foursquare <dir>
       uv run --with duckdb python scripts/measure_places_sources.py <dir>
 
-The scorer is the one from measure_overture_match.py: IDF-weighted fuzzy token containment with a
-head-token gate. The gate exists because IDF alone only discounts sector words, and three of them
-("african", "hair", "braiding") still outvote one distinctive name. IDF is computed over the whole
-corpus, so the bbox margin M changes the weights -- widen it and every source's score shifts
-together. Overture needs no credentials; the Overture bucket is anonymously readable.
+The scorer is RECONSTRUCTED from measure_overture_match.py's design -- IDF-weighted fuzzy token
+containment with a head-token gate -- and is NOT verified equivalent to it. It re-measures Overture
+at 71 where that script reported 74, and the candidate set cannot explain the gap: every 200 m
+neighbourhood lies inside even the tightest bbox tried, so only the IDF weights move, and they move
+Overture 72 -> 71 as the corpus grows 5,645 -> 9,352 POIs. 8,470 sits between those, so the two
+scorers differ in something else -- the threshold, the tokenizer, or the best-candidate rule.
+Consequence: the three-way comparison below is internally valid, because all three sources go
+through this one function, but the earlier run's figures (Overture 74, Foursquare 57/83) are NOT
+comparable to these. Do not retune the threshold to close the gap; reconcile the two scorers.
+
+The head-token gate exists because IDF alone only discounts sector words, and three of them
+("african", "hair", "braiding") still outvote one distinctive name. Overture needs no credentials;
+the bucket is anonymously readable.
 
 Caveat that survived into the numbers: Overture's "returned" column is 157 because every business
 has some POI within 200 m, and matching is exhaustive and offline, so it has no "false match"
