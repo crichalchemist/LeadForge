@@ -8,14 +8,17 @@ places against a 100,000 row/day free-tier write budget), so the matching happen
 result is stored -- 21,004 licence accounts, about a fifth of one day's budget. See
 docs/superpowers/specs/2026-09-25-overture-composition-design.md.
 
-Emits chunked SQL rather than one file because D1's per-statement ceiling is not documented in the
-material available; 500 rows per statement is deliberately well under any plausible limit.
+Emits chunked SQL rather than one file because D1 has a documented Maximum SQL statement length of
+100,000 bytes. At 500 rows/chunk the largest chunk measured 66,720 bytes -- 67% of that limit, a
+1.5x margin that is data-dependent: a longer POI name, website or phone in a future Overture
+release could cross it. 250 rows/chunk keeps the largest chunk around 33 KB, a 3x margin.
 """
 import json
 import math
 import sys
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 
 import duckdb
 
@@ -23,7 +26,7 @@ sys.path.insert(0, "scripts")
 from lib.name_match import THRESHOLD, load_idf, make_scorer   # noqa: E402
 
 OUTDIR = sys.argv[1]
-CHUNK = 500
+CHUNK = 250
 RADIUS_M = 200
 RELEASE = "2026-08-19.0"
 PARQUET = f"s3://overturemaps-us-west-2/release/{RELEASE}/theme=places/type=place/*"
@@ -89,6 +92,15 @@ def sql_str(value):
     return "'" + str(value).replace("'", "''") + "'"
 
 
+def blank_to_null(value):
+    """Normalise an empty or whitespace-only string to None at the point of writing, so the two
+    downstream readers -- SQLite TRIM(), which strips only U+0020, and JavaScript .trim(), which
+    strips more -- never have to agree on what counts as blank. NULL means the same thing to both."""
+    if value is not None and str(value).strip() == "":
+        return None
+    return value
+
+
 def main():
     licences = fetch_licences()
     print(f"licence accounts: {len(licences)}")
@@ -107,6 +119,7 @@ def main():
       WHERE {BBOX} AND names.primary IS NOT NULL
     """).fetchall()
     print(f"overture places in bbox: {len(places)}")
+    print(f"overture release: {RELEASE}")
 
     stop, idf, default_idf = load_idf()
     score = make_scorer(stop, idf, default_idf)
@@ -119,32 +132,37 @@ def main():
 
     rows = []
     for biz in licences:
+        if biz["lat"] is None:
+            # Ungeocoded: the build could not look at this licence at all, which is not the same
+            # as looking and finding nothing. Emit no row -- "no row" already means "not yet
+            # covered", and it self-repairs once the city geocodes the address, because rebuilds
+            # are wholesale (I4).
+            continue
         best = None
-        if biz["lat"] is not None:
-            gy, gx = round(biz["lat"] / 0.003), round(biz["lon"] / 0.003)
-            for dy in (-1, 0, 1):
-                for dx in (-1, 0, 1):
-                    for place in grid.get((gy + dy, gx + dx), ()):
-                        distance = haversine(biz["lat"], biz["lon"], place[2], place[3])
-                        if distance > RADIUS_M:
-                            continue
-                        value = score(biz["name"], place[1])
-                        if value >= THRESHOLD and (best is None or value > best[0]
-                                                   or (value == best[0] and distance < best[2])):
-                            best = (value, place, distance)
+        gy, gx = round(biz["lat"] / 0.003), round(biz["lon"] / 0.003)
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                for place in grid.get((gy + dy, gx + dx), ()):
+                    distance = haversine(biz["lat"], biz["lon"], place[2], place[3])
+                    if distance > RADIUS_M:
+                        continue
+                    value = score(biz["name"], place[1])
+                    if value >= THRESHOLD and (best is None or value > best[0]
+                                               or (value == best[0] and distance < best[2])):
+                        best = (value, place, distance)
         if best:
             value, place, distance = best
             socials = place[5] or []
             rows.append((biz, 1, place[0], place[1], round(value, 4), round(distance),
-                         place[4], int(any('facebook' in (s or '') for s in socials)),
-                         int(any('instagram' in (s or '') for s in socials)), place[6]))
+                         blank_to_null(place[4]), int(any('facebook' in (s or '') for s in socials)),
+                         int(any('instagram' in (s or '') for s in socials)), blank_to_null(place[6])))
         else:
             rows.append((biz, 0, None, None, None, None, None, 0, 0, None))
 
     matched = sum(1 for r in rows if r[1] == 1)
     print(f"matched: {matched} / {len(rows)} ({100 * matched / max(len(rows), 1):.0f}%)")
 
-    built_at = "2026-09-25T00:00:00Z"
+    built_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     chunks = 0
     for start in range(0, len(rows), CHUNK):
         chunk = rows[start:start + CHUNK]
@@ -163,7 +181,11 @@ def main():
         with open(path, "w") as handle:
             if chunks == 0:
                 # Wholesale replacement: no row outlives a rebuild, which is what keeps GERS id
-                # stability across monthly releases from mattering.
+                # stability across monthly releases from mattering. The release is recorded here
+                # as a comment (not a column -- rebuilds are wholesale, RELEASE is a pinned
+                # constant in this script, and git history plus a real built_at already recover
+                # it) so a reader of a chunk file knows which Overture release produced it (I2).
+                handle.write(f"-- Overture release: {RELEASE}\n")
                 handle.write("DELETE FROM overture_matches;\n")
             handle.write(
                 "INSERT INTO overture_matches (account_number, site_number, matched, gers_id,"
