@@ -431,6 +431,85 @@ describe('runDiscovery, unchanged behaviour', () => {
   });
 });
 
+describe('composition with the precomputed Overture matches', () => {
+  const overtureRow = async (over: Record<string, unknown> = {}) => {
+    const row = {
+      account_number: '478849', site_number: '1', matched: 1, website: null,
+      has_facebook: 0, has_instagram: 0, phone: null, ...over,
+    };
+    await env.DB.prepare(
+      `INSERT INTO overture_matches (account_number, site_number, matched, website,
+         has_facebook, has_instagram, phone, built_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, '2026-09-25T00:00:00Z')`,
+    ).bind(row.account_number, row.site_number, row.matched, row.website,
+           row.has_facebook, row.has_instagram, row.phone).run();
+  };
+
+  it('turns off the blanket social penalty when Overture has a social link', async () => {
+    // Google reports no social presence at all, so before this every business paid
+    // computeDigitalDeficit's +12 alike. 19 - 12 = 7.
+    await overtureRow({ has_facebook: 1 });
+    routeGoogle();
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(discovered[0].digital_deficit_score).toBe(7);
+
+    const presence = await env.DB.prepare(
+      'SELECT has_facebook_page, has_instagram FROM digital_presences WHERE business_id = ?',
+    ).bind(discovered[0].id).first();
+    expect(presence).toEqual({ has_facebook_page: 1, has_instagram: 0 });
+  });
+
+  it('credits a website Google missed', async () => {
+    // Google finds no website here; Overture does. 64 - 30 (website) = 34.
+    await overtureRow({ website: 'http://overture-found.com' });
+    routeGoogle([SOCRATA_ROW], { status: 'ZERO_RESULTS', candidates: [] });
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(discovered[0].digital_deficit_score).toBe(34);
+
+    const presence = await env.DB.prepare(
+      'SELECT has_website, website_url FROM digital_presences WHERE business_id = ?',
+    ).bind(discovered[0].id).first();
+    expect(presence).toEqual({ has_website: 1, website_url: 'http://overture-found.com' });
+  });
+
+  it('keeps Google as the only source of rating and review count', async () => {
+    await overtureRow({ website: 'http://overture-found.com', has_instagram: 1 });
+    routeGoogle();
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    const presence = await env.DB.prepare(
+      'SELECT google_avg_rating, google_review_count, website_url FROM digital_presences WHERE business_id = ?',
+    ).bind(discovered[0].id).first();
+    // Google's live URL wins over Overture's; the rating is Google's because Overture has none.
+    expect(presence).toEqual({
+      google_avg_rating: 4.5, google_review_count: 47, website_url: 'http://johnsbarbershop.com',
+    });
+  });
+
+  it('scores a business the build found no Overture match for exactly as before', async () => {
+    await overtureRow({ matched: 0 });
+    routeGoogle();
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(discovered[0].digital_deficit_score).toBe(19);
+  });
+
+  it('scores a business the build has not covered exactly as before', async () => {
+    routeGoogle();
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(discovered[0].digital_deficit_score).toBe(19);
+  });
+
+  it('still withholds a deficit when the live lookup never happened', async () => {
+    // Overture data must not make an unlooked-up business look researched: a null deficit means
+    // "not measured", and an offline match is not a measurement of the live source.
+    await overtureRow({ website: 'http://overture-found.com', has_facebook: 1 });
+    const health = newPlacesHealth();
+    routeGoogle([SOCRATA_ROW], { status: 'REQUEST_DENIED' });
+    const discovered = await runDiscovery(keyed, '60619', 'barbershops', 5, health);
+    expect(discovered[0].digital_deficit_score).toBeNull();
+    expect(health.unavailable).toBe(1);
+  });
+});
+
 describe('POST /api/discovery/run', () => {
   it('rejects an anonymous request', async () => {
     const res = await api('POST', '/discovery/run', { json: { zip_code: '60619', niche: 'barbershops' } });

@@ -1,5 +1,6 @@
 // =py pipeline/discovery
 import { locateCorridor } from './corridors';
+import { applyOvertureMatch, fetchOvertureMatch, type PresenceFacts } from './overture';
 import { computeDigitalDeficit } from './scoring';
 import { nameCorroborates } from './name-match';
 import {
@@ -173,29 +174,27 @@ async function enrichAndPersist(
   const presenceId = crypto.randomUUID();
   const scoreId = crypto.randomUUID();
 
-  const hasWebsite = enrichment.has_website ?? false;
+  // Google reports no social presence and finds under half the websites Overture does, so the
+  // precomputed match is overlaid before anything is scored (ADR 030 slice 2). The overlay never
+  // downgrades: whatever the live lookup established stands.
+  const overture = await fetchOvertureMatch(env.DB, bizData.account_number, bizData.site_number);
+  const live: PresenceFacts = {
+    has_website: enrichment.has_website ?? false,
+    website_url: enrichment.website ?? null,
+    has_facebook_page: false,
+    has_instagram: false,
+    phone: enrichment.phone ?? null,
+  };
+  const facts = applyOvertureMatch(live, overture);
+
+  const hasWebsite = facts.has_website;
+  const hasFacebook = facts.has_facebook_page;
+  const hasInstagram = facts.has_instagram;
   // null when no corroborated match was found, 0 when Google returned a place that genuinely has no
-  // reviews. The distinction is load-bearing: computeDigitalDeficit charges +10 for a zero review
-  // count and skips the term entirely on null, and only a business we actually looked up has earned
-  // that charge. Under Foursquare this always had to be null because the free plan never entitled
-  // `stats` at all; Google's Details response makes it a real measurement (ADR 030).
+  // reviews. computeDigitalDeficit charges +10 for a zero count and skips the term on null, and only
+  // a business we actually looked up has earned that charge. Overture carries neither field.
   const googleReviewCount = enrichment.google_review_count ?? null;
   const hasGbp = enrichment.has_google_business_profile ?? false;
-  // 0 here means "this source does not measure social presence", NOT "this business has none".
-  // Google returns no social fields at all. The columns are INTEGER NOT NULL DEFAULT 0 (mirroring the
-  // SQLAlchemy model per ADR 026), so they cannot express "unknown", and making them nullable would
-  // fork the schema from Python for no gain: computeDigitalDeficit tests them for falsiness, so null
-  // and 0 both charge the +12 "no social presence" term, and that function is pinned to Python by
-  // scoring-parity.test.ts.
-  //
-  // The consequence is worth naming rather than burying. Foursquare's `social_media` made these real
-  // signal; this loses it again until Overture is composed in, where 60 of 74 matches carry a social
-  // link (ADR 030). Until then every business pays the same +12, which leaves *ranking* intact — it
-  // is a uniform constant — but inflates every absolute deficit by 12 and can trip
-  // computeNofEligibility's `deficit > 60` property-need bonus on no evidence. That is the strongest
-  // reason to land the Overture slice promptly.
-  const hasFacebook = false;
-  const hasInstagram = false;
 
   // A failed lookup is not a finding. With the source unavailable every input below is absent and
   // computeDigitalDeficit returns the same constant for every business on earth — one that would
@@ -243,7 +242,7 @@ async function enrichAndPersist(
       enrichment.name ?? name,
       enrichment.address ?? address,
       zipCode,
-      enrichment.phone ?? null,
+      facts.phone,
       niche,
       bizData.license_number,
       bizData.license_status,
@@ -271,7 +270,7 @@ async function enrichAndPersist(
       presenceId,
       businessId,
       hasWebsite ? 1 : 0,
-      enrichment.website ?? null,
+      facts.website_url,
       hasGbp ? 1 : 0,
       googleReviewCount,
       enrichment.google_avg_rating ?? null,
