@@ -102,20 +102,32 @@ it. `api/test/helpers.ts` `resetDb` gains the new table.
 - **`GET /api/businesses/:id/provenance`** (`requireAuth`; viewers may read). Returns the licence record
   (`licence_name`, `account_number`, `site_number`, `license_number`, `license_status`,
   `license_issue_date`), the `google_matches` row or `null`, the `overture_matches` row joined on account
-  and site or `null`, and a `facts` list of `{ key, sources }`. The source rules live here and only here:
-  - `name`: `google` when the Google row is `matched`, otherwise `licence`.
-  - `website`, `phone`: `google` when the matched Google row carries a value; `overture` when the
-    Overture row is matched and carries one. Both may apply.
-  - `google_business_profile`, `rating`, `review_count`: `google` when matched.
-  - `facebook`, `instagram`: `overture` when matched and the flag is set.
+  and site or `null`, and a `facts` list of `{ key, value, sources }`. The source rules live here and only
+  here, under one principle: **a source is credited for a fact only when its recorded value equals the
+  value the record displays.** Displayed values come from the stored business, where the merge put
+  Google's value first and Overture's second (`base.website_url ?? website`, `base.phone ?? phone` in
+  `lib/overture.ts`). Overture values are compared after the same `overturePresent` trim the merge applies.
+  - `name`: `licence` when `name` equals `licence_name`; otherwise `google`, because Google's Details
+    name is the only other value discovery writes there. Rows without a `licence_name` get no source.
+  - `website`, `phone`: `google` when the Google row's value equals the displayed one; `overture` when
+    the Overture row's value does. Both apply only when both sources returned the same value.
+  - `google_business_profile`, `rating`, `review_count`: `google` when the Google row is `matched`;
+    Google is the only writer of these columns.
+  - `facebook`, `instagram`: `overture` when the Overture row is matched and its flag is set; Google
+    never sets them.
   - `license_status`: `licence`.
+  - A displayed value that no recorded source accounts for, which covers every row stored before
+    migration 0005, gets empty `sources`, and the record shows "source not recorded".
   - 404 for an unknown business.
+
+  `google_matches.matched_name` records the Find Place candidate's name, the one the score was computed
+  against; `website` and `phone` record what Details returned, before the merge.
 - **`POST /api/outreach`** `{ business_id }` (`requireAuth` + `requireAdmin`). Creates an outreach record
   at `scored` and returns it with 201. Returns 409 when the business already has a record (the table
   has no uniqueness, so the route guards it) and 404 for an unknown business.
 - **`GET /api/pipeline/transitions`** (`requireAuth`). Returns `VALID_TRANSITIONS` from
   `api/src/lib/stages.ts`, so the frontend never keeps a second copy of the rules.
-- **`GET /leads/ranked`** items gain `score_version`, `in_nof_corridor`, `nof_corridor_name`,
+- **`GET /api/leads/ranked`** items gain `score_version`, `in_nof_corridor`, `nof_corridor_name`,
   `account_number` and `site_number`.
 
 ## Part 2 — frontend foundations
@@ -209,7 +221,9 @@ Data: the business detail, the provenance route, and the transitions map (cached
 - Migration 0005 applies; `google_matches` cascades with its business.
 - Discovery records each verdict with its numbers (matched, rejected on distance, rejected on name, no
   candidate, unavailable), stores `licence_name`, and counts created, skipped and failed.
-- The provenance route applies each source rule, admits viewers, and returns 404 for an unknown id.
+- The provenance route applies each source rule, admits viewers, and returns 404 for an unknown id. It
+  must credit only Google when Google and Overture return different websites, both when they return the
+  same one, and neither for a pre-0005 row.
 - `POST /api/outreach`: 201 at `scored` for an admin, 403 for a viewer, 409 on a duplicate, 404 unknown.
 - The transitions route returns exactly `VALID_TRANSITIONS`; ranked leads carry the new fields.
 
@@ -244,3 +258,6 @@ remote credentials; the plan confirms a local-only configuration before the job 
 The home screen (needs-attention queue and both lines as diagrams), the map room, rebuilding the boards,
 grants and reports, viewer redaction, AI calls, outreach briefs, TCPA screening, scoring beyond version
 1, and any backfill of rows stored before migration 0005.
+
+When viewer redaction is built, it must cover the provenance route too: that route returns the licence
+account and site, Google's matched name, and the raw website and phone from both sources.
