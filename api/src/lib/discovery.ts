@@ -188,6 +188,14 @@ async function enrichAndPersist(
   const facts = applyOvertureMatch(live, overture);
 
   const hasWebsite = facts.has_website;
+  // A stored 0 in either social column is still ambiguous, and narrowly so: it means EITHER Overture
+  // matched this licence and recorded no social link — a real measurement — OR there is no match row
+  // at all and nothing is known. The columns are INTEGER NOT NULL DEFAULT 0, mirroring the SQLAlchemy
+  // model per ADR 026, so they cannot express "unknown", and computeDigitalDeficit tests them for
+  // falsiness, so both cases pay its +12 alike. That is the design's stated residual: a business
+  // Overture does not cover is charged for absent social presence on no evidence. Making the columns
+  // nullable would fork the schema from Python for no scoring gain, so the ambiguity stays and is
+  // recorded here rather than rediscovered.
   const hasFacebook = facts.has_facebook_page;
   const hasInstagram = facts.has_instagram;
   // null when no corroborated match was found, 0 when Google returned a place that genuinely has no
@@ -203,6 +211,11 @@ async function enrichAndPersist(
   // instead: the columns are nullable, and `?? 0` in the NOF scorer already treats null as absent.
   //
   // Divergence from Python, deliberately: pipeline/discovery.py writes the 74.
+  //
+  // Note this gates the SCORE only. The presence row below is still written from the merged facts, so
+  // an unmeasured business can carry an Overture-sourced website while its deficit is null. That is
+  // intended: the evidence we actually hold is worth keeping, and the score is what would be
+  // incomparable, because the withheld terms (GBP, review count) are exactly the Google-only ones.
   const measured = lookups.unavailable === 0;
   const deficit = !measured ? null : computeDigitalDeficit({
     has_website: hasWebsite ? 1 : 0,
