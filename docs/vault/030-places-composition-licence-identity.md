@@ -117,6 +117,26 @@ Overture finds 55 (40 of them Overture-only), and the website term is 30 of the 
 100 points. Scores written in the Google-only interval are therefore not comparable with scores
 written after Overture is composed in — the same versioned-score caution ADR 014 already applies.
 
+## As shipped
+
+Slice 1 (Google, licence identity) shipped 2026-09-25. Slice 2 (Overture composition) shipped 2026-09-26:
+migration 0004 and `overture_matches`, `scripts/build_overture_matches.py`, `api/src/lib/overture.ts`,
+ingest composition in `lib/discovery.ts`, and `POST /api/enrichment/overture-backfill`. In production:
+23,571 rows across 20,782 licence accounts, 10,166 matched, yielding 7,558 websites, 6,864 social links
+and 9,580 phones that Google alone does not return.
+
+Three decisions were made during implementation that this ADR did not anticipate, recorded here because
+each closed a real defect rather than a hypothetical one:
+
+- **Socrata offset paging needs `$order` on a unique column.** Unordered paging silently dropped 1,718 of
+  23,969 account/site pairs (7.2%) with a clean exit. `$order: ":id"`.
+- **A licence the city never geocoded gets no row at all**, not `matched = 0`. The build cannot look at it,
+  which is not the same as looking and finding nothing. 398 rows, 222 accounts now entirely uncovered.
+- **The backfill excludes businesses whose latest score is the deliberate NULL.** Their stored
+  `has_google_business_profile = 0` means "never looked up", so scoring them would charge +15 on no
+  evidence and destroy the marker recording that nobody researched them. This is deliberately asymmetric
+  with ingest, which stores merged facts and withholds only the score.
+
 ## Consequences
 
 - Migration 0003 adds `account_number`/`site_number` and a UNIQUE index on the pair. Rows already
