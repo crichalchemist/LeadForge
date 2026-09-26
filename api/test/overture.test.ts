@@ -78,6 +78,25 @@ describe('applyOvertureMatch', () => {
     expect(out.has_instagram).toBe(true);
   });
 
+  it('never downgrades a Facebook page already recorded', () => {
+    const base = { ...bare, has_facebook_page: true };
+    expect(applyOvertureMatch(base, match({ has_facebook: 0 })).has_facebook_page).toBe(true);
+  });
+
+  it('never downgrades an Instagram presence already recorded', () => {
+    const base = { ...bare, has_instagram: true };
+    expect(applyOvertureMatch(base, match({ has_instagram: 0 })).has_instagram).toBe(true);
+  });
+
+  it('does not credit a business with a website Overture recorded as blank', () => {
+    // Measured against the real 23,969-row build: 82 matched rows carry website = '' rather than
+    // null. An empty string is neither null nor undefined, so a naive !== null / ?? check would
+    // flip the 30-point website term (scoring.ts:42) on zero evidence for every one of them.
+    const out = applyOvertureMatch(bare, match({ website: '' }));
+    expect(out.has_website).toBe(false);
+    expect(out.website_url).toBeNull();
+  });
+
   it('adds nothing for a row the build found no match for', () => {
     expect(applyOvertureMatch(bare, match({ matched: 0, website: 'http://stale.com' }))).toEqual(bare);
   });
@@ -86,8 +105,11 @@ describe('applyOvertureMatch', () => {
     expect(applyOvertureMatch(bare, null)).toEqual(bare);
   });
 
-  it('fills a phone the live lookup missed without overwriting one it found', () => {
+  it('fills a phone the live lookup missed', () => {
     expect(applyOvertureMatch(bare, match({ phone: '773-555-0000' })).phone).toBe('773-555-0000');
+  });
+
+  it('never downgrades a phone the live lookup found', () => {
     const base = { ...bare, phone: '773-555-1111' };
     expect(applyOvertureMatch(base, match({ phone: '773-555-0000' })).phone).toBe('773-555-1111');
   });

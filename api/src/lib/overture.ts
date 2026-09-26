@@ -38,18 +38,31 @@ export interface PresenceFacts {
  * invisible, showing up only as businesses scored on different evidence depending on when they were
  * discovered.
  */
+// The offline build stores a blank string rather than null for some rows (measured: 82 of 23,969
+// with website = '', 5 with phone = '') — trim and collapse those to null so "Overture has
+// something" agrees for has_website, website_url and phone by construction, not by three separate
+// checks that could drift. Google/base values are never run through this: there is no measured
+// evidence the live lookup emits empty strings, and normalizing an unevidenced source is exactly
+// the speculative work this project avoids.
+function overturePresent(value: string | null): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
 export function applyOvertureMatch(base: PresenceFacts, match: OvertureMatch | null): PresenceFacts {
   // matched = 0 means the build looked and Overture had nothing; a null match means it has not
   // covered this business yet. Neither contributes evidence, and the columns of a no-match row are
   // empty anyway — this guard makes that explicit rather than incidental.
   if (!match || match.matched !== 1) return base;
+  const website = overturePresent(match.website);
+  const phone = overturePresent(match.phone);
   return {
-    has_website: base.has_website || match.website !== null,
+    has_website: base.has_website || website !== null,
     // Google's URL is fetched live where Overture's is up to a month old, so it leads.
-    website_url: base.website_url ?? match.website,
+    website_url: base.website_url ?? website,
     has_facebook_page: base.has_facebook_page || match.has_facebook === 1,
     has_instagram: base.has_instagram || match.has_instagram === 1,
-    phone: base.phone ?? match.phone,
+    phone: base.phone ?? phone,
   };
 }
 
