@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted
+Superseded by ADR-029, and then by ADR-030: identity is the city's licence account
+(`account_number` + `site_number`), not a third-party place id.
 
 ## Date
 

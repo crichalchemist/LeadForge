@@ -2,9 +2,20 @@
 
 Internal reference for team setup, daily operations, and troubleshooting.
 
-## Environment Variables
+Two backends coexist on `main`, and almost nothing about their operation is shared. The Python
+backend under `src/leadforge/` runs locally against PostgreSQL and is the reference
+implementation; the Workers backend under `api/` is what is deployed. Configuration, secrets,
+migrations, and the cookie rules all differ. Each section below says which backend it applies to.
 
-Copy `.env.example` to `.env` and fill in all values. Here's what each one does:
+- Python backend: [Environment variables](#environment-variables-python-backend) onwards
+- Workers backend: [Workers API operations](#workers-api-operations)
+- Both: [CI and commit hooks](#ci-and-commit-hooks)
+
+## Environment Variables (Python backend)
+
+Copy `.env.example` to `.env` and fill in all values. Here's what each one does. The Workers
+backend reads none of these — see [Workers API operations](#workers-api-operations) for its
+`wrangler.jsonc` vars and secrets.
 
 ### Infrastructure
 
@@ -41,6 +52,10 @@ Copy `.env.example` to `.env` and fill in all values. Here's what each one does:
 | `VLLM_BASE_URL` | No | vLLM endpoint. Default: `http://localhost:8001/v1` |
 | `VLLM_MODEL` | No | Model served by vLLM. Default: `Qwen/Qwen2.5-3B-Instruct` |
 
+ADR 008 and ADR 011 both discuss Qwen2.5-**7B**; the shipped default is the **3B** instruct model,
+because the decision was to pick by available VRAM and this runs on CPU. The config is correct and
+the ADRs record the earlier sizing — treat `.env.example` as the source of truth.
+
 ### Voice Outreach
 
 | Variable | Required | Description |
@@ -56,7 +71,7 @@ Copy `.env.example` to `.env` and fill in all values. Here's what each one does:
 | `RECALIBRATION_SCORE_CHANGE_THRESHOLD` | No | Score delta to flag as significant. Default: `0.10` (10%) |
 | `NOF_ELIGIBILITY_THRESHOLD` | No | Min NOF eligibility score for grant-first pitch. Default: `50.0` |
 
-## Database
+## Database (Python backend)
 
 ### Start PostgreSQL + PostGIS
 
@@ -94,7 +109,11 @@ docker compose up -d db
 uv run alembic upgrade head
 ```
 
-## User Management
+## User Management (Python backend)
+
+The Workers backend has no CLI. Its first admin user was inserted into D1 directly; subsequent
+users go through `POST /api/auth/signup`, which requires an existing admin token. See
+[Workers API operations](#workers-api-operations).
 
 ### Create a user
 
@@ -124,7 +143,7 @@ UPDATE users SET is_active = false WHERE email = 'user@example.com';
 
 Their next API request or token refresh will fail with 401.
 
-## Running Locally
+## Running Locally (Python backend)
 
 ### API server
 
@@ -173,7 +192,7 @@ docker compose up -d
 
 Starts: PostgreSQL, Redis, API, Celery worker, Celery beat, vLLM, and frontend (nginx on port 3000).
 
-## CLI Commands
+## CLI Commands (Python backend)
 
 All commands: `uv run leadforge --help`
 
@@ -188,9 +207,17 @@ All commands: `uv run leadforge --help`
 | `export` | Export scored leads to CSV | `uv run leadforge export --min-score 40 -o leads.csv` |
 | `create-user` | Create a CRM user | `uv run leadforge create-user --email a@b.com --name "Name" --role admin` |
 
-Valid niches: `barbershops`, `bars`, `nail_salons`, `auto_repair`, `restaurants`, `laundromats`
+Valid niches — fifteen, identical in both backends (`NICHE_MAPPING` in
+`src/leadforge/scrapers/socrata.py` and `NICHES` in `api/src/lib/stages.ts`):
+`barbershops`, `bars`, `beauty_shops`, `beauty_supply`, `lawn_services`, `meat_markets`,
+`mobile_mechanics`, `nail_salons`, `security_services`, `septic_services`, `smoke_shops`,
+`tire_shops`, `towing`, `used_auto_parts`, `veterinarians`.
 
-## Deployment Notes
+An earlier version of this guide listed six, three of which (`auto_repair`, `restaurants`,
+`laundromats`) have never existed in either mapping. A niche with no mapping logs a warning and
+returns nothing, so a typo here reads as "no businesses found" rather than as an error.
+
+## Deployment Notes (Python backend)
 
 ### JWT secret rotation
 
@@ -198,6 +225,10 @@ Valid niches: `barbershops`, `bars`, `nail_salons`, `auto_repair`, `restaurants`
 2. Update `JWT_SECRET_KEY` in `.env`
 3. Restart the API server
 4. All existing tokens (access + refresh) are immediately invalid — everyone must re-login
+
+On Workers the same secret is named `JWT_SECRET` and is rotated with
+`npx wrangler secret put JWT_SECRET` followed by a deploy. The two backends do not share a secret,
+so a token issued by one is not valid at the other.
 
 ### CORS for production
 
@@ -209,13 +240,153 @@ CORS_ORIGINS=["https://crm.yourdomain.com"]
 
 ### Cookie settings for production
 
-The refresh token cookie is set with `secure=True` and `samesite=lax`. This requires HTTPS in production. If running behind a reverse proxy, ensure `X-Forwarded-Proto: https` is set.
+In **Python**, the refresh token cookie is set with `secure=True` and `samesite=lax`. This requires
+HTTPS in production. If running behind a reverse proxy, ensure `X-Forwarded-Proto: https` is set.
+
+In **Workers** it is `SameSite=None; Secure` instead, because the Pages frontend is a different
+origin from the Worker and `Lax` would suppress the cookie on the cross-site refresh request
+(ADR 027). That also means the production `CORS_ORIGINS` var must list the Pages origin exactly —
+a wildcard will not do, since credentialed requests reject `*`.
 
 ### Anthropic (Azure Foundry) gotchas
 
 - Endpoint format: `https://{resource}.cognitiveservices.azure.com/anthropic/`
 - Auth header is `x-api-key` (NOT the standard Azure `api-key` header)
 - The Anthropic SDK's `base_url` should NOT include `/v1/` — the SDK adds it
+
+## Workers API operations
+
+Everything here runs from `api/`. The deployed Worker is
+https://leadforge-api.crichalchemist.workers.dev
+
+### Configuration
+
+Non-secret values live in `api/wrangler.jsonc`, which is tracked:
+
+| Binding | What it is |
+|---|---|
+| `DB` | D1 database `leadforge-db`, migrations in `api/migrations/` |
+| `AI` | Workers AI, used by both the fast and quality LLM clients |
+| `ENRICHMENT_QUEUE`, `OUTREACH_QUEUE`, `SENTIMENT_QUEUE`, `RECALIBRATION_QUEUE` | Queue producers |
+| consumer | `leadforge-sentiment` only, 2 retries with a 60 s delay, matching the Celery policy |
+| `COOKIE_STORE` | KV namespace, bound but not read by any route |
+| `vars.CORS_ORIGINS` | The Pages origin, listed exactly |
+| `triggers.crons` | Empty. Add each cron together with its handler, never before |
+
+Three of the four queues have a producer bound that nothing sends to, and no consumer that would
+read it; they wait on the scraper, voice, and scoring ports. The sentiment consumer has no
+dead-letter queue, matching Celery, so a message that exhausts its retries leaves only the logged
+errors as a trace.
+
+The one live path is: `POST /api/webhooks/retell/*` enqueues on `SENTIMENT_QUEUE`, and
+`tasks/sentiment.ts` consumes it, calls Workers AI, and applies the score feedback. It is the only
+caller of `api/src/lib/llm/` — the outreach-brief and entity-resolution modules are ported and
+tested but reached by nothing.
+
+### Secrets
+
+```bash
+npx wrangler secret put JWT_SECRET               # required; auth 500s without it
+npx wrangler secret put RETELL_API_KEY           # HMAC key for the webhook signature
+npx wrangler secret put GOOGLE_PLACES_API_KEY    # discovery enrichment (ADR 030)
+```
+
+Optional: `GOOGLE_PLACES_API_SECRET` (URL signing; unset, and `buildSignedUrl` only signs when it
+is set). `YELP_API_KEY` is safe to set — no scoring module reads the Yelp columns. **`APIFY_API_TOKEN`
+is not**: setting it starts writing `has_meta_ads`, which feeds the digital deficit and competitive
+context, and would make Workers score differently from Python.
+
+> **`api/.dev.vars` is tracked in git and has no `.gitignore` rule.** It is the file wrangler reads
+> for local secrets, so anything put there is staged by default. It currently holds only
+> `CORS_ORIGINS`. Pass throwaway local values with `wrangler dev --var KEY:value` instead.
+
+### D1 migrations
+
+```bash
+npx wrangler d1 migrations apply leadforge-db            # LOCAL miniflare state
+npx wrangler d1 migrations apply leadforge-db --remote   # production
+```
+
+`--remote` is the opt-in, and there is no `--local` to forget: wrangler 4 defaults to local, so
+dropping the flag silently migrates the miniflare database in `api/.wrangler/state` and reports
+success. Verify a production migration by querying for something it created rather than by trusting
+the exit code.
+
+### Deploy
+
+```bash
+npm run typecheck      # tsc --noEmit, strict
+npm test               # vitest on workerd
+npm run build          # wrangler deploy --dry-run: bundles and validates bindings, no credentials
+npx wrangler deploy
+```
+
+### Frontend on Pages
+
+```bash
+cd frontend && npm run build
+npx wrangler pages deploy dist --project-name=leadforge-frontend --branch=master
+```
+
+**`--branch=master` is deliberate and outlived the git rename to `main`.** Pages decides
+production-versus-preview by matching that value against the *project's* own production branch
+setting, which is independent of git and was fixed as `master` when the project was created.
+Passing `--branch=main` before changing the dashboard setting publishes to a preview URL instead of
+production, silently. Change the dashboard setting first, then the flag.
+
+`frontend/.env.production` bakes `VITE_API_BASE_URL` into `dist/`, so the production bundle talks to
+the Worker directly rather than through a dev proxy.
+
+### Users
+
+The Workers user table is not interchangeable with Python's. Passwords are PBKDF2-SHA256 via Web
+Crypto, stored as `pbkdf2$<iterations>$<salt_b64url>$<hash_b64url>`; Python's bcrypt hashes are not
+portable to the Workers runtime, so no user row migrates between backends.
+
+There is **no bootstrap CLI** — this is a known gap. The first admin row has to be inserted into D1
+directly with a hash in the format above. After that, `POST /api/auth/signup` creates users and
+requires an existing admin token.
+
+### Rebuilding the Overture match table
+
+`scripts/build_overture_matches.py` runs a DuckDB query over Overture's Parquet release and emits
+SQL chunks that load into `overture_matches` (migration 0004). Overture cannot be queried from a
+Worker, so this is always precomputed, never live.
+
+- **Run it from the repo root.** It resolves the bundled IDF table by the relative path
+  `api/src/data/name-idf.json`.
+- **Rebuilds are wholesale.** The first chunk truncates the table, so recovery is always to restart
+  from chunk 000. Resuming midway is not safe.
+- **Do not run discovery while the table is truncated.** Dedup happens before enrichment, so a
+  business discovered in that window is never revisited, and only the backfill can repair it.
+- A partial load can therefore only produce *missing* data, never wrong data: an absent row means
+  "not yet covered", and both consumers handle that.
+
+`POST /api/enrichment/overture-backfill` improves businesses already stored. Its limit is 15 per
+call by design — each candidate costs a 3-statement batch plus a select — and it is idempotent, so a
+small limit just means calling it again.
+
+## CI and commit hooks
+
+Applies to both backends. `.github/workflows/ci.yml` runs on every push and pull request as three
+parallel jobs: ruff check, `ruff format --check`, and pytest; then typecheck, vitest, and
+`wrangler deploy --dry-run`; then the frontend build. It needs **no secrets**.
+
+Install the hooks once per clone:
+
+```bash
+uvx pre-commit install
+uvx pre-commit run --all-files                            # run over everything
+git config blame.ignoreRevsFile .git-blame-ignore-revs    # skip the formatting-only commit
+```
+
+The hooks are the fast gates only — whitespace, `ruff --fix`, `ruff-format`, and `tsc`. The full
+suites belong in CI, because a hook slow enough to be annoying gets bypassed with `--no-verify`, and
+CI cannot be. `api/src/data/` and `api/test/fixtures/` are excluded from every formatting hook: a
+single byte there breaks the fixtures that pin the Python scorers to their TypeScript ports.
+
+GitHub honours `.git-blame-ignore-revs` automatically; the `git config` line is what makes local
+`git blame` skip the same commit.
 
 ## Troubleshooting
 
@@ -258,3 +429,39 @@ Tests use SQLite in-memory. UUID columns are stored as strings in SQLite, so any
 ### Tests failing after auth changes
 
 The test conftest creates real JWT tokens and User records. If auth behavior changes, update the fixtures in `tests/api/conftest.py`. The `auth_headers` fixture provides admin-level access; `viewer_headers` provides read-only access.
+
+### Workers: `table users already exists` on a local migration
+
+A local D1 created before the ADR-026 schema reconciliation has the old shape (`users.name`, no
+`is_active`, `digital_presence` singular), and `wrangler d1 migrations apply` refuses it. Login then
+401s on an undefined `is_active`. Delete `api/.wrangler/state/v3/d1` and re-apply.
+
+### Workers: tests pass locally, fail in CI with an auth error
+
+`api/vitest.config.ts` sets `remoteBindings: false`. Without it the pool opens a remote proxy session
+for the declared `ai` binding, which succeeds locally off a cached `wrangler login` token and fails in
+CI with an authentication error that looks nothing like a test failure. If you add a binding that has
+a remote counterpart, keep that flag in mind.
+
+### Workers: a discovery run that reads as clean but measured nothing
+
+Google answers a denied key, an exhausted quota, and a malformed request with **HTTP 200** plus a
+`status` field, so nothing throws and the payload merely lacks its results key. Check the `places`
+object in the route's response, not the exit status: it tallies lookups that failed for a
+configuration or quota reason, separately from businesses Google genuinely has no record of. A
+business whose lookup failed is stored with a **null** `digital_deficit_score` — deliberately, rather
+than with Python's constant 74 — and every later run then skips it at the pre-lookup dedup. Recovery
+is to delete those `businesses` rows and re-run; all four child tables cascade.
+
+### Workers: the Overture backfill returns `{examined: 0, updated: 0, skipped: 0}`
+
+That is the correct answer when no stored business has a match row, and also when the only candidates
+are businesses whose latest score carries the deliberate NULL from an incomplete Places lookup. Those
+are excluded on purpose: their stored `has_google_business_profile = 0` means *unknown*, so scoring
+them would charge points on no evidence and overwrite the marker recording that they were never
+measured. They need Google first, not Overture.
+
+### Workers: `{"detail": "JWT_SECRET not configured"}` with a 500
+
+The secret is unset on the deployed Worker. `npx wrangler secret put JWT_SECRET`, then deploy. Auth
+routes and middleware both fail closed rather than falling back to a default.

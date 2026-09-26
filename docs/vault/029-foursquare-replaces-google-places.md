@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted. Supersedes ADR-004. Narrows ADR-005.
+Superseded by ADR-030, which restored Google Places as the source of record once its billing worked
+again and dropped Foursquare. Supersedes ADR-004. Narrows ADR-005.
 
 ## Date
 

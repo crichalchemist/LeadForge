@@ -17,13 +17,21 @@ ADRs follow the format: `NNN-short-title.md`
 
 ## Phase Block Reservations
 
-To maintain organization across the 4-phase build:
+To maintain organization across the build:
 
 - **Phase 1 (Data Pipeline MVP)**: 001-006
 - **Phase 2 (Full Scoring + Platform Scrapers)**: 007-010
 - **Phase 3 (LLM Integration + Voice Outreach)**: 011-014
 - **Phase 4 (CRM + Dashboard)**: 015-018
+- **Phase 5A (Voice provider alignment)**: 019
 - **Phase 5B (NOF Grant Integration)**: 020-025
+- **Phase 6 (Cloudflare migration)**: 026-035, of which 026-030 are used
+
+## Status Formatting
+
+Two formats are in use and both are fine to read: the earlier ADRs use a `## Status` section, the
+later ones an inline `**Status:**` line. What matters is that an ADR's own status and its row in the
+index below agree — they have drifted before.
 
 ## ADR Index
 
@@ -44,7 +52,7 @@ To maintain organization across the 4-phase build:
 | 013 | Retell integration: webhook-driven async, idempotent handlers | Accepted | 2026-03-14 |
 | 014 | Sentiment feedback: multiplicative on composite, one adjustment per call, capped at 100 | Accepted | 2026-03-14 |
 | 015 | Frontend stack: React + Vite + Tailwind, React Query for server state, @dnd-kit for DnD | Accepted | 2026-03-14 |
-| 016 | API auth: API key for MVP, upgrade path to OAuth2/OIDC | Accepted | 2026-03-14 |
+| 016 | API auth: API key for MVP, upgrade path to OAuth2/OIDC | Superseded by JWT auth | 2026-03-14 |
 | 017 | Recalibration: 90-day full re-enrichment, score versioning for audit trail | Accepted | 2026-03-14 |
 | 018 | Pipeline transitions: valid transition enforcement in backend, optimistic updates in frontend | Accepted | 2026-03-14 |
 | 019 | Retell API v2 alignment: parameter names, webhook structure, signature verification | Accepted | 2026-03-14 |
