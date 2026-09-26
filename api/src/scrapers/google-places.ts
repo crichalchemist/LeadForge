@@ -59,8 +59,14 @@ export function distanceMeters(lat1: number, lon1: number, lat2: number, lon2: n
 }
 
 /**
- * Google answers a denied key, an exhausted quota, and a malformed request with HTTP 200 and a
- * `status` field, so `raise_for_status` never fires and the payload simply lacks its results key.
+ * Google answers a denied key and a malformed request with HTTP 200 and a `status` field, so
+ * `raise_for_status` never fires and the payload simply lacks its results key. **An exhausted quota is
+ * believed to behave the same way but is UNVERIFIED**: the experiment that would have settled it capped
+ * the project at 1/day and then saw four consecutive 200 OKs, which means the cap had not propagated, so
+ * the result was inconclusive rather than confirmatory. Both paths are guarded regardless — this check
+ * catches the 200-plus-status shape, and the try/catch at each call site tallies a non-2xx or transport
+ * failure — so the uncertainty costs nothing operationally. It is recorded here so nobody later reads the
+ * quota case as established.
  * Without this check every such reply reads as "no such business" and the pipeline stores a
  * maximal digital deficit for a shop it never actually looked up.
  *

@@ -4,8 +4,10 @@
 -- Overture is a DuckDB query over Parquet on S3 and Workers has no DuckDB, so matching happens
 -- offline and only the result is stored. Mirroring the POIs instead is not an option: Chicago holds
 -- 214,735 named Overture places against a Workers Free budget of 100,000 D1 row writes per day, so
--- one load would consume three full days and so would every refresh. The 21,004 licence accounts
--- here are a fifth of a single day.
+-- one load would consume three full days and so would every refresh. This table holds one row per
+-- licence ACCOUNT/SITE pair -- about 23.6k, across 21,004 distinct account numbers, since a business
+-- may hold several site numbers -- which is roughly a quarter of one day's writes. A refresh costs
+-- about double that, because the wholesale DELETE counts as rows written too.
 --
 -- Keyed on the licence account, the same identity migration 0003 gave `businesses`, so this table
 -- needs no place id and does not depend on Overture's GERS ids being stable across monthly releases.
