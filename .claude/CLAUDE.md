@@ -99,6 +99,25 @@ The bundled corridor polygons were checked against live licence coordinates and 
 
 Test helpers in `api/test/helpers.ts` bind fixed column lists: `createBusiness` silently drops overrides outside its list (`google_place_id` and `fsq_place_id` among them), so a test that needs another column must insert the row itself.
 
+## Agent tooling
+
+**Serena (`mcp__plugin_serena_serena__*`) is the right tool for symbol-level work, not grep.** It is
+LSP-backed, so it answers "who calls this", "what is this symbol's body", and "what does this file
+export" across both backends without reading whole files into context — which matters here, where a
+port is verified by comparing a TypeScript symbol against its Python namesake. The useful ones:
+`find_symbol`, `find_referencing_symbols`, `find_implementations`, `get_symbols_overview`,
+`search_for_pattern`, and for edits `replace_symbol_body` / `insert_after_symbol` /
+`replace_in_files`. Reach for it before hand-rolling a `grep | sed` pass over `src/leadforge/` and
+`api/src/`.
+
+Two mechanics: call `initial_instructions` first (the server asks for it), and its tools are
+**deferred** — load them with `ToolSearch` (`select:mcp__plugin_serena_serena__find_symbol,...`,
+batched in one call) before calling, or they fail with `InputValidationError`.
+
+If the tools are absent, that is a connection failure, not a missing capability — serena failed to
+connect (`CONNECTION_CLOSED`) on 2026-09-25, and the fix is to restart or retry the server, not to
+conclude it is unconfigured and fall back to grep silently.
+
 ## Docs conventions
 
 - Architecture decisions are ADRs in `docs/vault/NNN-title.md`, indexed in `docs/vault/README.md` with reserved number blocks per phase. Record a new ADR when changing an architectural choice; supersede rather than edit accepted ones.
@@ -175,9 +194,9 @@ same 157 licensed `hair service` businesses in 60619:
 
 | source | returned | name-corroborated | false | website | phone | social | rating | reviews ≥5 |
 |---|---|---|---|---|---|---|---|---|
-| Google | 102 | **74** (47%) | 28 | 23 | 62 | — | **71** | **60** |
-| Foursquare | 140 | 56 (36%) | **84** | 17 | 44 | 4 | 0 | 0 |
-| Overture | 157 | 71 (45%) | n/a | **52** | 70 | **57** | 0 | 0 |
+| Google | 102 | **77** (49%) | 25 | 23 | 65 | — | **74** | **63** |
+| Foursquare | 140 | 57 (36%) | **83** | 17 | 44 | 4 | 0 | 0 |
+| Overture | 157 | 74 (47%) | n/a | **55** | 73 | **60** | 0 | 0 |
 
 Overture's "returned" is 157 because every business has *some* POI within 200 m, and its matching
 is exhaustive and offline, so it has no false-match count comparable to a single nearest API
@@ -185,24 +204,32 @@ result. Google's `locationbias` is a bias and not a filter, so the 200 m cut is 
 time from a recorded distance; unrestricted, Google returns 144 and corroborates 86 but at 58 false.
 
 **Foursquare is dominated on every axis and carries no field the others lack**: fewer corroborated
-matches than either (56), the most false matches by far (84), a third of Overture's website
+matches than either (57), the most false matches by far (83), under a third of Overture's website
 coverage, and no rating. It adds only 12 businesses over Google ∪ Overture. Unions:
-Google ∪ Overture **89/157** (57%), all three 101 (64%). Overture covers 15 businesses Google
-misses; Google covers 18 Overture misses; Google supplies a rating for 56 of Overture's 71.
-Website coverage is Overture's strength and Google's weakness — 52 against 23, 37 of them
+Google ∪ Overture **93/157** (59%), all three 105 (67%). Overture covers 16 businesses Google
+misses; Google covers 19 Overture misses; Google supplies a rating for 58 of Overture's 74.
+Website coverage is Overture's strength and Google's weakness — 55 against 23, 40 of them
 Overture-only — which matters because the website term is 30 of the deficit's points.
 
-Caveat on the numbers: `measure_places_sources.py`'s scorer is **reconstructed** from
-`measure_overture_match.py`'s design and is **not verified equivalent** to it — it re-measures
-Overture at 71 where that script reported 74. The candidate set does not explain the gap: every
-200 m neighbourhood falls inside even the tightest bbox tried, so only the IDF weights move, and
-they move Overture 72 → 71 as the corpus grows 5,645 → 9,352 POIs; 8,470 lies between those. The
-two scorers therefore differ in the threshold, the tokenizer, or the best-candidate rule, and the
-repo currently holds two scripts claiming one scorer. **The three-way table is internally valid —
-all three sources go through the same function — but its figures are not comparable with the
-earlier run's 74/57/83.** The 12 lowest-scoring accepted Google pairs were hand-audited and all 12
-read correct; `REGINA AFRICAN IMPACT → Regina African Braiding` (6 m apart) is the one genuinely
-uncertain.
+**Corroborate before the Details call.** Find Place already returns `name` and `geometry`, so
+scoring the name and applying the 200 m cut before the second call takes Details from 102 to 77 —
+about 234 calls per 157 businesses instead of the 307 this measurement paid — and means a false
+match is never billed and never stored.
+
+The two scorers are **reconciled**: `measure_places_sources.py` and `measure_overture_match.py` are
+behaviourally identical (one routes `&` to the STOP-listed token "and" where the other drops it as a
+separator; the empty-bigram branch is unreachable because tokens are always ≥3 chars), and the
+table above reproduces the Overture-only run's 74 and the Foursquare run's 57-with-83-false exactly.
+
+That agreement took a bug fix worth remembering: **key businesses by the city's
+`account_number`/`site_number`, never by name.** Five names among the 157 are held by two or three
+different licence accounts, so a dict keyed by name silently merged 6 businesses and under-reported
+*every* source at once (Overture read 71, Foursquare 56/84). An earlier commit here explained that
+gap as a bbox/IDF difference; that was wrong. The script now asserts key uniqueness and asserts that
+each fetcher's output is positionally aligned with the licence list.
+
+The 12 lowest-scoring accepted Google pairs were hand-audited and all 12 read correct;
+`REGINA AFRICAN IMPACT → Regina African Braiding` (6 m apart) is the one genuinely uncertain.
 
 `hf://datasets/foursquare/fsq-os-places` (Apache-2.0) remains gated: `gated: auto`, token scoped
 correctly (`canReadGatedRepos: true`), but the account is not on the authorized list and the access

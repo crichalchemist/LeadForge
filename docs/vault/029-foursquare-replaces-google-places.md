@@ -281,22 +281,22 @@ containment with a head-token gate), same candidate corpus for the IDF weights.
 
 | source | returned | name-corroborated | false | website | phone | social | rating | reviews ≥5 |
 |---|---|---|---|---|---|---|---|---|
-| Google | 102 | 74 (47%) | 28 | 23 | 62 | — | 71 | 60 |
-| Foursquare | 140 | 56 (36%) | 84 | 17 | 44 | 4 | 0 | 0 |
-| Overture | 157 | 71 (45%) | n/a | 52 | 70 | 57 | 0 | 0 |
+| Google | 102 | 77 (49%) | 25 | 23 | 65 | — | 74 | 63 |
+| Foursquare | 140 | 57 (36%) | 83 | 17 | 44 | 4 | 0 | 0 |
+| Overture | 157 | 74 (47%) | n/a | 55 | 73 | 60 | 0 | 0 |
 
 **Foursquare is dominated.** It corroborates fewer businesses than either alternative, produces by
 far the most false matches, carries a third of Overture's website coverage, and has no field the
 others lack — its rating and review count are the entitlement-denied ones that 429 the whole
 request. Over Google ∪ Overture it adds 12 businesses, and to get them the pipeline would filter
-84 false matches. The decision this ADR records should not survive on the evidence that replaced
+83 false matches. The decision this ADR records should not survive on the evidence that replaced
 its premise.
 
-**The two survivors are complementary, not ranked.** Google ∪ Overture reaches 89/157 (57%);
-Overture covers 15 businesses Google misses and Google covers 18 of Overture's. They are strong in
-different fields: Overture supplies website for 52 against Google's 23 (37 Overture-only), which
+**The two survivors are complementary, not ranked.** Google ∪ Overture reaches 93/157 (59%);
+Overture covers 16 businesses Google misses and Google covers 19 of Overture's. They are strong in
+different fields: Overture supplies website for 55 against Google's 23 (40 Overture-only), which
 matters because the website term is 30 of the digital deficit's points; Google supplies a rating
-for 71, including 56 of Overture's own 71 matches, which is the `computeViability` block that no
+for 74, including 58 of Overture's own 74 matches, which is the `computeViability` block that no
 free source restores.
 
 ### What this does and does not settle
@@ -314,7 +314,7 @@ The saving is on the *expensive* call, not the cheap one. Find Place stays at 15
 say which of its misses Google will catch without asking, and a rating for one of Overture's own
 matches still needs a Google `place_id`, which Overture does not carry. But Find Place already
 returns `name` and `geometry`, so applying name corroboration and the 200 m cut to *that* response
-before calling Details drops Details from the 150 this measurement paid to roughly 74 — about 231
+before calling Details drops Details from the 150 this measurement paid to 77 — about 234
 calls per 157 businesses instead of 307, with the cut falling entirely on the SKU that carries
 `rating`, `reviews` and `website`. Corroborating before Details also means a false match is never
 paid for and never stored.
@@ -329,21 +329,29 @@ exists, retained but dead.
 
 ### Provenance of the numbers
 
-The scorer here is **reconstructed** from `measure_overture_match.py`'s design, not reused from it —
-that file could not be read this session (see below) — and it is **not verified equivalent**: it
-re-measures Overture at 71 where the earlier run reported 74. The candidate set does not account
-for the gap. Every licence's 200 m neighbourhood lies inside even the tightest bbox tried, so the
-candidate POIs are identical across margins and only the IDF weights move; those move Overture
-72 → 71 as the corpus grows 5,645 → 9,352 POIs, and 8,470 lies between those two sizes. So the two
-scorers differ in the threshold, the tokenizer, or the best-candidate rule, and the repo now holds
-two scripts that claim the same scorer and may disagree. **Reconciling them is open work.** The
-three-way table is internally valid, because all three sources pass through one function; its
-numbers are *not* comparable with the earlier run's 74/57/83.
+The two scorers are **reconciled**, and the table above reproduces the Overture-only run's 74 and
+the Foursquare run's 57-with-83-false exactly. `measure_places_sources.py` and
+`measure_overture_match.py` are behaviourally identical: one routes `&` through the STOP-listed
+token "and" where the other drops it as a separator, and the empty-bigram branch in `charsim` is
+unreachable because tokens are always ≥3 chars.
 
-Recorded because it is the kind of thing that gets lost: the exact-match gate ("reproduce 74 or
-stop") was written before the measurement and then loosened to a 68–80 band *after* seeing it
-return 72. That was the point to stop and reconcile, not to continue. The band is why the
-non-equivalence reached a commit before being named.
+Getting there required admitting two errors in this ADR's own first draft of this section.
+
+**The bug was mine, and it is worth stating plainly because it is a trap any future measurement
+here can fall into.** The script keyed businesses by name. Five names among the 157 are held by two
+or three *different* licence accounts, so six businesses silently merged, and every source was
+under-reported at once — Overture read 71, Foursquare 56 with 84 false. Keying by the city's
+`account_number`/`site_number` fixes it, which is the same identity this decision adopts as the
+dedup key. The script now asserts that the key is unique and that each fetcher's output is
+positionally aligned with the licence list.
+
+**The first explanation for that gap was wrong, and wrong in an instructive way.** It blamed a bbox
+and IDF-corpus difference. That story was refuted by the same script's own radius sweep, which
+returns 74 at both 150 m and 200 m on this corpus. The reason a wrong explanation survived to a
+commit: the measurement had an explicit gate — "reproduce 74 or stop" — which returned 72 and was
+then widened to a 68–80 band *after* seeing the failure. A gate relaxed in response to its own
+result is not a gate. The correct move at that point was to reconcile the scorers, which is what
+finally found the real bug.
 
 Google's
 `locationbias` is a bias and not a filter, so the 200 m cut is applied at scoring time from a
