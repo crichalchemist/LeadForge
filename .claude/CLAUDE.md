@@ -173,6 +173,20 @@ deficit's 30-point website term on fabricated evidence. Untried and likely to be
 string-similarity threshold: `limit=10` with a `fsq_category_ids` filter, and a radius tighter
 than 200 m.
 
+**Paginate Socrata with `$order` on a UNIQUE column, or it silently skips rows.** SoQL offset
+paging without a total order has no stable page boundary, so rows shift between requests and pages
+lose them without any error. Measured 2026-09-25 on `r5kz-chrr` across the 15 niches: unordered
+offset paging collected 22,251 distinct `(account_number, site_number)` pairs where the true count is
+**23,969** — 1,718 pairs, 7.2%, gone with a clean exit. `$order: ":id"` fixes it and is verified to
+work on this dataset. Ordering by a non-unique column is not enough: ties at a page boundary are
+orderable arbitrarily, which is why `searchBusinesses` in `api/src/scrapers/socrata.ts` should use
+`:id` rather than its current `legal_name ASC` (latent, not live — see Known discrepancies).
+
+Verified counts for this dataset and filter, useful as a regression anchor: **113,383** licence rows,
+**23,969** distinct `(account_number, site_number)` pairs, **21,004** distinct `account_number`
+values. A business holding several site numbers is why the last two differ; only 146 distinct
+`site_number` values exist in the whole filtered set.
+
 **Overture Maps is the open alternative, measured 2026-09-16 and not yet adopted.** Foursquare
 donated its places data to Overture, whose release bucket is anonymously readable with no key, no
 gate and no rate limit: `s3://overturemaps-us-west-2/release/<version>/theme=places/type=place/*`
@@ -265,4 +279,11 @@ exists but now holds only `LICENSE.txt` and `NOTICE.txt` — the data is gone fr
 - Deficit scores from Workers still are not comparable with Python's, but for narrower reasons than before: both now enrich from Google Places with the same 0.0-5.0 rating scale and the same hardcoded-0 social flags, so the remaining divergences are that Workers stores a null deficit where Python writes the 74, and that Workers discards a candidate whose name does not corroborate the licence where Python accepts Google's nearest answer (ADR 030). `fsq_place_id` is now a dead column retained alongside its UNIQUE index; `google_place_id` is written again but as an enrichment attribute, not identity.
 - `api/.dev.vars` is tracked in git with no `.gitignore` rule, while `.env` is ignored. It currently holds only `CORS_ORIGINS`, but it is the file wrangler reads for local secrets, so anything put there is staged by default. Pass throwaway local values with `wrangler dev --var KEY:value` instead.
 - A local D1 created before the ADR-026 reconciliation has the old schema (`users.name`, no `is_active`, `digital_presence` singular) and `wrangler d1 migrations apply --local` refuses it with `table users already exists`, so login 401s on an undefined `is_active`. Delete `api/.wrangler/state/v3/d1` and re-apply.
+- `searchBusinesses` in `api/src/scrapers/socrata.ts` pages with `$order: 'legal_name ASC'`, a
+  non-unique column, so ties at a page boundary could skip or duplicate rows (see the Socrata note
+  above; the correct order key is `:id`). **Latent, not live:** the only caller asks for at most
+  `limit * LICENSE_OVERFETCH` = 200 rows, `searchBusinesses` shrinks `pageSize` to that, and it
+  returns as soon as it has `limit` rows — so the multi-page path is currently unreachable and one
+  page is always enough. It becomes a real bug the moment a caller requests more than
+  `SOCRATA_PAGE_SIZE` rows.
 - There is no CI workflow or pre-commit config in the repo.
