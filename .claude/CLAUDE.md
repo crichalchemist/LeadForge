@@ -223,10 +223,18 @@ scoring the name and applying the 200 m cut before the second call takes Details
 about 234 calls per 157 businesses instead of the 307 this measurement paid — and means a false
 match is never billed and never stored.
 
-The two scorers are **reconciled**: `measure_places_sources.py` and `measure_overture_match.py` are
-behaviourally identical (one routes `&` to the STOP-listed token "and" where the other drops it as a
-separator; the empty-bigram branch is unreachable because tokens are always ≥3 chars), and the
-table above reproduces the Overture-only run's 74 and the Foursquare run's 57-with-83-false exactly.
+**There is one canonical Python scorer**, `scripts/lib/name_match.py`, which
+`measure_places_sources.py` imports; `api/src/lib/name-match.ts` is its TypeScript port, pinned by
+`api/test/fixtures/name-match-vectors.json`. `measure_overture_match.py` keeps its own older copy on
+purpose, as the historical record of the run it made — so do not "fix" it into agreement. The two are
+**not** behaviourally identical: they break a tied max-weight head token differently, and because
+every token with `df = 1` scores exactly `log(N/1)`, singleton proper nouns tie by construction rather
+than by accident. Measured 2026-09-25: 6 of the 157 names have a tied head token and the divergence
+moved **zero** businesses in all three sources. That is a property of this corpus, not a guarantee —
+`measure_places_sources.py`'s module docstring is the authoritative record of the divergence and of
+how the check was reproduced, deliberately kept in one place so the two cannot drift apart again.
+The table above reproduces the Overture-only run's 74 and the Foursquare run's 57-with-83-false
+exactly.
 
 That agreement took a bug fix worth remembering: **key businesses by the city's
 `account_number`/`site_number`, never by name.** Five names among the 157 are held by two or three
