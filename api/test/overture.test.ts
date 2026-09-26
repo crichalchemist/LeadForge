@@ -97,6 +97,16 @@ describe('applyOvertureMatch', () => {
     expect(out.website_url).toBeNull();
   });
 
+  it('treats a whitespace-only website or phone as absent', () => {
+    // This is the test that protects the trim(). Without it, overturePresent could be reduced to
+    // `value ? value : null` and every other test would still pass while whitespace silently
+    // regressed to being treated as evidence.
+    const out = applyOvertureMatch(bare, match({ website: '   ', phone: '\t ' }));
+    expect(out.has_website).toBe(false);
+    expect(out.website_url).toBeNull();
+    expect(out.phone).toBeNull();
+  });
+
   it('adds nothing for a row the build found no match for', () => {
     expect(applyOvertureMatch(bare, match({ matched: 0, website: 'http://stale.com' }))).toEqual(bare);
   });
