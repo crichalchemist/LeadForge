@@ -8,7 +8,8 @@ describe('D1 migration', () => {
     ).all<{ name: string }>();
     expect(rows.results.map((r) => r.name)).toEqual([
       'businesses', 'competitive_contexts', 'digital_presences', 'grant_applications',
-      'grant_documents', 'lead_scores', 'nof_corridors', 'outreach_records', 'users',
+      'grant_documents', 'lead_scores', 'nof_corridors', 'outreach_records', 'overture_matches', // Workers-only (Overture is not in the Python backend)
+      'users',
     ]);
   });
 
