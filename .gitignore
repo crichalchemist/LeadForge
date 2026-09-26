@@ -102,3 +102,8 @@ Thumbs.db
 *.pid
 *.seed
 *.pid.lock
+
+# Agent tooling — per-developer state, not project config
+.pi/
+.serena/
+.superpowers/
