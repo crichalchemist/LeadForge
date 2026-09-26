@@ -56,3 +56,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 - New dependencies to approve at build time: self-hosted Fira Sans + Fira Sans Condensed, Lucide icons.
 - The map room draws corridors from the bundled polygons; whether to add any basemap is undecided and
   must never assume paid tiles.
+- Theme selection: automatic from `prefers-color-scheme`, a manual toggle, or both, and which theme is
+  the default. Undecided.
+- The old Pipeline, Grants and Reports pages keep running inside the new shell until wave 2. They are
+  working destinations, so the line rail must not draw them as planned track; how they are marked is
+  undecided. If the design hook is on during wave 1, expect drift findings on those files.
