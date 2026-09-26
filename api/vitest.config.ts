@@ -7,6 +7,13 @@ export default defineConfig({
     cloudflareTest(async () => {
       const migrations = await readD1Migrations(path.join(__dirname, 'migrations'));
       return {
+        // wrangler.jsonc declares an `ai` binding, and Workers AI has no local emulation, so the pool
+        // defaults to opening a REMOTE PROXY SESSION for it against the real account. That needs
+        // CLOUDFLARE_API_TOKEN, which a developer has cached from `wrangler login` and CI does not --
+        // so the suite passed locally and failed on the first CI run with an auth error, not a test
+        // failure. No test calls the service: queue.test.ts only does vi.spyOn(env.AI, 'run') with a
+        // mocked result, so the binding needs to exist, not to work.
+        remoteBindings: false,
         wrangler: { configPath: './wrangler.jsonc' },
         miniflare: {
           bindings: {
