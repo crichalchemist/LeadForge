@@ -45,6 +45,22 @@ the licence removes the dependency entirely — **a source id is an enrichment a
 identity** — and it also retires the unverified question of whether GERS ids are stable across
 monthly Overture releases, because nothing now depends on that.
 
+**This changes the shape of the bad-key hazard rather than removing it, and the distinction matters for the
+first production run.** A run with no key — or one that trips the 1,000/day quota partway through — stores
+businesses with a null deficit. Every later run now skips precisely those rows at the pre-lookup dedup,
+before any Places call, and nothing enriches them afterwards because `lib/enrichment.ts` still has no
+caller. So the old failure (a duplicate row per unmeasured business) becomes a new one: silent
+non-enrichment. What is genuinely better is recovery — deleting the affected `businesses` rows and
+re-running is clean, since every child table is `ON DELETE CASCADE` and the re-insert no longer collides
+the way a NULL-keyed row did. Making dedup re-look-up unmeasured rows instead would need an UPDATE path,
+because a re-insert now hits the UNIQUE index; that is deliberately out of scope here.
+
+The quota's own failure mode is unverified. If a capped quota answers HTTP 200 with `OVER_QUERY_LIMIT`, the
+health tally catches it. If it answers a real HTTP 429, `base.ts`'s `fetchJson` throws, the business is
+dropped by `runDiscovery`'s per-business catch, and `places.unavailable` stays 0 — a run that reads as clean
+while storing nothing. The first production run must be small and its `places` block read before anything
+larger follows.
+
 `google_place_id` (already present, `UNIQUE`, dead since 029) and any Overture GERS id become plain
 enrichment columns.
 

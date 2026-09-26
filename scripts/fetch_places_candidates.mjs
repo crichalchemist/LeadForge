@@ -5,8 +5,13 @@
 //   node scripts/fetch_places_candidates.mjs foursquare <outdir>
 //
 // Keys are read from the repo's gitignored .env (GOOGLE_PLACES_API_KEY, FOURSQUARE_API_KEY);
-// never from api/.dev.vars, which is tracked. Google and Foursquare append JSONL and skip names
+// never from api/.dev.vars, which is tracked. Google and Foursquare append JSONL and skip businesses
 // already present, so an interrupted run resumes instead of paying twice.
+//
+// The resume set is keyed by the city's account_number/site_number, never by name. Five of the 157
+// names in 60619 are held by two or three different licence accounts, so a name-keyed resume would
+// skip the duplicates and leave the output misaligned with the licence list -- the same mistake that
+// once made measure_places_sources.py under-report every source at once.
 import fs from 'fs';
 import path from 'path';
 
@@ -18,6 +23,18 @@ const envKey = (name) => {
   if (!line) throw new Error(name + ' not in .env');
   return line.slice(name.length + 1).trim();
 };
+const bkey = (b) => `${b.account_number}/${b.site_number ?? ''}`;
+
+// Refuses a file written before results carried `key` rather than silently re-paying for every
+// lookup in it: an undefined key matches nothing, so the run would look like a fresh one.
+function resumeSet(outPath) {
+  if (!fs.existsSync(outPath)) return new Set();
+  const recs = fs.readFileSync(outPath, 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  if (recs.some((r) => r.key === undefined)) {
+    throw new Error(`${outPath} predates licence-account keying — delete it to refetch, or it will be re-paid for silently`);
+  }
+  return new Set(recs.map((r) => r.key));
+}
 const hav = (a, b, c, d) => {
   const R = 6371000, t = Math.PI / 180, x = (c - a) * t, y = (d - b) * t;
   const h = Math.sin(x / 2) ** 2 + Math.cos(a * t) * Math.cos(c * t) * Math.sin(y / 2) ** 2;
@@ -69,14 +86,13 @@ async function google() {
   let calls = 0;
   const outPath = path.join(outdir, 'google_results.jsonl');
   const biz = JSON.parse(fs.readFileSync(path.join(outdir, 'licences.json'), 'utf8'));
-  const done = new Set(fs.existsSync(outPath)
-    ? fs.readFileSync(outPath, 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l).name) : []);
+  const done = resumeSet(outPath);
   const fh = fs.openSync(outPath, 'a');
   const t = { m: 0, n: 0, e: 0 };
   for (const b of biz) {
-    if (done.has(b.name)) continue;
+    if (done.has(bkey(b))) continue;
     if (calls + 2 > CAP) { console.log('CAP REACHED'); break; }
-    const rec = { name: b.name, lat: b.latitude, lon: b.longitude };
+    const rec = { key: bkey(b), name: b.name, lat: b.latitude, lon: b.longitude };
     try {
       calls++;
       const f = await (await fetch(H + '/maps/api/place/findplacefromtext/json?' + new URLSearchParams({
@@ -115,13 +131,12 @@ async function foursquare() {
   const F = 'fsq_place_id,name,location,latitude,longitude,website,tel,email,social_media,categories';
   const outPath = path.join(outdir, 'fsq_results.jsonl');
   const biz = JSON.parse(fs.readFileSync(path.join(outdir, 'licences.json'), 'utf8'));
-  const done = new Set(fs.existsSync(outPath)
-    ? fs.readFileSync(outPath, 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l).name) : []);
+  const done = resumeSet(outPath);
   const fh = fs.openSync(outPath, 'a');
   const t = { m: 0, n: 0, e: 0 };
   for (const b of biz) {
-    if (done.has(b.name)) continue;
-    const rec = { name: b.name };
+    if (done.has(bkey(b))) continue;
+    const rec = { key: bkey(b), name: b.name };
     try {
       const r = await fetch('https://places-api.foursquare.com/places/search?' + new URLSearchParams({
         query: b.name, ll: `${b.latitude},${b.longitude}`, radius: '200', limit: '1', fields: F }),
