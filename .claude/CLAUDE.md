@@ -334,4 +334,20 @@ exists but now holds only `LICENSE.txt` and `NOTICE.txt` — the data is gone fr
   returns as soon as it has `limit` rows — so the multi-page path is currently unreachable and one
   page is always enough. It becomes a real bug the moment a caller requests more than
   `SOCRATA_PAGE_SIZE` rows.
-- There is no CI workflow or pre-commit config in the repo.
+- CI runs on every push and pull request (`.github/workflows/ci.yml`): three parallel jobs covering
+  ruff + pytest (158), tsc + vitest + `wrangler deploy --dry-run` (601), and the frontend build. It needs
+  **no secrets** -- but only after `remoteBindings: false` was set in `api/vitest.config.ts`. Without it
+  the pool opens a remote proxy session for the `ai` binding, which succeeds locally off a cached
+  `wrangler login` token and fails in CI with an auth error that looks nothing like a test failure.
+  `main` requires all three checks (strict), with `enforce_admins` off so a direct push is still possible.
+- **Neither `ruff format --check` nor whitespace fixers are wired up, deliberately.** Measured on this
+  repo they would rewrite 76, 136 and 6 files respectively, turning the next commit that touches any of
+  them into a reformatting commit. Reformatting is safe (it is a formatter -- it does not change
+  behaviour, and the 158 tests confirm it) but it is a one-time decision that deserves its own commit.
+  Ruff's lint config compensates: `line-length = 120` against a 97-char p99, `migrations` excluded as
+  Alembic-generated, and style rules relaxed for `scripts/*.py` while the correctness rules stay on.
+  `scripts/lib/` is NOT relaxed, because `name_match.py` is pinned to the TypeScript port by a fixture.
+- `src/leadforge/voice/call_manager.py` builds an agent prompt and never passes it to the Retell call, so
+  the agent would run without it. Found by ruff (F841) while wiring CI; marked with a `noqa` and a comment
+  rather than deleted, since deleting the assignment would have hidden the defect. Belongs with the voice
+  port, which is unported on Workers.
