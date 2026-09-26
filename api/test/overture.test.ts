@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:workers';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { resetDb } from './helpers';
+import { applyOvertureMatch, fetchOvertureMatch, type OvertureMatch, type PresenceFacts } from '../src/lib/overture';
 
 beforeEach(async () => {
   await resetDb();
@@ -36,5 +37,74 @@ describe('overture_matches', () => {
     ).bind('999999').first();
     expect(looked?.matched).toBe(0);
     expect(never).toBeNull();
+  });
+});
+
+const bare: PresenceFacts = {
+  has_website: false, website_url: null, has_facebook_page: false, has_instagram: false, phone: null,
+};
+const match = (over: Partial<OvertureMatch> = {}): OvertureMatch => ({
+  account_number: '478849', site_number: '1', matched: 1, gers_id: 'g1', matched_name: 'Shop',
+  score: 0.9, distance_m: 12, website: null, has_facebook: 0, has_instagram: 0, phone: null, ...over,
+});
+
+describe('applyOvertureMatch', () => {
+  it('adds a website Google did not find', () => {
+    // Overture carries 55 websites to Google's 23 on the measured sample, 40 of them Overture-only,
+    // and the website term is 30 of the deficit's 100 points.
+    const out = applyOvertureMatch(bare, match({ website: 'http://shop.com' }));
+    expect(out.has_website).toBe(true);
+    expect(out.website_url).toBe('http://shop.com');
+  });
+
+  it('never downgrades a website Google did find', () => {
+    const base = { ...bare, has_website: true, website_url: 'http://google-found.com' };
+    const out = applyOvertureMatch(base, match({ website: null }));
+    expect(out.has_website).toBe(true);
+    expect(out.website_url).toBe('http://google-found.com');
+  });
+
+  it('prefers the live Google URL when both sources have one', () => {
+    const base = { ...bare, has_website: true, website_url: 'http://google-found.com' };
+    const out = applyOvertureMatch(base, match({ website: 'http://overture-found.com' }));
+    expect(out.website_url).toBe('http://google-found.com');
+  });
+
+  it('supplies social presence, which Google never reports', () => {
+    // This is what stops computeDigitalDeficit's +12 firing for every business alike: 60 of
+    // Overture's 74 matches carry a social link where Google carries none at all.
+    const out = applyOvertureMatch(bare, match({ has_facebook: 1, has_instagram: 1 }));
+    expect(out.has_facebook_page).toBe(true);
+    expect(out.has_instagram).toBe(true);
+  });
+
+  it('adds nothing for a row the build found no match for', () => {
+    expect(applyOvertureMatch(bare, match({ matched: 0, website: 'http://stale.com' }))).toEqual(bare);
+  });
+
+  it('adds nothing when the build has not covered the business', () => {
+    expect(applyOvertureMatch(bare, null)).toEqual(bare);
+  });
+
+  it('fills a phone the live lookup missed without overwriting one it found', () => {
+    expect(applyOvertureMatch(bare, match({ phone: '773-555-0000' })).phone).toBe('773-555-0000');
+    const base = { ...bare, phone: '773-555-1111' };
+    expect(applyOvertureMatch(base, match({ phone: '773-555-0000' })).phone).toBe('773-555-1111');
+  });
+});
+
+describe('fetchOvertureMatch', () => {
+  it('finds the row for a licence account', async () => {
+    await env.DB.prepare(
+      `INSERT INTO overture_matches (account_number, site_number, matched, website, built_at)
+       VALUES ('478849', '1', 1, 'http://shop.com', '2026-09-25T00:00:00Z')`,
+    ).run();
+    const found = await fetchOvertureMatch(env.DB, '478849', '1');
+    expect(found?.website).toBe('http://shop.com');
+  });
+
+  it('returns null for an account with no row and for a licence with no account number', async () => {
+    expect(await fetchOvertureMatch(env.DB, '999999', '1')).toBeNull();
+    expect(await fetchOvertureMatch(env.DB, null, null)).toBeNull();
   });
 });
