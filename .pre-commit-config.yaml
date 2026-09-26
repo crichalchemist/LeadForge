@@ -4,22 +4,24 @@
 # Install once per clone:  uvx pre-commit install
 # Run over everything:     uvx pre-commit run --all-files
 #
-# NOTHING HERE REFORMATS EXISTING CODE, and that is a deliberate constraint rather than an oversight.
-# Three tempting hooks were measured against this repo and left out for the same reason:
-#   ruff-format          would rewrite 56-76 files (the codebase has never been ruff-formatted)
-#   trailing-whitespace  would rewrite 136 files
-#   end-of-file-fixer    would rewrite 6 files
-# Any of them would turn the next commit that touches a file into a reformatting commit, burying the
-# real change and every later `git blame`. Reformatting this repo is a decision worth taking on its
-# own, with its own commit; it is not something to acquire as a side effect of adding hooks.
-#
-# `ruff --fix` below is safe on that score: `ruff check .` is already clean, so it is a no-op on
-# existing code and only touches violations somebody is introducing right now.
+# The formatting hooks below were added only AFTER the repo was formatted in one dedicated commit,
+# recorded in .git-blame-ignore-revs so `git blame` skips it. That ordering matters: enabling them on an
+# unformatted repo makes the next commit that touches any file a reformatting commit, burying the real
+# change. What that commit actually moved, measured against the tracked tree rather than the working
+# directory: ruff-format rewrote 76 files, trailing-whitespace 1 (three lines of .editorconfig), and
+# end-of-file-fixer 1. All 158 Python tests and `ruff check` passed across it, and nothing semantic was
+# at stake -- no multi-line string contained trailing whitespace, and no Markdown file relied on two
+# trailing spaces as a hard line break.
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-      # Read-only checks: these fail a commit, they never rewrite it.
+      - id: trailing-whitespace
+        # Generated artifacts and the fixture pinning the Python scorer to its TypeScript port must
+        # never be touched by a formatting hook -- a byte change there breaks the pin.
+        exclude: ^api/src/data/|^api/test/fixtures/
+      - id: end-of-file-fixer
+        exclude: ^api/src/data/|^api/test/fixtures/
       - id: check-yaml
       - id: check-json
         # api/src/data/*.json are large generated artifacts. name-idf.json (416 KiB) is the IDF table
@@ -36,6 +38,7 @@ repos:
     hooks:
       - id: ruff
         args: [--fix]
+      - id: ruff-format
 
   - repo: local
     hooks:

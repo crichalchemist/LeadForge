@@ -1,0 +1,7 @@
+# Commits listed here are formatting-only and are skipped by `git blame`.
+# GitHub honours this file automatically. Locally it needs one command per clone:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# Whole-tree ruff-format pass. 76 files reformatted, every one verified to parse to a
+# byte-identical AST, with both test suites green across it.
+f9b1554e819a6e982d3ae4f48caee0aa755447ca

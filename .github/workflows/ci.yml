@@ -34,13 +34,14 @@ jobs:
 
       # `ruff check` and `ruff format` are deliberately NOT combined into `make lint` here, so that a
       # lint failure and a formatting failure are distinguishable at a glance in the run summary.
-      #
-      # `ruff format --check` is absent on purpose: this codebase has never been ruff-formatted, and
-      # the check wants to rewrite 56-76 files. Adding it would either start CI red or force a
-      # whole-repo reformatting commit that buries every later `git blame`. That is a real decision
-      # for a human to make on its own, not a side effect of turning CI on.
       - name: Lint
         run: uv run ruff check .
+
+      # The tree was formatted in one dedicated commit (listed in .git-blame-ignore-revs), so this is
+      # green as of that commit and stays green via the pre-commit hook. CI is the real gate, though:
+      # a hook can be skipped with `--no-verify`, and this check cannot.
+      - name: Format
+        run: uv run ruff format --check .
 
       - name: Tests
         run: uv run pytest -q

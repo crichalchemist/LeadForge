@@ -340,11 +340,19 @@ exists but now holds only `LICENSE.txt` and `NOTICE.txt` — the data is gone fr
   the pool opens a remote proxy session for the `ai` binding, which succeeds locally off a cached
   `wrangler login` token and fails in CI with an auth error that looks nothing like a test failure.
   `main` requires all three checks (strict), with `enforce_admins` off so a direct push is still possible.
-- **Neither `ruff format --check` nor whitespace fixers are wired up, deliberately.** Measured on this
-  repo they would rewrite 76, 136 and 6 files respectively, turning the next commit that touches any of
-  them into a reformatting commit. Reformatting is safe (it is a formatter -- it does not change
-  behaviour, and the 158 tests confirm it) but it is a one-time decision that deserves its own commit.
-  Ruff's lint config compensates: `line-length = 120` against a 97-char p99, `migrations` excluded as
+- **The tree is ruff-formatted, as of the dedicated commit listed in `.git-blame-ignore-revs`**, and both
+  `ruff format --check` and the whitespace fixers are now enforced by pre-commit and by CI's `Format`
+  step. That commit rewrote 76 files; trailing whitespace existed on exactly three lines of
+  `.editorconfig` and one plan document lacked its final newline, so the earlier "136 and 6 files" note
+  in this file was wrong -- it counted the working directory, not the tracked tree. Every one of the 76
+  files was verified to parse to a byte-identical AST across the change, with both suites green.
+  `api/src/data/` and `api/test/fixtures/` are excluded from all four formatting hooks, because a single
+  byte there breaks the fixtures that pin the Python scorers to their TypeScript ports.
+  Run `git config blame.ignoreRevsFile .git-blame-ignore-revs` once per clone; GitHub honours the file
+  automatically. Measured, its local effect is nil on this particular commit: only 64 lines across the 76
+  files end up credited to it at all, and those are blank lines ruff-format inserted, which git cannot
+  reassign to any earlier commit. The file earns its place for the next formatting commit, not this one.
+  Ruff's lint config: `line-length = 120` against a 97-char p99, `migrations` excluded as
   Alembic-generated, and style rules relaxed for `scripts/*.py` while the correctness rules stay on.
   `scripts/lib/` is NOT relaxed, because `name_match.py` is pinned to the TypeScript port by a fixture.
 - `src/leadforge/voice/call_manager.py` builds an agent prompt and never passes it to the Retell call, so
