@@ -24,8 +24,7 @@ Caveat that survived into the numbers: Overture's "returned" column is 157 becau
 has some POI within 200 m, and matching is exhaustive and offline, so it has no "false match"
 count comparable to the two APIs' single nearest result.
 """
-import duckdb, json, math, re, sys
-from collections import Counter
+import duckdb, json, math, sys
 
 S = sys.argv[1]
 con = duckdb.connect()
@@ -53,33 +52,13 @@ rows = con.execute(f"""
   WHERE bbox.ymin BETWEEN {min(la)-M} AND {max(la)+M}
     AND bbox.xmin BETWEEN {min(lo)-M} AND {max(lo)+M} AND names.primary IS NOT NULL""").fetchall()
 
+sys.path.insert(0, "scripts")
+from lib.name_match import build_idf, make_scorer, tokenize   # noqa: E402
+
 STOP = {'llc','inc','corp','corporation','ltd','the','and','dba','co','company','incorporated','of','by','at'}
-def toks(s):
-    out = []
-    for t in re.findall(r"[a-z0-9]+", (s or "").lower()):
-        if len(t) < 3 or t in STOP: continue
-        out.append(t[:-1] if len(t) > 4 and t.endswith('s') else t)
-    return out
-docs = [toks(r[0]) for r in rows] + [toks(b["name"]) for b in biz]
-df = Counter()
-for d in docs: df.update(set(d))
-N = len(docs); idf = {t: math.log(N / c) for t, c in df.items()}
-def bg(s): return {s[i:i+2] for i in range(len(s)-1)}
-def charsim(a, b):
-    A, B = bg(a), bg(b)
-    return len(A & B) / len(A | B) if (A | B) else 0.0
-def tokmatch(t, u):
-    if len(t) >= 5 and len(u) >= 5 and (t.startswith(u) or u.startswith(t)): return True
-    return charsim(t, u) >= 0.80
-def score(a, b):
-    ta, tb = toks(a), toks(b)
-    if not ta or not tb: return 0.0
-    sa = set(ta); tbs = set(tb)
-    den = sum(idf.get(t, 0) for t in sa)
-    if den <= 0: return 0.0
-    head = max(sa, key=lambda t: idf.get(t, 0))
-    if not any(tokmatch(head, u) for u in tbs): return 0.0
-    return sum(idf.get(t, 0) for t in sa if any(tokmatch(t, u) for u in tbs)) / den
+idf, default_idf = build_idf([r[0] for r in rows], STOP, extra=[b["name"] for b in biz])
+score = make_scorer(STOP, idf, default_idf)
+N = len(rows) + len(biz)
 def hav(a, b, c, d):
     R, t = 6371000.0, math.pi / 180
     x, y = (c - a) * t, (d - b) * t

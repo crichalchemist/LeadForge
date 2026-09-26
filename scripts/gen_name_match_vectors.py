@@ -9,39 +9,13 @@ neither shows up as a test failure anywhere else -- the same reason scoring-pari
 Python-scored vectors. Vectors are real measured pairs plus the adversarial cases that earlier
 versions of this scorer got wrong.
 """
-import json, math, re, sys
+import json, sys
 
-A = json.load(open("api/src/data/name-idf.json"))
-stop, IDF, DEF = set(A["stop"]), A["idf"], A["default_idf"]
+sys.path.insert(0, "scripts")
+from lib.name_match import load_idf, make_scorer   # noqa: E402
 
-def toks(s):
-    out = []
-    for t in re.findall(r"[a-z0-9]+", (s or "").lower()):
-        if len(t) < 3 or t in stop: continue
-        out.append(t[:-1] if len(t) > 4 and t.endswith('s') else t)
-    return out
-def w(t): return IDF.get(t, DEF)
-def bg(s): return {s[i:i+2] for i in range(len(s)-1)}
-def cs(a, b):
-    ga, gb = bg(a), bg(b)
-    if not ga and not gb: return 0.0
-    shared = len(ga & gb)
-    return shared / (len(ga) + len(gb) - shared)
-def tm(a, b):
-    if len(a) >= 5 and len(b) >= 5 and (a.startswith(b) or b.startswith(a)): return True
-    return cs(a, b) >= 0.8
-def score(lic, cand):
-    tl, tc = toks(lic), toks(cand)
-    if not tl or not tc: return 0.0
-    uniq, cands = list(dict.fromkeys(tl)), list(dict.fromkeys(tc))
-    den = sum(w(t) for t in uniq)
-    if den <= 0: return 0.0
-    head = uniq[0]
-    for t in uniq:                      # lexicographic tie-break, matching the port
-        d = w(t) - w(head)
-        if d > 0 or (d == 0 and t < head): head = t
-    if not any(tm(head, u) for u in cands): return 0.0
-    return sum(w(t) for t in uniq if any(tm(t, u) for u in cands)) / den
+stop, IDF, DEF = load_idf()
+score = make_scorer(stop, IDF, DEF)
 
 # Cases every earlier version of this scorer got wrong, kept so a regression is loud.
 CASES = [
