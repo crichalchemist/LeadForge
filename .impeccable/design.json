@@ -51,6 +51,7 @@
       { "name": "rail-bar", "value": "900px" },
       { "name": "master-detail", "value": "1200px" }
     ],
+    "themeSelection": { "default": "system", "options": ["system", "enamel", "porcelain"], "systemMapping": { "dark": "enamel", "light": "porcelain" } },
     "themes": {
       "enamel": { "ground": "midnight-enamel", "raised": "enamel-raised", "rule": "enamel-rule", "edge": "enamel-edge", "text": "porcelain", "textDim": "porcelain-dim", "focus": "porcelain", "error": "scarlet-light", "outreachLine": "cobalt-line-dark", "outreachText": "cobalt-ink-dark", "grantLine": "green-line-dark", "grantText": "green-ink-dark", "serviceLine": "amber", "serviceText": "amber" },
       "porcelain": { "ground": "porcelain-ground", "raised": "porcelain-raised", "rule": "porcelain-rule", "edge": "porcelain-edge", "text": "midnight-enamel", "textDim": "ink-dim", "focus": "midnight-enamel", "error": "scarlet-deep", "outreachLine": "cobalt-line-light", "outreachText": "cobalt-ink-light", "grantLine": "green-line-light", "grantText": "green-ink-light", "serviceLine": "amber-line-light", "serviceText": "amber-ink-light" }

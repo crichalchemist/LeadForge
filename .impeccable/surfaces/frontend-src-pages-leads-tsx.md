@@ -20,7 +20,11 @@ pipelines drawn as lines, the corridor map room, grants detail, reports) inherit
   and 0 grant records. Empty states teach; nothing synthetic ever renders.
 - Wave 1 includes backend work: a provenance read route (licence + Overture joined on the licence
   account) and persisting Google's name-match score and distance at discovery.
-- Two themes, dark enamel and porcelain daylight, sharing the line inks.
+- Two themes, dark enamel and porcelain daylight, sharing the line inks. The default follows the
+  system setting; a System / Enamel / Porcelain toggle overrides it.
+- Old pages are deleted when their replacement ships, never kept alongside it. Wave 1 replaces the app
+  shell, Leads and LeadDetail and moves the landing route from Dashboard to Leads; Dashboard,
+  Pipeline, Grants and Reports keep running as ordinary stations until wave 2 replaces each of them.
 
 ## Direction contract
 
@@ -56,8 +60,5 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 - New dependencies to approve at build time: self-hosted Fira Sans + Fira Sans Condensed, Lucide icons.
 - The map room draws corridors from the bundled polygons; whether to add any basemap is undecided and
   must never assume paid tiles.
-- Theme selection: automatic from `prefers-color-scheme`, a manual toggle, or both, and which theme is
-  the default. Undecided.
-- The old Pipeline, Grants and Reports pages keep running inside the new shell until wave 2. They are
-  working destinations, so the line rail must not draw them as planned track; how they are marked is
-  undecided. If the design hook is on during wave 1, expect drift findings on those files.
+- If the design hook is on during wave 1, an edit to one of the old pages awaiting replacement will
+  surface drift findings; those pages are not edited, only deleted when replaced.

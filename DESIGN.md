@@ -201,6 +201,10 @@ Every text pairing above measures at least 4.5:1, and every line ink and control
 both the ground and the raised region of its theme. Seams sit near 1.3-1.6:1 on purpose: they separate
 regions and never identify a control.
 
+Theme selection follows the system by default: enamel when the operating system prefers dark,
+porcelain when it prefers light. A three-way toggle (System, Enamel, Porcelain) overrides it, and
+System stays the default until the viewer picks otherwise.
+
 ### Named Rules
 **The Line Owns Its Ink Rule.** Cobalt is outreach, green is grant, amber is discovery. A line ink never
 decorates, never marks a generic state, and never appears on a surface that is not about its line.
