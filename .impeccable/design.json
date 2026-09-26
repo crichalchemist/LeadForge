@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-26T20:00:00Z",
+  "title": "Design System: LeadForge",
+  "extensions": {
+    "colorMeta": {
+      "midnight-enamel": { "role": "neutral", "displayName": "Midnight Enamel", "canonical": "oklch(19.6% 0.060 270.1)", "tonalRamp": ["#040724", "#192241", "#333E60", "#505C80", "#6F7CA2", "#909DC5", "#B5C3EC", "#E8EEFE"] },
+      "enamel-raised": { "role": "neutral", "displayName": "Raised Enamel" },
+      "enamel-rule": { "role": "neutral", "displayName": "Enamel Seam" },
+      "enamel-edge": { "role": "neutral", "displayName": "Enamel Edge" },
+      "porcelain": { "role": "neutral", "displayName": "Porcelain", "canonical": "oklch(95.5% 0.008 91.5)", "tonalRamp": ["#0C0B07", "#252420", "#41403B", "#5F5D58", "#7F7D78", "#A09E99", "#C6C4BE", "#F0EEE8"] },
+      "porcelain-dim": { "role": "neutral", "displayName": "Dim Porcelain" },
+      "porcelain-ground": { "role": "neutral", "displayName": "Porcelain Tile" },
+      "porcelain-raised": { "role": "neutral", "displayName": "Glazed White" },
+      "porcelain-rule": { "role": "neutral", "displayName": "Grout Line" },
+      "porcelain-edge": { "role": "neutral", "displayName": "Tile Edge" },
+      "ink-dim": { "role": "neutral", "displayName": "Faded Enamel" },
+      "scarlet": { "role": "primary", "displayName": "Scarlet Plate", "canonical": "oklch(56.2% 0.216 25.0)", "tonalRamp": ["#200000", "#4B0005", "#7C000F", "#B1001B", "#E12933", "#FF645F", "#FFABA3", "#FFE9E6"] },
+      "scarlet-deep": { "role": "primary", "displayName": "Scarlet Deep" },
+      "scarlet-light": { "role": "primary", "displayName": "Scarlet Light" },
+      "plate-text": { "role": "neutral", "displayName": "Plate White" },
+      "cobalt-line-dark": { "role": "secondary", "displayName": "Cobalt Line (enamel)" },
+      "cobalt-line-light": { "role": "secondary", "displayName": "Cobalt Line", "canonical": "oklch(54.7% 0.250 264.0)", "tonalRamp": ["#000038", "#00007A", "#000AC0", "#0A42E7", "#356FFE", "#6C9AFF", "#A7C4FE", "#E7EFFE"] },
+      "cobalt-ink-dark": { "role": "secondary", "displayName": "Cobalt Ink (enamel)" },
+      "cobalt-ink-light": { "role": "secondary", "displayName": "Cobalt Ink" },
+      "green-line-dark": { "role": "tertiary", "displayName": "Grant Green", "canonical": "oklch(66.7% 0.183 147.8)", "tonalRamp": ["#001001", "#002D0B", "#014E1A", "#02712A", "#03973A", "#33BC56", "#62E37C", "#C9FFCF"] },
+      "green-line-light": { "role": "tertiary", "displayName": "Grant Green (porcelain)" },
+      "green-ink-dark": { "role": "tertiary", "displayName": "Grant Ink (enamel)" },
+      "green-ink-light": { "role": "tertiary", "displayName": "Grant Ink" },
+      "amber": { "role": "tertiary", "displayName": "Service Amber", "canonical": "oklch(84.6% 0.172 85.3)", "tonalRamp": ["#120900", "#302200", "#523C00", "#765802", "#9D7705", "#C79600", "#F5BA03", "#FFEDC6"] },
+      "amber-line-light": { "role": "tertiary", "displayName": "Service Amber (porcelain)" },
+      "amber-ink-light": { "role": "tertiary", "displayName": "Service Ink" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The screen title only, one per route." },
+      "headline": { "displayName": "Headline", "purpose": "A lead record's business name." },
+      "title": { "displayName": "Title", "purpose": "Region heads, in capitals." },
+      "body": { "displayName": "Body", "purpose": "Notes, explanations and empty-state teaching copy, at most 70ch." },
+      "data": { "displayName": "Data", "purpose": "Scores, counts, call budgets, distances and dates, in tabular figures." },
+      "label": { "displayName": "Label", "purpose": "Station names, column headers, buttons and bullets, in capitals at a fixed size." }
+    },
+    "shadows": [
+      { "name": "overlay-enamel", "value": "0 8px 24px rgb(0 0 0 / 0.45)", "purpose": "Menus and popovers floating over the enamel ground; nothing else casts a shadow." },
+      { "name": "overlay-porcelain", "value": "0 8px 24px rgb(11 18 48 / 0.16)", "purpose": "Menus and popovers floating over the porcelain ground." }
+    ],
+    "motion": [
+      { "name": "route-trace", "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "The strip map drawing a lead's route from origin to its current station; instant under reduced motion." },
+      { "name": "state", "value": "150ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Hover, pressed, selection and focus changes." }
+    ],
+    "breakpoints": [
+      { "name": "rail-bar", "value": "900px" },
+      { "name": "master-detail", "value": "1200px" }
+    ],
+    "themeSelection": { "default": "system", "options": ["system", "enamel", "porcelain"], "systemMapping": { "dark": "enamel", "light": "porcelain" } },
+    "themes": {
+      "enamel": { "ground": "midnight-enamel", "raised": "enamel-raised", "rule": "enamel-rule", "edge": "enamel-edge", "text": "porcelain", "textDim": "porcelain-dim", "focus": "porcelain", "error": "scarlet-light", "outreachLine": "cobalt-line-dark", "outreachText": "cobalt-ink-dark", "grantLine": "green-line-dark", "grantText": "green-ink-dark", "serviceLine": "amber", "serviceText": "amber" },
+      "porcelain": { "ground": "porcelain-ground", "raised": "porcelain-raised", "rule": "porcelain-rule", "edge": "porcelain-edge", "text": "midnight-enamel", "textDim": "ink-dim", "focus": "midnight-enamel", "error": "scarlet-deep", "outreachLine": "cobalt-line-light", "outreachText": "cobalt-ink-light", "grantLine": "green-line-light", "grantText": "green-ink-light", "serviceLine": "amber-line-light", "serviceText": "amber-ink-light" }
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The Scarlet Plate: the one filled action on a screen.",
+      "html": "<button class=\"ds-btn-plate\">Plan a run<svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-btn-plate { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 10px 16px; background: #D71A2A; color: #FFFFFF; border: none; border-radius: 6px; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-plate:hover { background: #B8141F; } .ds-btn-plate:focus-visible { outline: 2px solid #F2F0EA; outline-offset: 2px; } .ds-btn-plate:active { background: #B8141F; }"
+    },
+    {
+      "name": "Transfer Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary action; as a transfer it names the destination station and replaces drag.",
+      "html": "<button class=\"ds-btn-transfer\">Transfer to Engaged</button>",
+      "css": ".ds-btn-transfer { height: 36px; padding: 9px 15px; background: transparent; color: #F2F0EA; border: 1px solid #7C87AA; border-radius: 6px; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1), border-color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-transfer:hover { background: #131C45; border-color: #F2F0EA; } .ds-btn-transfer:focus-visible { outline: 2px solid #F2F0EA; outline-offset: 2px; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Text field on the raised region with a 3:1 control edge.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Zip code</span><input class=\"ds-input\" placeholder=\"606xx\"></label>",
+      "css": ".ds-field { display: inline-flex; flex-direction: column; gap: 4px; } .ds-field-label { color: #A9B1CB; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; } .ds-input { height: 36px; padding: 8px 12px; background: #131C45; color: #F2F0EA; border: 1px solid #7C87AA; border-radius: 6px; font-family: 'Fira Sans', system-ui, sans-serif; font-size: 0.9375rem; caret-color: #F2F0EA; } .ds-input::placeholder { color: #A9B1CB; } .ds-input:focus-visible { outline: 2px solid #F2F0EA; outline-offset: 2px; border-color: #F2F0EA; }"
+    },
+    {
+      "name": "Line Rail",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Destinations as stations on one vertical line; the current station wears the interchange ring.",
+      "html": "<nav class=\"ds-rail\" aria-label=\"Main\"><a class=\"ds-rail-item\" aria-current=\"page\" href=\"#\"><span class=\"ds-rail-ring\"></span>Leads</a><a class=\"ds-rail-item\" href=\"#\"><span class=\"ds-rail-tick\"></span>Discovery</a><a class=\"ds-rail-item ds-rail-planned\" href=\"#\"><span class=\"ds-rail-tick\"></span>Map room</a></nav>",
+      "css": ".ds-rail { position: relative; display: flex; flex-direction: column; gap: 4px; width: 208px; padding: 8px 0 8px 16px; background: #131C45; } .ds-rail::before { content: ''; position: absolute; left: 28px; top: 20px; bottom: 20px; width: 2px; background: #F2F0EA; } .ds-rail-item { position: relative; display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 4px; color: #A9B1CB; text-decoration: none; border-radius: 6px; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; transition: color 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-rail-item:hover, .ds-rail-item[aria-current='page'] { color: #F2F0EA; } .ds-rail-item:focus-visible { outline: 2px solid #F2F0EA; outline-offset: 2px; } .ds-rail-tick { width: 10px; height: 10px; margin-left: 4px; border-radius: 9999px; background: #F2F0EA; box-shadow: 0 0 0 2px #131C45; } .ds-rail-ring { width: 14px; height: 14px; margin-left: 2px; border-radius: 9999px; border: 3px solid #F2F0EA; background: #131C45; box-sizing: border-box; } .ds-rail-planned .ds-rail-tick { background: #131C45; border: 2px dashed #A9B1CB; box-sizing: border-box; }"
+    },
+    {
+      "name": "Source Bullets",
+      "kind": "chip",
+      "refersTo": "source-bullet",
+      "description": "Lettered roundels after every fact: L City licence, G Google Places, O Overture.",
+      "html": "<span class=\"ds-sources\"><abbr class=\"ds-bullet\" title=\"City licence\">L</abbr><abbr class=\"ds-bullet\" title=\"Google Places\">G</abbr><abbr class=\"ds-bullet\" title=\"Overture\">O</abbr></span>",
+      "css": ".ds-sources { display: inline-flex; gap: 4px; } .ds-bullet { display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1px solid #F2F0EA; border-radius: 9999px; color: #F2F0EA; text-decoration: none; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 600; line-height: 1; cursor: help; }"
+    },
+    {
+      "name": "Service Plate",
+      "kind": "chip",
+      "refersTo": "service-plate",
+      "description": "Amber plate for run budgets and service notices, enamel text on either ground.",
+      "html": "<span class=\"ds-plate-amber\">Up to 40 Places calls</span>",
+      "css": ".ds-plate-amber { display: inline-block; padding: 4px 8px; background: #FFC20E; color: #0B1230; border-radius: 4px; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Route Row",
+      "kind": "custom",
+      "refersTo": "route-row",
+      "description": "A ranked lead as a station on the table's route line; an unmeasured composite is a suspended tick in words.",
+      "html": "<div class=\"ds-route-row\" tabindex=\"0\"><span class=\"ds-route-line\"><span class=\"ds-route-suspended\"></span></span><span class=\"ds-route-grid\"><span class=\"ds-route-name\">Business name</span><span class=\"ds-route-meta\">Niche · Zip · Licence account</span></span><span class=\"ds-route-score\">not measured</span><span class=\"ds-sources\"><abbr class=\"ds-bullet\" title=\"City licence\">L</abbr></span></div>",
+      "css": ".ds-route-row { display: grid; grid-template-columns: 24px 1fr auto auto; align-items: center; gap: 16px; height: 52px; padding: 0 16px; color: #F2F0EA; background: #0B1230; border-bottom: 1px solid #2B3769; font-family: 'Fira Sans', system-ui, sans-serif; transition: background 150ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-route-row:hover { background: #131C45; } .ds-route-row:focus-visible { outline: 2px solid #F2F0EA; outline-offset: -2px; } .ds-route-line { position: relative; display: grid; place-items: center; height: 100%; } .ds-route-line::before { content: ''; position: absolute; top: 0; bottom: 0; left: 11px; width: 2px; background: #F2F0EA; } .ds-route-suspended { position: relative; width: 10px; height: 10px; border-radius: 9999px; border: 2px solid #F2F0EA; background: #0B1230; box-sizing: border-box; box-shadow: 0 0 0 4px #0B1230; } .ds-route-grid { display: flex; flex-direction: column; min-width: 0; } .ds-route-name { font-size: 0.9375rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-route-meta { color: #A9B1CB; font-size: 0.8125rem; } .ds-route-score { color: #A9B1CB; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; } .ds-sources { display: inline-flex; gap: 4px; } .ds-bullet { display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1px solid #F2F0EA; border-radius: 9999px; color: #F2F0EA; text-decoration: none; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 600; line-height: 1; }"
+    },
+    {
+      "name": "Strip Map",
+      "kind": "custom",
+      "description": "A lead's route across both lines: past stations solid, current ringed, ticks ahead dimmed on solid track, the grant interchange first.",
+      "html": "<figure class=\"ds-strip\"><svg width=\"320\" height=\"84\" viewBox=\"0 0 320 84\" role=\"img\" aria-label=\"Outreach: at Queued. Grant line interchange at Scored.\"><path class=\"ds-strip-grant\" d=\"M16 30 L40 54 H304\"/><path class=\"ds-strip-out\" d=\"M16 30 H304\"/><circle class=\"ds-strip-interchange\" cx=\"16\" cy=\"30\" r=\"6\"/><circle class=\"ds-strip-tick\" cx=\"112\" cy=\"30\" r=\"7\"/><circle class=\"ds-strip-dim\" cx=\"208\" cy=\"30\" r=\"4\"/><circle class=\"ds-strip-dim\" cx=\"304\" cy=\"30\" r=\"4\"/><text x=\"16\" y=\"14\" text-anchor=\"start\">SCORED</text><text x=\"112\" y=\"14\" text-anchor=\"middle\">QUEUED</text><text x=\"208\" y=\"14\" text-anchor=\"middle\">CONTACTED</text><text x=\"304\" y=\"14\" text-anchor=\"end\">ENGAGED</text><text x=\"304\" y=\"78\" text-anchor=\"end\">GRANT LINE</text></svg></figure>",
+      "css": ".ds-strip { margin: 0; padding: 16px; background: #0B1230; } .ds-strip svg { display: block; max-width: 100%; height: auto; } .ds-strip path { fill: none; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; } .ds-strip-out { stroke: #3D74FF; } .ds-strip-grant { stroke: #22B14C; } .ds-strip-tick { fill: #0B1230; stroke: #F2F0EA; stroke-width: 3; } .ds-strip-interchange { fill: #0B1230; stroke: #F2F0EA; stroke-width: 3; } .ds-strip-dim { fill: #A9B1CB; } .ds-strip text { fill: #A9B1CB; font-family: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.06em; } @media (prefers-reduced-motion: no-preference) { .ds-strip-out { stroke-dasharray: 288; stroke-dashoffset: 288; animation: ds-trace 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards; } @keyframes ds-trace { to { stroke-dashoffset: 0; } } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Loop Diagram",
+    "overview": "LeadForge is drawn as a transit system. The outreach pipeline is a line, the NOF grant pipeline is a second line, every stage is a station, and a business sitting on a City corridor meets both lines at an interchange where the grant line leads. The grammar is the metropolitan rail diagram fired in enamel: disciplined lines that bend only at 45 and 90 degrees, porcelain station ticks, one ink per meaning, and labels set at a fixed size so the network reads the same everywhere. It is borrowed grammar, not borrowed identity: the marks, names and colors are LeadForge's own.\n\nThe diagram's honesty is the point. A transit map distinguishes service that runs from service that is planned or suspended, and LeadForge uses exactly that vocabulary for evidence: a version-1 score, a feature that does not run yet and a value nobody measured are drawn as planned or suspended track, dashed or hollow and named in words, never as a solid mark or a zero. Every fact carries lettered source bullets the way a station lists the lines that serve it. Density is welcome; this is an operator's tool, and the ranking is a long table read at a desk.\n\nTwo grounds carry one world. Midnight enamel is the native ground; porcelain tile is the daylight ground for long desk sessions. The line inks are shared and tuned per ground so every pairing holds WCAG 2.2 AA. Confirmed rejections: the generic SaaS admin template (stat tiles over pastel kanban columns), and confidence the data has not earned (bold numbers and clean charts that hide what is unmeasured).",
+    "keyCharacteristics": [
+      "Pipelines are lines, stages are stations, grant-first is an interchange.",
+      "Planned and suspended marks stand for anything preliminary, unmeasured or not running.",
+      "One ink per meaning; one scarlet action plate per screen.",
+      "Lettered source bullets (L, G, O) on every fact.",
+      "Condensed station labels over tabular data, one type family throughout.",
+      "Flat enamel: depth from tone and seams, never from decoration."
+    ],
+    "rules": [
+      { "name": "The Line Owns Its Ink Rule", "body": "Cobalt is outreach, green is grant, amber is discovery. A line ink never decorates, never marks a generic state, and never appears on a surface that is not about its line.", "section": "colors" },
+      { "name": "The One Plate Rule", "body": "A screen has at most one scarlet filled action. Everything else is a secondary button, a link, or a transfer control.", "section": "colors" },
+      { "name": "The Never Color Alone Rule", "body": "Every state a color marks is also marked by shape, pattern or words: line bullets carry letters, planned track is dashed, suspended stations are hollow.", "section": "colors" },
+      { "name": "The Fixed Label Rule", "body": "Station and column labels keep one size everywhere; hierarchy comes from the line and its position, never from enlarging a label.", "section": "typography" },
+      { "name": "The Tabular Rule", "body": "Every number that can sit in a column sets in tabular figures, on screen and in tables alike.", "section": "typography" },
+      { "name": "The Flat Enamel Rule", "body": "Surfaces rest flat. A shadow appears only on something that floats above the page, and a region is never a card inside a card.", "section": "elevation" },
+      { "name": "The 45/90 Rule", "body": "No drawn line bends at any other angle, and no line is drawn freehand.", "section": "shapes" },
+      { "name": "The Planned Track Rule", "body": "A version-1 score, a value never measured and a feature that does not run yet are drawn dashed or hollow and named in words. None of them ever renders as a solid mark or a zero.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do draw every pipeline as a line and every stage as a station, with transfers as explicit controls.",
+      "Do mark unmeasured, preliminary and not-running things as planned or suspended track, in words.",
+      "Do put source bullets on every fact, in L, G, O order.",
+      "Do keep one scarlet plate per screen, and use the line inks only for their own line.",
+      "Do set every number in tabular figures and every station label at its fixed size.",
+      "Do check every new pairing at 4.5:1 for text and 3:1 for lines and control edges, on both grounds.",
+      "Do theme the browser's own surfaces: selection, caret, focus ring, scrollbars and underline offset."
+    ],
+    "donts": [
+      "Don't build the generic SaaS admin template: stat tiles over pastel kanban columns, or big-number KPI cards with small labels.",
+      "Don't show confidence the data has not earned: no solid mark, zero or default score where a measurement is missing or preliminary.",
+      "Don't reproduce any transit agency's own marks, line names or brand colors; the grammar is borrowed, the identity is LeadForge's.",
+      "Don't add glow, gradient text, glass, or nested cards.",
+      "Don't put an eyebrow or kicker above a heading.",
+      "Don't make dragging the only way to move a card between stations.",
+      "Don't use Unicode glyphs or emoji as icons; icons are one drawn set in one stroke weight.",
+      "Don't render synthetic businesses or placeholder data where real records belong; an empty state teaches instead."
+    ]
+  }
+}
