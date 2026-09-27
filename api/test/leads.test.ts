@@ -48,6 +48,24 @@ describe('TestRankedLeads', () => {
     expect(data.items[0].pipeline_stage).toBe('engaged');
   });
 
+  it('pages through leads with equal composites without skipping or repeating any', async () => {
+    const ids: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const id = await createBusiness({ name: `Tied ${i}` });
+      await createScore(id, { composite_acquisition_score: 50 });
+      ids.push(id);
+    }
+    const seen: string[] = [];
+    for (const page of [1, 2, 3]) {
+      const data = (await (await api('GET', `/leads/ranked?page=${page}&page_size=2`, { token })).json()) as {
+        items: { business_id: string }[];
+      };
+      seen.push(...data.items.map((i) => i.business_id));
+    }
+    expect(seen).toHaveLength(5);
+    expect([...seen].sort()).toEqual([...ids].sort());
+  });
+
   it('tells the list which scores are preliminary and which leads sit on an NOF corridor', async () => {
     const biz = await createBusiness({ name: 'Corridor' });
     await env.DB.prepare(

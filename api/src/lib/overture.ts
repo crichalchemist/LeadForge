@@ -19,6 +19,7 @@ export interface OvertureMatch {
   has_facebook: number;
   has_instagram: number;
   phone: string | null;
+  built_at: string;
 }
 
 /** The fields the overlay can change, shared by the ingest path and the backfill. */

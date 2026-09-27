@@ -45,7 +45,8 @@ const bare: PresenceFacts = {
 };
 const match = (over: Partial<OvertureMatch> = {}): OvertureMatch => ({
   account_number: '478849', site_number: '1', matched: 1, gers_id: 'g1', matched_name: 'Shop',
-  score: 0.9, distance_m: 12, website: null, has_facebook: 0, has_instagram: 0, phone: null, ...over,
+  score: 0.9, distance_m: 12, website: null, has_facebook: 0, has_instagram: 0, phone: null,
+  built_at: '2026-09-25T00:00:00Z', ...over,
 });
 
 describe('applyOvertureMatch', () => {

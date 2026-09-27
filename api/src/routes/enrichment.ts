@@ -85,7 +85,7 @@ router.post('/overture-backfill', requireAuth, requireAdmin, jsonBody(backfillSc
             dp.google_review_count AS stored_review_count,
             b.phone AS stored_phone,
             om.account_number, om.site_number, om.matched, om.gers_id, om.matched_name,
-            om.score, om.distance_m, om.website, om.has_facebook, om.has_instagram, om.phone,
+            om.score, om.distance_m, om.website, om.has_facebook, om.has_instagram, om.phone, om.built_at,
             ls.score_version AS latest_version
        FROM businesses b
        JOIN digital_presences dp ON dp.business_id = b.id

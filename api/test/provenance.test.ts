@@ -14,6 +14,7 @@ const GOOGLE_MATCHED: GoogleMatchRow = {
 const OVERTURE_MATCHED: OvertureMatch = {
   account_number: '478849', site_number: '1', matched: 1, gers_id: 'gers-fixture', matched_name: 'Fixture Barbershop',
   score: 1, distance_m: 5, website: 'http://fixture-barbershop.test', has_facebook: 1, has_instagram: 0, phone: null,
+  built_at: '2026-09-25T00:00:00Z',
 };
 const BUSINESS = { name: 'Fixture Barbershop', license_name: 'Fixture Barbershop', phone: '(773) 555-0100', license_status: 'active' };
 const PRESENCE = {
@@ -105,6 +106,23 @@ describe('saying whether an absent fact was looked for', () => {
     });
     expect(f.website.state).toBe('not_recorded');
     expect(f.google_business_profile.state).toBe('not_recorded');
+  });
+
+  it('says not recorded, not none found, for a missing website or phone when only Overture’s look was recorded', () => {
+    // "None found" claims every source that could supply the fact looked; whether Google did was never kept.
+    const f = facts({
+      business: { ...BUSINESS, phone: null },
+      google: null,
+      overture: { ...OVERTURE_MATCHED, matched: 0, gers_id: null, matched_name: null, score: null, distance_m: null, website: null, has_facebook: 0 },
+      presence: { ...PRESENCE, website_url: null },
+    });
+    expect(f.website).toMatchObject({ value: null, sources: [], state: 'not_recorded' });
+    expect(f.phone).toMatchObject({ value: null, sources: [], state: 'not_recorded' });
+  });
+
+  it('still credits Overture alone for a website it found on a business stored before Google’s look was recorded', () => {
+    const f = facts({ google: null, presence: { ...PRESENCE, website_url: 'http://fixture-barbershop.test' } });
+    expect(f.website).toMatchObject({ value: 'http://fixture-barbershop.test', sources: ['overture'], state: 'found' });
   });
 
   it('treats zero reviews as a measurement, not an absence', () => {

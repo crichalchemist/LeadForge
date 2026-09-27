@@ -35,7 +35,7 @@ router.get('/ranked', requireAuth, queryParams(rankedQuery), async (c) => {
                      ls.composite_acquisition_score, ls.score_version, ls.price_tier, lo.status AS pipeline_stage,
                      b.in_nof_corridor, b.nof_corridor_name, b.account_number, b.site_number
               ${from}
-              ORDER BY ls.composite_acquisition_score DESC NULLS LAST
+              ORDER BY ls.composite_acquisition_score DESC NULLS LAST, b.id
               LIMIT ? OFFSET ?`)
     .bind(...binds, q.page_size, (q.page - 1) * q.page_size)
     .all<Record<string, unknown>>();

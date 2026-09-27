@@ -611,6 +611,30 @@ describe('the Google verdict, kept (ADR 031)', () => {
     expect(verdict?.distance_m as number).toBeGreaterThan(MATCH_RADIUS_M);
   });
 
+  it('judges the radius on the whole metres it stores, so a candidate shown at 200 m is inside and one at 201 m is not', async () => {
+    // A candidate due north of the licence, on its longitude, sits exactly its latitude difference away.
+    const lat = Number(SOCRATA_ROW.latitude);
+    const lng = Number(SOCRATA_ROW.longitude);
+    const northBy = (metres: number) => lat + (metres / 6371000) * (180 / Math.PI);
+    const verdictAt = async (metres: number) => {
+      const candidateLat = northBy(metres);
+      // The boundary is what this test is about, so prove the fixture lands on it before trusting the verdict.
+      expect(distanceMeters(lat, lng, candidateLat, lng)).toBeGreaterThan(MATCH_RADIUS_M);
+      await resetDb();
+      routeGoogle([SOCRATA_ROW], {
+        status: 'OK',
+        candidates: [{ place_id: 'ChIJ_edge', name: "John's Barbershop", geometry: { location: { lat: candidateLat, lng } } }],
+      });
+      const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+      return verdictOf(business.id);
+    };
+
+    expect(Math.round(distanceMeters(lat, lng, northBy(200.3), lng))).toBe(200);
+    expect(await verdictAt(200.3)).toMatchObject({ status: 'matched', distance_m: 200 });
+    expect(Math.round(distanceMeters(lat, lng, northBy(200.6), lng))).toBe(201);
+    expect(await verdictAt(200.6)).toMatchObject({ status: 'rejected_distance', distance_m: 201 });
+  });
+
   it('records a genuine no-match as no candidate, with nothing to score', async () => {
     routeGoogle([SOCRATA_ROW], { status: 'ZERO_RESULTS', candidates: [] });
     const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);

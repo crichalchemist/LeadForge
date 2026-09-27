@@ -166,9 +166,11 @@ async function enrichAndPersist(
   };
   if (candidate) {
     const location = candidate.geometry?.location;
+    // Rounded once, here, so the radius is judged on the whole metres the record displays: a candidate
+    // shown at 200 m is inside the 200 m cut, never rejected beside it.
     const distance =
       bizData.latitude !== null && bizData.longitude !== null && location?.lat !== undefined && location?.lng !== undefined
-        ? distanceMeters(bizData.latitude, bizData.longitude, location.lat, location.lng)
+        ? Math.round(distanceMeters(bizData.latitude, bizData.longitude, location.lat, location.lng))
         : null;
     const score = nameMatchScore(name, candidate.name ?? '');
     verdict = {
@@ -176,7 +178,7 @@ async function enrichAndPersist(
       place_id: candidate.place_id ?? null,
       matched_name: candidate.name ?? null,
       score,
-      distance_m: distance === null ? null : Math.round(distance),
+      distance_m: distance,
     };
 
     if (distance !== null && distance > MATCH_RADIUS_M) {

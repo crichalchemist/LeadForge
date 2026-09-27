@@ -56,14 +56,15 @@ export function deriveFacts({ business, presence, google, overture }: Provenance
   const googleState = (present: boolean): FactState =>
     present ? 'found' : google === null ? 'not_recorded' : googleLooked ? 'none_found' : 'unknown';
 
-  // Either source can supply a website or a phone. A refused Places lookup leaves the fact open even when
-  // Overture looked, because Google could have supplied it (unavailable outranks every other status).
-  // Otherwise an Overture row, matched or not, means its build looked at this licence.
+  // Either source can supply a website or a phone, so an absent one was looked for only if both looked.
+  // With no Google row (stored before migration 0005) whether Google looked was never recorded, whatever
+  // Overture's row says. A refused Places lookup leaves the fact open even when Overture looked, because
+  // Google could have supplied it (unavailable outranks every other status).
   const eitherState = (present: boolean): FactState => {
     if (present) return 'found';
-    if (google?.status === 'unavailable') return 'unknown';
-    if (googleLooked || overture !== null) return 'none_found';
-    return 'not_recorded';
+    if (google === null) return 'not_recorded';
+    if (google.status === 'unavailable') return 'unknown';
+    return 'none_found';
   };
 
   // Overture alone supplies social links; Google reports none.
