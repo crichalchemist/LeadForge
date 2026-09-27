@@ -31,7 +31,7 @@ export default {
         condensed: ['var(--font-condensed)'],
       },
       fontSize: {
-        display: ['2rem', { lineHeight: '1.1', fontWeight: '600' }],
+        display: ['2rem', { lineHeight: '1.1', fontWeight: '600', letterSpacing: '-0.01em' }],
         headline: ['1.5rem', { lineHeight: '1.2', fontWeight: '600' }],
         title: ['1.125rem', { lineHeight: '1.3', letterSpacing: '0.02em', fontWeight: '600' }],
         body: ['0.9375rem', { lineHeight: '1.5' }],
