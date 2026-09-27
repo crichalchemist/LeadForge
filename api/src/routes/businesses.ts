@@ -4,7 +4,9 @@ import { requireAuth, requireAdmin } from '../middleware/auth';
 import { jsonBody, queryParams } from '../lib/validate';
 import { NICHES } from '../lib/stages';
 import { nowIso, withBooleans, DIGITAL_PRESENCE_BOOLS, OUTREACH_BOOLS } from '../db/serialize';
-import type { AppEnv, BusinessRow, DigitalPresenceRow, LeadScoreRow, OutreachRecordRow } from '../types';
+import { deriveFacts, type ProvenanceInput } from '../lib/provenance';
+import { fetchOvertureMatch } from '../lib/overture';
+import type { AppEnv, BusinessRow, DigitalPresenceRow, GoogleMatchRow, LeadScoreRow, OutreachRecordRow } from '../types';
 
 const router = new Hono<AppEnv>();
 
@@ -128,6 +130,44 @@ router.get('/:id', requireAuth, async (c) => {
   const detail = await loadDetail(c.env.DB, c.req.param('id')!);
   if (!detail) return c.json({ detail: 'Business not found' }, 404);
   return c.json(detail);
+});
+
+type ProvenanceBusiness = Pick<BusinessRow, 'name' | 'license_name' | 'phone' | 'license_number' | 'license_status' | 'license_issue_date' | 'account_number' | 'site_number'>;
+
+// Where each fact on a lead record came from, and whether an absent one was looked for (ADR 031).
+// Viewer-readable, like every GET here.
+router.get('/:id/provenance', requireAuth, async (c) => {
+  const db = c.env.DB;
+  const id = c.req.param('id');
+  const business = await db
+    .prepare(`SELECT name, license_name, phone, license_number, license_status, license_issue_date, account_number, site_number
+              FROM businesses WHERE id = ?`)
+    .bind(id)
+    .first<ProvenanceBusiness>();
+  if (!business) return c.json({ detail: 'Business not found' }, 404);
+
+  const [presence, google, overture] = await Promise.all([
+    db.prepare(`SELECT website_url, has_google_business_profile, google_avg_rating, google_review_count,
+                       has_facebook_page, has_instagram
+                FROM digital_presences WHERE business_id = ?`).bind(id).first<NonNullable<ProvenanceInput['presence']>>(),
+    db.prepare('SELECT * FROM google_matches WHERE business_id = ?').bind(id).first<GoogleMatchRow>(),
+    // SELECT *, so the row carries built_at for the record's Sources panel.
+    fetchOvertureMatch(db, business.account_number, business.site_number),
+  ]);
+
+  return c.json({
+    license: {
+      license_name: business.license_name,
+      account_number: business.account_number,
+      site_number: business.site_number,
+      license_number: business.license_number,
+      license_status: business.license_status,
+      license_issue_date: business.license_issue_date,
+    },
+    google,
+    overture,
+    facts: deriveFacts({ business, presence, google, overture }),
+  });
 });
 
 // =py routes/businesses.update_business
