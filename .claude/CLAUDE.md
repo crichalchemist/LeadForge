@@ -14,7 +14,7 @@ redirect for the old name, so stale clones still fetch). Both backends now live 
 |---|---|---|
 | Location | `src/leadforge/` | `api/` |
 | Stack | FastAPI, SQLAlchemy 2 async, PostgreSQL+PostGIS, Celery+Redis, vLLM + Claude (Azure Foundry) | Hono, Zod, D1 (SQLite), Queues, Cron Triggers, Workers AI, KV |
-| Tests | `tests/` (pytest, 158 tests) | `api/test/` (vitest on `@cloudflare/vitest-plugin`, 642 tests across 24 files, mirroring `tests/api/` and `tests/unit/`) |
+| Tests | `tests/` (pytest, 158 tests) | `api/test/` (vitest on `@cloudflare/vitest-plugin`, 646 tests across 24 files, mirroring `tests/api/` and `tests/unit/`) |
 
 The Python code is the behavioral spec. When porting a route, read the matching module under `src/leadforge/api/routes/` and its tests first, and reproduce stage transitions, scoring math, and auth rules exactly. Design and task-by-task plan: `docs/superpowers/specs/2026-05-13-leadforge-cloudflare-migration-design.md` and `docs/superpowers/plans/2026-05-13-leadforge-cloudflare-migration.md`.
 
@@ -345,7 +345,7 @@ exists but now holds only `LICENSE.txt` and `NOTICE.txt` — the data is gone fr
   page is always enough. It becomes a real bug the moment a caller requests more than
   `SOCRATA_PAGE_SIZE` rows.
 - CI runs on every push and pull request (`.github/workflows/ci.yml`): four parallel jobs covering
-  ruff + pytest (158), tsc + vitest + `wrangler deploy --dry-run` (642), the frontend's Vitest suite and build
+  ruff + pytest (158), tsc + vitest + `wrangler deploy --dry-run` (646), the frontend's Vitest suite and build
   (the check is still named `Frontend (build)`, because branch protection requires that name), and Playwright
   e2e against `wrangler dev --local` on a freshly seeded local D1. It needs
   **no secrets** -- but only after `remoteBindings: false` was set in `api/vitest.config.ts`. Without it
