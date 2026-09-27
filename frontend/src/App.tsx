@@ -8,7 +8,6 @@ import Pipeline from './pages/Pipeline';
 import GrantPipeline from './pages/GrantPipeline';
 import GrantDetail from './pages/GrantDetail';
 import Leads from './pages/Leads';
-import LeadRecord from './pages/LeadRecord';
 import Reports from './pages/Reports';
 import Discovery from './pages/Discovery';
 
@@ -27,8 +26,8 @@ export default function App() {
                 <Route path="/pipeline" element={<LegacySurface><Pipeline /></LegacySurface>} />
                 <Route path="/grants" element={<LegacySurface><GrantPipeline /></LegacySurface>} />
                 <Route path="/grants/:id" element={<LegacySurface><GrantDetail /></LegacySurface>} />
-                <Route path="/leads" element={<LegacySurface><Leads /></LegacySurface>} />
-                <Route path="/leads/:id" element={<LeadRecord />} />
+                <Route path="/leads" element={<Leads />} />
+                <Route path="/leads/:id" element={<Leads />} />
                 <Route path="/discovery" element={<Discovery />} />
                 <Route path="/reports" element={<LegacySurface><Reports /></LegacySurface>} />
               </Routes>

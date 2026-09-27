@@ -35,7 +35,7 @@ const GOOGLE_VERDICT: Record<GoogleMatchStatus, string> = {
   unavailable: 'Lookup unavailable',
 };
 
-export default function LeadRecord() {
+export default function LeadRecord({ back }: { back?: { to: string; state?: unknown } } = {}) {
   const { id = '' } = useParams();
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
@@ -82,6 +82,11 @@ export default function LeadRecord() {
 
   return (
     <article aria-labelledby="record-title" className="px-6 py-8 wide:px-10">
+      {back && (
+        <Link to={back.to} state={back.state} className="font-condensed text-label uppercase text-dim underline">
+          Back to leads
+        </Link>
+      )}
       <header>
         <h1 id="record-title" className="font-condensed text-headline">{record.name}</h1>
         <p className="mt-1 font-condensed text-label uppercase text-dim">
