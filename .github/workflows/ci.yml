@@ -2,8 +2,10 @@ name: CI
 
 # Runs on every push to any branch, and on pull requests. Nothing here needs a secret: the Python
 # suite uses in-memory aiosqlite, the Workers suite uses miniflare with fake bindings declared in
-# api/vitest.config.ts, and `wrangler deploy --dry-run` was verified to succeed with no Cloudflare
-# credentials present. So forks and first-time contributors get a full green run.
+# api/vitest.config.ts, `wrangler deploy --dry-run` was verified to succeed with no Cloudflare
+# credentials present, the frontend suite runs on jsdom with only src/api/client.ts mocked, and the
+# e2e job runs `wrangler dev --local` on a throwaway `--var JWT_SECRET`, with the `ai` binding never
+# opened. So forks and first-time contributors get a full green run.
 on:
   push:
   pull_request:
@@ -96,7 +98,65 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # `tsc -b && vite build`. There is no frontend test suite, so this is the only gate on the
-      # React app compiling at all.
+      # Vitest + Testing Library on jsdom. Component tests mock only src/api/client.ts.
+      - name: Tests
+        run: npm test
+
+      # `tsc -b && vite build`, the gate on the React app compiling at all.
       - name: Build
         run: npm run build
+
+  e2e:
+    name: Frontend e2e (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Not a required check yet (spec 2026-09-26): it runs on every push and becomes required once stable.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            api/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install API dependencies
+        working-directory: api
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.ts starts `wrangler dev --local` on a fresh seeded D1 and the Vite dev server.
+      # --local is what lets this run with no Cloudflare credentials, like every other job here.
+      - name: E2E
+        working-directory: frontend
+        run: npm run e2e
+
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          retention-days: 7
+
+      # The captures from e2e/captures.spec.ts, for the finish review: the record beside the list on a desktop
+      # and alone on a phone, and a lead already on the outreach line beside the list, each in both themes;
+      # the bare list; and the Discovery screen. Uploaded on every run, pass or fail, so the review never
+      # depends on a red build.
+      - name: Upload the finish-review captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: finish-review-captures
+          path: .impeccable/review
+          if-no-files-found: warn
+          retention-days: 7

@@ -16,7 +16,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/dashboard', { replace: true });
+      navigate('/leads', { replace: true });
     } catch {
       setError('Invalid credentials');
     } finally {

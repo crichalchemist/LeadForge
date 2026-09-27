@@ -65,3 +65,34 @@ describe('TestUpdateOutreach', () => {
     expect(res.status).toBe(403);
   });
 });
+
+describe('TestStartOutreach', () => {
+  it('puts a business on the outreach line at its first station', async () => {
+    const biz = await createBusiness();
+    const res = await api('POST', '/outreach', { token, json: { business_id: biz } });
+    expect(res.status).toBe(201);
+    expect(await res.json()).toMatchObject({ business_id: biz, status: 'scored', meeting_scheduled: false });
+    const history = (await (await api('GET', `/outreach/by-business/${biz}`, { token })).json()) as { total: number };
+    expect(history.total).toBe(1);
+  });
+
+  it('refuses to put a business on the line twice', async () => {
+    const biz = await createBusiness();
+    const first = (await (await api('POST', '/outreach', { token, json: { business_id: biz } })).json()) as { id: string };
+    const second = await api('POST', '/outreach', { token, json: { business_id: biz } });
+    expect(second.status).toBe(409);
+    expect(await second.json()).toMatchObject({ outreach_id: first.id });
+    const history = (await (await api('GET', `/outreach/by-business/${biz}`, { token })).json()) as { total: number };
+    expect(history.total).toBe(1);
+  });
+
+  it('refuses a viewer', async () => {
+    const biz = await createBusiness();
+    const viewer = await accessToken(await viewerUser());
+    expect((await api('POST', '/outreach', { token: viewer, json: { business_id: biz } })).status).toBe(403);
+  });
+
+  it('answers 404 for a business that does not exist', async () => {
+    expect((await api('POST', '/outreach', { token, json: { business_id: crypto.randomUUID() } })).status).toBe(404);
+  });
+});

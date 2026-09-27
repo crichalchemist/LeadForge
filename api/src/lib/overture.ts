@@ -19,6 +19,7 @@ export interface OvertureMatch {
   has_facebook: number;
   has_instagram: number;
   phone: string | null;
+  built_at: string;
 }
 
 /** The fields the overlay can change, shared by the ingest path and the backfill. */
@@ -44,7 +45,7 @@ export interface PresenceFacts {
 // checks that could drift. Google/base values are never run through this: there is no measured
 // evidence the live lookup emits empty strings, and normalizing an unevidenced source is exactly
 // the speculative work this project avoids.
-function overturePresent(value: string | null): string | null {
+export function overturePresent(value: string | null): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
 }

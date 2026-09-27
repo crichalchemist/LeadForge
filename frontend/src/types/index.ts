@@ -25,6 +25,8 @@ export interface Business {
   thumbtack_hires: number | null;
   nextdoor_recommendations: number | null;
   total_customer_ugc: number | null;
+  in_nof_corridor: boolean;
+  nof_corridor_name: string | null;
   created_at: string;
   updated_at: string;
   digital_presence: DigitalPresence | null;
@@ -52,6 +54,11 @@ export interface RankedLead {
   zip_code: string;
   niche: string;
   composite_acquisition_score: number | null;
+  score_version: number | null;
+  in_nof_corridor: boolean;
+  nof_corridor_name: string | null;
+  account_number: string | null;
+  site_number: string | null;
   price_tier: number | null;
   pipeline_stage: string | null;
 }
@@ -300,3 +307,97 @@ export const NOF_STAGE_COLORS: Record<string, string> = {
   alumnus: 'bg-green-200',
   removed: 'bg-red-100',
 };
+
+// ── Wave 1: provenance, discovery, transitions (spec 2026-09-26) ──
+
+export type PipelineStage = (typeof PIPELINE_STAGES)[number];
+
+/** The Worker's list (api/src/lib/stages.ts, NICHES). The discovery route answers 422 for anything else. */
+export const NICHES = [
+  'septic_services', 'used_auto_parts', 'meat_markets', 'bars', 'nail_salons',
+  'beauty_shops', 'smoke_shops', 'beauty_supply', 'mobile_mechanics', 'tire_shops',
+  'lawn_services', 'towing', 'barbershops', 'veterinarians', 'security_services',
+] as const;
+export type Niche = (typeof NICHES)[number];
+
+export type Source = 'license' | 'google' | 'overture';
+export type FactState = 'found' | 'none_found' | 'unknown' | 'not_recorded';
+export type FactKey =
+  | 'name' | 'license_status' | 'website' | 'phone'
+  | 'google_business_profile' | 'rating' | 'review_count' | 'facebook' | 'instagram';
+
+export interface Fact {
+  key: FactKey;
+  value: string | number | boolean | null;
+  sources: Source[];
+  state: FactState;
+}
+
+export type GoogleMatchStatus = 'matched' | 'rejected_distance' | 'rejected_name' | 'no_candidate' | 'unavailable';
+
+export interface GoogleMatch {
+  status: GoogleMatchStatus;
+  place_id: string | null;
+  matched_name: string | null;
+  score: number | null;
+  distance_m: number | null;
+  website: string | null;
+  phone: string | null;
+  looked_up_at: string;
+}
+
+export interface OvertureMatch {
+  matched: number;
+  matched_name: string | null;
+  score: number | null;
+  distance_m: number | null;
+  website: string | null;
+  has_facebook: number;
+  has_instagram: number;
+  phone: string | null;
+  built_at: string;
+}
+
+export interface LicenseRecord {
+  license_name: string | null;
+  account_number: string | null;
+  site_number: string | null;
+  license_number: string | null;
+  license_status: string | null;
+  license_issue_date: string | null;
+}
+
+export interface Provenance {
+  license: LicenseRecord;
+  google: GoogleMatch | null;
+  overture: OvertureMatch | null;
+  facts: Fact[];
+}
+
+export interface DiscoveryRunRequest {
+  zip_code: string;
+  niche: Niche;
+  limit: number;
+}
+
+export interface DiscoveredBusiness {
+  id: string;
+  name: string;
+  zip_code: string;
+  digital_deficit_score: number | null;
+  nof_corridor: string | null;
+}
+
+export interface DiscoveryRunResult {
+  zip_code: string;
+  niche: Niche;
+  limit: number;
+  discovered: number;
+  created: number;
+  skipped_known: number;
+  failed: number;
+  places: { unavailable: number; last_status: string | null };
+  businesses: DiscoveredBusiness[];
+}
+
+export type Transitions = Record<PipelineStage, PipelineStage[]>;

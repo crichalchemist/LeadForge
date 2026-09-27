@@ -1,0 +1,136 @@
+/* The strip map's line and ticks (DESIGN.md, Shapes and Strip Map). A 4px line with round ends; stations
+   passed are 10px solid discs, the current one the 14px interchange ring with a 3px stroke in the outreach
+   line's ink, stations ahead 10px hollow ticks in that same ink. The part travelled is solid outreach-ink
+   and draws from origin to the current station in 220ms on an exponential ease-out; the part ahead is
+   dashed outreach-ink planned track (the Planned Track Rule), same axis, same 6/4 dash as an unstarted
+   lead's line. Under reduced motion the rule in index.css makes it instant. */
+
+.strip-map__line,
+.strip-map__branch,
+.strip-map__planned-line {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding-left: 28px; /* room for the line and the ticks */
+}
+
+.strip-map__line::before,
+.strip-map__line::after {
+  content: '';
+  position: absolute;
+  left: 11px; /* centred on the ticks at 13px */
+  top: 8px;
+  width: 4px;
+  border-radius: 2px;
+}
+
+.strip-map__line::before {
+  top: calc(8px + (100% - 16px) * var(--travelled, 0));
+  bottom: 8px;
+  background: repeating-linear-gradient(to bottom, var(--line-outreach) 0 6px, transparent 6px 10px);
+}
+
+.strip-map__line::after {
+  height: calc((100% - 16px) * var(--travelled, 0));
+  background: var(--line-outreach);
+  transform-origin: top;
+  animation: strip-map-trace 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes strip-map-trace {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+.strip-map__station {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 16px;
+}
+
+.strip-map__tick {
+  position: absolute;
+  left: -20px; /* 28px padding - 8px: centre at 13px from the list's edge */
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 2px var(--ground); /* ringed in the ground color */
+}
+
+.strip-map__station--passed .strip-map__tick {
+  background: var(--text);
+}
+
+.strip-map__station--ahead .strip-map__tick {
+  background: var(--ground);
+  border: 2px solid var(--line-outreach);
+}
+
+.strip-map__station--current .strip-map__tick {
+  left: -22px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  background: var(--ground);
+  border: 3px solid var(--line-outreach);
+}
+
+/* Planned track (DESIGN.md, The Planned Track Rule): before a lead is on the outreach line, the route is the
+   line's own ink dashed 6/4 with hollow stations, at the same spacing as the travelled line, and nothing
+   traces along it. The dashes are an SVG stroke, from the first station's centre to the last. */
+.strip-map__planned {
+  position: relative;
+}
+
+.strip-map__planned-track {
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  width: 4px;
+  height: calc(100% - 16px);
+}
+
+.strip-map__station--planned .strip-map__tick {
+  background: var(--ground);
+  border: 2px solid var(--line-outreach);
+}
+
+/* The interchange: the 14px ring on the line's axis, one station step above the first station, with the
+   grant line leaving it at a right angle. Its first line of text is centred on the ring, as a station's
+   label is on its tick. */
+.strip-map__interchange {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-left: 20px; /* the grant line starts at the ring's edge */
+  padding-bottom: 12px;
+}
+
+.strip-map__ring {
+  position: absolute;
+  left: 6px; /* centre at 13px, on the line */
+  top: 1px; /* centre at 8px, on the first line of text */
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--ground);
+  border: 3px solid var(--text);
+  box-shadow: 0 0 0 2px var(--ground);
+}
+
+/* On the outreach line, the interchange joins the line's track down to the first station. Planned, the
+   planned track's own stroke already runs through it. */
+.strip-map__interchange--on-line::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  bottom: -8px;
+  width: 4px;
+  background: var(--edge);
+}
