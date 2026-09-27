@@ -348,6 +348,18 @@ npm run build          # wrangler deploy --dry-run: bundles and validates bindin
 npx wrangler deploy
 ```
 
+**Deploy CRM wave 1 in this order**, because it carries migration 0005 and new routes:
+
+```bash
+npx wrangler d1 migrations apply leadforge-db --remote   # 1. the schema
+npx wrangler deploy                                      # 2. the Worker
+# 3. the Pages deploy, --branch=master (Frontend on Pages, below)
+```
+
+The migration goes first because a Worker without 0005 fails every discovered business in its batch after
+its Places calls are paid for. The Worker goes before Pages because a frontend ahead of the Worker gets
+404s on the new routes.
+
 ### Frontend on Pages
 
 ```bash
@@ -497,7 +509,10 @@ object in the route's response, not the exit status: it tallies lookups that fai
 configuration or quota reason, separately from businesses Google genuinely has no record of. A
 business whose lookup failed is stored with a **null** `digital_deficit_score` — deliberately, rather
 than with Python's constant 74 — and every later run then skips it at the pre-lookup dedup. Recovery
-is to delete those `businesses` rows and re-run; all four child tables cascade.
+is to delete those `businesses` rows and re-run; all five child tables cascade (`digital_presences`,
+`lead_scores`, `outreach_records`, `grant_applications` and `google_matches`), and `grant_documents`
+cascades beneath `grant_applications`. `SELECT business_id FROM google_matches WHERE status = 'unavailable'`
+finds the unmeasured rows (on the remote only once migration 0005 is applied there).
 
 Since CRM wave 1, the response also answers `created` (equal to `discovered`), `skipped_known`
 (licences already stored, skipped before any Places call), and `failed`, so those no longer have to
