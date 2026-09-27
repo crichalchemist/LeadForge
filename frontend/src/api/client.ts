@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { DiscoveryRunRequest, DiscoveryRunResult, OutreachRecord, Provenance, Transitions } from '../types';
 
 let accessToken: string | null = null;
 
@@ -24,6 +25,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// The refresh and login calls answer 401 for a missing or wrong credential, and retrying them through
+// this interceptor deadlocked: the retry awaited a refreshPromise that was itself waiting on the retry,
+// so a first visit with no session hung on the spinner. Their 401 is the answer, not a reason to refresh.
+const NO_REFRESH = ['/auth/refresh', '/auth/login'];
+
 // Deduplicated refresh on 401
 let refreshPromise: Promise<string> | null = null;
 
@@ -31,7 +37,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+    if (error.response?.status === 401 && !original._retry && !NO_REFRESH.includes(original.url)) {
       original._retry = true;
 
       if (!refreshPromise) {
@@ -160,3 +166,17 @@ export const updateGrantDocument = (grantId: string, docId: string, data: Record
 
 export const fetchGrantFinancials = (grantId: string) =>
   api.get(`/grants/financials/${grantId}`).then((r) => r.data);
+
+// ── Wave 1 (spec 2026-09-26) ─────────────────
+
+export const runDiscovery = (body: DiscoveryRunRequest) =>
+  api.post<DiscoveryRunResult>('/discovery/run', body).then((r) => r.data);
+
+export const fetchProvenance = (businessId: string) =>
+  api.get<Provenance>(`/businesses/${businessId}/provenance`).then((r) => r.data);
+
+export const startOutreach = (businessId: string) =>
+  api.post<OutreachRecord>('/outreach', { business_id: businessId }).then((r) => r.data);
+
+export const fetchTransitions = () =>
+  api.get<Transitions>('/pipeline/transitions').then((r) => r.data);

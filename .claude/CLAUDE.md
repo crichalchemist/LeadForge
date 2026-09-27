@@ -66,6 +66,7 @@ npx wrangler deploy    # single production deployment: https://leadforge-api.cri
 cd frontend
 npm install
 npm run dev            # Vite on :5173
+npm test               # Vitest + Testing Library on jsdom; component tests mock only src/api/client.ts
 npm run build          # tsc -b && vite build; .env.production bakes VITE_API_BASE_URL into dist/
 npx wrangler pages deploy dist --project-name=leadforge-frontend --branch=master   # Pages: https://leadforge-frontend-80u.pages.dev
 # ^ `--branch=master` is DELIBERATE and outlives the git rename to `main` (2026-09-26).
@@ -77,7 +78,7 @@ npx wrangler pages deploy dist --project-name=leadforge-frontend --branch=master
 
 ## Architecture notes that span files
 
-**Route prefixes differ between backends.** The frontend axios client uses `baseURL: '/api'`. The Vite dev proxy forwards `/api/*` to `localhost:8000` and strips the `/api` prefix because FastAPI mounts routers at the root. The Workers app mounts everything under `/api/*`. The production build points at the Worker directly through `VITE_API_BASE_URL` in `frontend/.env.production` (ADR 027); in dev the value is unset and the proxy applies, so the prefix is stripped only for FastAPI.
+**Route prefixes differ between backends.** The frontend axios client uses `baseURL: '/api'`. The Workers app mounts everything under `/api/*`; FastAPI mounts routers at the root. Since CRM wave 1 (2026-09-26) the Vite dev proxy forwards `/api/*` to `wrangler dev` on `localhost:8787` and keeps the prefix, so local development runs against the Worker and the FastAPI server is no longer reachable from `npm run dev`. The production build points at the Worker directly through `VITE_API_BASE_URL` in `frontend/.env.production` (ADR 027); in dev the value is unset and the proxy applies.
 
 **Auth.** Both backends issue HS256 JWTs with `sub`, `role` (`admin` | `viewer`), and `type` (`access` | `refresh`) in the payload — no `email`. Access tokens 60 min, refresh tokens 30 days in an HTTP-only cookie. On Workers the cookie is `SameSite=None; Secure` because the Pages frontend is cross-site (ADR 027), and the production `CORS_ORIGINS` var must list the Pages origin exactly. Public routes: health, login/refresh, and the Retell webhook. Every other route requires a token, and writes require `admin`. In Workers, `requireAuth` sets `user` on the Hono context and `requireAdmin` reads it, so `requireAdmin` must be chained after `requireAuth`. `JWT_SECRET` is required: auth routes and middleware return 500 `{ detail: 'JWT_SECRET not configured' }` when it is unset. Set it with `wrangler secret put JWT_SECRET` before deploying.
 

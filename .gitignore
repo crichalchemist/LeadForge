@@ -16,6 +16,8 @@ lib/
 !/api/src/lib/**
 !/scripts/lib/
 !/scripts/lib/**
+!/frontend/src/lib/
+!/frontend/src/lib/**
 # ...but the negation above out-ranks the __pycache__ rule at the top of this file, so
 # re-exclude bytecode. Later rules win, so this must stay below the negation.
 /scripts/lib/**/__pycache__/
