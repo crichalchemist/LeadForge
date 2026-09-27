@@ -1,0 +1,77 @@
+/* The strip map's line and ticks (DESIGN.md, Shapes and Strip Map). A 4px line with round ends; stations
+   passed are 10px solid discs, the current one the 14px interchange ring with a 3px stroke, stations ahead
+   10px hollow ticks. The whole line is track in the control-edge color; the part travelled is the
+   outreach line's own color, and it draws from origin to the current station in 220ms on an exponential
+   ease-out. Under reduced motion the rule in index.css makes it instant. */
+
+.strip-map__line,
+.strip-map__branch {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding-left: 28px; /* room for the line and the ticks */
+}
+
+.strip-map__line::before,
+.strip-map__line::after {
+  content: '';
+  position: absolute;
+  left: 11px; /* centred on the ticks at 13px */
+  top: 8px;
+  width: 4px;
+  border-radius: 2px;
+}
+
+.strip-map__line::before {
+  bottom: 8px;
+  background: var(--edge);
+}
+
+.strip-map__line::after {
+  height: calc((100% - 16px) * var(--travelled, 0));
+  background: var(--line-outreach);
+  transform-origin: top;
+  animation: strip-map-trace 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes strip-map-trace {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+.strip-map__station {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 16px;
+}
+
+.strip-map__tick {
+  position: absolute;
+  left: -20px; /* 28px padding - 8px: centre at 13px from the list's edge */
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 2px var(--ground); /* ringed in the ground color */
+}
+
+.strip-map__station--passed .strip-map__tick {
+  background: var(--text);
+}
+
+.strip-map__station--ahead .strip-map__tick {
+  background: var(--ground);
+  border: 2px solid var(--edge);
+}
+
+.strip-map__station--current .strip-map__tick {
+  left: -22px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  background: var(--ground);
+  border: 3px solid var(--text);
+}
