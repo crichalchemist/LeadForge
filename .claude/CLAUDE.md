@@ -338,12 +338,15 @@ exists but now holds only `LICENSE.txt` and `NOTICE.txt` — the data is gone fr
   returns as soon as it has `limit` rows — so the multi-page path is currently unreachable and one
   page is always enough. It becomes a real bug the moment a caller requests more than
   `SOCRATA_PAGE_SIZE` rows.
-- CI runs on every push and pull request (`.github/workflows/ci.yml`): three parallel jobs covering
-  ruff + pytest (158), tsc + vitest + `wrangler deploy --dry-run` (601), and the frontend build. It needs
+- CI runs on every push and pull request (`.github/workflows/ci.yml`): four parallel jobs covering
+  ruff + pytest (158), tsc + vitest + `wrangler deploy --dry-run` (601), the frontend's Vitest suite and build
+  (the check is still named `Frontend (build)`, because branch protection requires that name), and Playwright
+  e2e against `wrangler dev --local` on a freshly seeded local D1. It needs
   **no secrets** -- but only after `remoteBindings: false` was set in `api/vitest.config.ts`. Without it
   the pool opens a remote proxy session for the `ai` binding, which succeeds locally off a cached
   `wrangler login` token and fails in CI with an auth error that looks nothing like a test failure.
-  `main` requires all three checks (strict), with `enforce_admins` off so a direct push is still possible.
+  `main` requires the first three checks (strict), with `enforce_admins` off so a direct push is still
+  possible. The e2e job is deliberately not required until it has proved stable (spec 2026-09-26).
 - **The tree is ruff-formatted, as of the dedicated commit listed in `.git-blame-ignore-revs`**, and both
   `ruff format --check` and the whitespace fixers are now enforced by pre-commit and by CI's `Format`
   step. That commit rewrote 76 files; trailing whitespace existed on exactly three lines of
