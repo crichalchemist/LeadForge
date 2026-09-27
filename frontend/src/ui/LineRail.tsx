@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FileText, Landmark, LayoutDashboard, ListOrdered, Map as MapIcon, Menu, Workflow, X, type LucideIcon } from 'lucide-react';
+import { FileText, Landmark, LayoutDashboard, ListOrdered, Map as MapIcon, Menu, Radar, Workflow, X, type LucideIcon } from 'lucide-react';
 
 export interface Station {
   to: string;
@@ -8,11 +8,12 @@ export interface Station {
   icon: LucideIcon;
 }
 
-// Destinations as stations on one vertical line (DESIGN.md, Navigation). Leads comes first, where the core
-// loop starts. Dashboard, Pipeline, Grants and Reports are the old pages, ordinary stations until wave 2
-// replaces each. Map is planned track: drawn and named, but not a link.
+// Destinations as stations on one vertical line (DESIGN.md, Navigation). Leads and Discovery come first, where
+// the core loop starts. Dashboard, Pipeline, Grants and Reports are the old pages, ordinary stations until
+// wave 2 replaces each. Map is planned track: drawn and named, but not a link.
 export const STATIONS: Station[] = [
   { to: '/leads', label: 'Leads', icon: ListOrdered },
+  { to: '/discovery', label: 'Discovery', icon: Radar },
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/pipeline', label: 'Pipeline', icon: Workflow },
   { to: '/grants', label: 'Grants', icon: Landmark },

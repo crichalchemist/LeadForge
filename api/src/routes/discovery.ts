@@ -1,6 +1,6 @@
 // Operator trigger for the discovery pipeline. Python has no HTTP route for this — it runs from the
 // Typer CLI (`leadforge pipeline --zip --niche --limit`), and a Worker has no CLI, so this is the
-// Workers stand-in. It is not part of the CRM contract and nothing in the frontend calls it.
+// Workers stand-in. It is not part of the Python contract; the CRM's Discovery screen calls it (wave 1).
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { requireAdmin, requireAuth } from '../middleware/auth';

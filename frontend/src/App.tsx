@@ -10,6 +10,7 @@ import GrantDetail from './pages/GrantDetail';
 import Leads from './pages/Leads';
 import LeadDetail from './pages/LeadDetail';
 import Reports from './pages/Reports';
+import Discovery from './pages/Discovery';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
                 <Route path="/grants/:id" element={<LegacySurface><GrantDetail /></LegacySurface>} />
                 <Route path="/leads" element={<LegacySurface><Leads /></LegacySurface>} />
                 <Route path="/leads/:id" element={<LegacySurface><LeadDetail /></LegacySurface>} />
+                <Route path="/discovery" element={<Discovery />} />
                 <Route path="/reports" element={<LegacySurface><Reports /></LegacySurface>} />
               </Routes>
             </AppLayout>
