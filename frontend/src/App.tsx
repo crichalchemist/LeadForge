@@ -21,7 +21,7 @@ export default function App() {
           <ProtectedRoute>
             <AppLayout>
               <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/" element={<Navigate to="/leads" replace />} />
                 <Route path="/dashboard" element={<LegacySurface><Dashboard /></LegacySurface>} />
                 <Route path="/pipeline" element={<LegacySurface><Pipeline /></LegacySurface>} />
                 <Route path="/grants" element={<LegacySurface><GrantPipeline /></LegacySurface>} />
