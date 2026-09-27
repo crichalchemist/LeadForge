@@ -12,8 +12,9 @@ const TERMS = [
 /** The composite as one line in three segments sized by weight: 40% deficit, 35% viability, 25% pressure
  *  (DESIGN.md, Score Segments). A missing term is dashed and named, never drawn as zero. Only the deficit
  *  has evidence behind it in version 1, so only it carries source bullets. The line stays proportional at
- *  every width; below the rail breakpoint the terms are listed as rows under it, so none breaks mid-phrase,
- *  and from it up each term sits under its own segment. */
+ *  every width. Each term sits under its own segment only from the rail breakpoint up to wide, where the
+ *  record has the full working width; on a phone and in the seven-column record beside the list, the terms
+ *  are listed as rows under the line, so none breaks mid-phrase. */
 export function ScoreSegments({ score, deficitSources }: { score: LeadScore; deficitSources: Source[] }) {
   return (
     <div>
@@ -33,7 +34,7 @@ export function ScoreSegments({ score, deficitSources }: { score: LeadScore; def
           );
         })}
       </div>
-      <ol aria-label="Composite terms" className="mt-2 space-y-2 rail:flex rail:gap-1 rail:space-y-0">
+      <ol aria-label="Composite terms" className="mt-2 space-y-2 rail:max-wide:flex rail:max-wide:gap-1 rail:max-wide:space-y-0">
         {TERMS.map((term) => {
           const value = score[term.key];
           const measured = value !== null;
@@ -41,12 +42,12 @@ export function ScoreSegments({ score, deficitSources }: { score: LeadScore; def
             <li
               key={term.key}
               style={{ flexGrow: term.weight, flexBasis: 0 }}
-              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rail:block rail:min-w-0"
+              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rail:max-wide:block rail:max-wide:min-w-0"
             >
-              <p className="whitespace-nowrap font-condensed text-label uppercase text-dim rail:whitespace-normal">
+              <p className="whitespace-nowrap font-condensed text-label uppercase text-dim rail:max-wide:whitespace-normal">
                 {term.label} · {term.weight}%
               </p>
-              <p className="flex items-center gap-2 whitespace-nowrap text-data tabular-nums rail:mt-1 rail:whitespace-normal">
+              <p className="flex items-center gap-2 whitespace-nowrap text-data tabular-nums rail:max-wide:mt-1 rail:max-wide:whitespace-normal">
                 {measured ? formatScore(value) : <PlannedMark>not measured</PlannedMark>}
                 {measured && term.key === 'digital_deficit_score' && <SourceBullets sources={deficitSources} />}
               </p>
