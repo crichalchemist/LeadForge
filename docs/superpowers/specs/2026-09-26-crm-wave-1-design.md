@@ -61,7 +61,7 @@ none of them, and its visual system is stock Tailwind that the user rejected. Fi
 ### Migration `0005_provenance.sql`
 
 ```sql
-ALTER TABLE businesses ADD COLUMN licence_name TEXT;
+ALTER TABLE businesses ADD COLUMN license_name TEXT;
 
 CREATE TABLE google_matches (
   business_id  TEXT PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
@@ -83,7 +83,7 @@ it. `api/test/helpers.ts` `resetDb` gains the new table.
 
 ### Discovery
 
-- Store the licence name in `licence_name` on every new row; `name` keeps its current behavior.
+- Store the licence name in `license_name` on every new row; `name` keeps its current behavior.
 - For every Find Place candidate, compute the name score (`nameMatchScore`) and, when both sides have
   coordinates, the distance (`distanceMeters`), whether or not the candidate is accepted.
 - Write one `google_matches` row per new business, in the same `DB.batch` as the business:
@@ -100,22 +100,22 @@ it. `api/test/helpers.ts` `resetDb` gains the new table.
 ### New and extended routes
 
 - **`GET /api/businesses/:id/provenance`** (`requireAuth`; viewers may read). Returns the licence record
-  (`licence_name`, `account_number`, `site_number`, `license_number`, `license_status`,
+  (`license_name`, `account_number`, `site_number`, `license_number`, `license_status`,
   `license_issue_date`), the `google_matches` row or `null`, the `overture_matches` row joined on account
   and site or `null`, and a `facts` list of `{ key, value, sources }`. The source rules live here and only
   here, under one principle: **a source is credited for a fact only when its recorded value equals the
   value the record displays.** Displayed values come from the stored business, where the merge put
   Google's value first and Overture's second (`base.website_url ?? website`, `base.phone ?? phone` in
   `lib/overture.ts`). Overture values are compared after the same `overturePresent` trim the merge applies.
-  - `name`: `licence` when `name` equals `licence_name`; otherwise `google`, because Google's Details
-    name is the only other value discovery writes there. Rows without a `licence_name` get no source.
+  - `name`: `license` when `name` equals `license_name`; otherwise `google`, because Google's Details
+    name is the only other value discovery writes there. Rows without a `license_name` get no source.
   - `website`, `phone`: `google` when the Google row's value equals the displayed one; `overture` when
     the Overture row's value does. Both apply only when both sources returned the same value.
   - `google_business_profile`, `rating`, `review_count`: `google` when the Google row is `matched`;
     Google is the only writer of these columns.
   - `facebook`, `instagram`: `overture` when the Overture row is matched and its flag is set; Google
     never sets them.
-  - `license_status`: `licence`.
+  - `license_status`: `license`.
   - A displayed value that no recorded source accounts for, which covers every row stored before
     migration 0005, gets empty `sources`, and the record shows "source not recorded".
   - 404 for an unknown business.
@@ -220,7 +220,7 @@ Data: the business detail, the provenance route, and the transitions map (cached
 **API** (vitest on `@cloudflare/vitest-plugin`, existing harness):
 - Migration 0005 applies; `google_matches` cascades with its business.
 - Discovery records each verdict with its numbers (matched, rejected on distance, rejected on name, no
-  candidate, unavailable), stores `licence_name`, and counts created, skipped and failed.
+  candidate, unavailable), stores `license_name`, and counts created, skipped and failed.
 - The provenance route applies each source rule, admits viewers, and returns 404 for an unknown id. It
   must credit only Google when Google and Overture return different websites, both when they return the
   same one, and neither for a pre-0005 row.
