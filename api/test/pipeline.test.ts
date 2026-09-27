@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { accessToken, adminUser, api, createBusiness, createOutreach, resetDb, viewerUser } from './helpers';
+import { VALID_TRANSITIONS } from '../src/lib/stages';
 
 let token: string;
 beforeEach(async () => { await resetDb(); token = await accessToken(await adminUser()); });
@@ -63,5 +64,18 @@ describe('TestStageTransition', () => {
     const id = await createOutreach(await createBusiness());
     const viewer = await accessToken(await viewerUser());
     expect((await api('PATCH', `/pipeline/${id}/stage`, { token: viewer, json: { new_stage: 'queued' } })).status).toBe(403);
+  });
+});
+
+describe('GET /api/pipeline/transitions', () => {
+  it('serves exactly the moves the stage route enforces, so the CRM never offers one it would refuse', async () => {
+    const res = await api('GET', '/pipeline/transitions', { token });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(VALID_TRANSITIONS);
+  });
+
+  it('lets a viewer read the rules', async () => {
+    const viewer = await accessToken(await viewerUser());
+    expect((await api('GET', '/pipeline/transitions', { token: viewer })).status).toBe(200);
   });
 });

@@ -8,6 +8,31 @@ import type { AppEnv, OutreachRecordRow } from '../types';
 const router = new Hono<AppEnv>();
 const serialize = (row: OutreachRecordRow) => withBooleans<Pick<OutreachRecordRow, keyof OutreachRecordRow>>(row, OUTREACH_BOOLS);
 
+// Puts a business on the outreach line at its first station (spec 2026-09-26). Python has no HTTP
+// equivalent: its records come from the pipeline CLI. outreach_records has no per-business uniqueness,
+// so the guard is here, and it is one statement so two quick clicks cannot both insert.
+router.post('/', requireAuth, requireAdmin, jsonBody(z.object({ business_id: z.string().min(1) })), async (c) => {
+  const { business_id } = c.req.valid('json');
+  const db = c.env.DB;
+  const business = await db.prepare('SELECT id FROM businesses WHERE id = ?').bind(business_id).first();
+  if (!business) return c.json({ detail: 'Business not found' }, 404);
+
+  const id = crypto.randomUUID();
+  const now = nowIso();
+  const inserted = await db
+    .prepare(`INSERT INTO outreach_records (id, business_id, status, created_at, updated_at)
+              SELECT ?, ?, 'scored', ?, ? WHERE NOT EXISTS (SELECT 1 FROM outreach_records WHERE business_id = ?)`)
+    .bind(id, business_id, now, now, business_id)
+    .run();
+  if (!inserted.meta.changes) {
+    const existing = await db.prepare('SELECT id FROM outreach_records WHERE business_id = ? ORDER BY created_at DESC')
+      .bind(business_id).first<{ id: string }>();
+    return c.json({ detail: 'This business is already on the outreach line', outreach_id: existing?.id ?? null }, 409);
+  }
+  const row = await db.prepare('SELECT * FROM outreach_records WHERE id = ?').bind(id).first<OutreachRecordRow>();
+  return c.json(serialize(row!), 201);
+});
+
 // =py routes/outreach.get_outreach_history
 router.get('/by-business/:business_id', requireAuth, async (c) => {
   const rows = await c.env.DB.prepare('SELECT * FROM outreach_records WHERE business_id = ? ORDER BY created_at DESC')
