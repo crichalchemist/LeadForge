@@ -1,0 +1,54 @@
+/* DESIGN.md's palette, expressed as theme roles. Components name a role through Tailwind (bg-ground,
+   text-dim, stroke-line-outreach), never a hex value. index.html's pre-paint script and src/lib/theme.ts
+   write the resolved theme to data-theme on <html>: the system setting by default, the operator's pick
+   when there is one. Every value is copied from DESIGN.md's frontmatter; change it there first. */
+
+:root {
+  --font-sans: 'Fira Sans', system-ui, sans-serif;
+  --font-condensed: 'Fira Sans Condensed', 'Fira Sans', system-ui, sans-serif;
+
+  /* The same on both grounds. */
+  --plate: #D71A2A;             /* scarlet */
+  --plate-deep: #B8141F;        /* scarlet-deep */
+  --on-plate: #FFFFFF;          /* plate-text */
+  --service-plate: #FFC20E;     /* amber: a filled plate always carries midnight-enamel text */
+  --on-service-plate: #0B1230;  /* midnight-enamel */
+}
+
+:root[data-theme='enamel'] {
+  color-scheme: dark;
+  --ground: #0B1230;            /* midnight-enamel */
+  --raised: #131C45;            /* enamel-raised */
+  --seam: #2B3769;              /* enamel-rule */
+  --edge: #7C87AA;              /* enamel-edge */
+  --text: #F2F0EA;              /* porcelain */
+  --dim: #A9B1CB;               /* porcelain-dim */
+  --focus: #F2F0EA;             /* porcelain */
+  --error: #FF7A7A;             /* scarlet-light */
+  --line-outreach: #3D74FF;     /* cobalt-line-dark */
+  --ink-outreach: #8FAEFF;      /* cobalt-ink-dark */
+  --line-grant: #22B14C;        /* green-line-dark */
+  --ink-grant: #62D38A;         /* green-ink-dark */
+  --line-service: #FFC20E;      /* amber */
+  --ink-service: #FFC20E;       /* amber */
+  --overlay-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+}
+
+:root[data-theme='porcelain'] {
+  color-scheme: light;
+  --ground: #F5F6F8;            /* porcelain-ground */
+  --raised: #FFFFFF;            /* porcelain-raised */
+  --seam: #D7DCE6;              /* porcelain-rule */
+  --edge: #7A849E;              /* porcelain-edge */
+  --text: #0B1230;              /* midnight-enamel */
+  --dim: #4A5578;               /* ink-dim */
+  --focus: #0B1230;             /* midnight-enamel */
+  --error: #B8141F;             /* scarlet-deep */
+  --line-outreach: #1E5BFF;     /* cobalt-line-light */
+  --ink-outreach: #1A4BD6;      /* cobalt-ink-light */
+  --line-grant: #178A3C;        /* green-line-light */
+  --ink-grant: #11702F;         /* green-ink-light */
+  --line-service: #B07A00;      /* amber-line-light */
+  --ink-service: #7A5300;       /* amber-ink-light */
+  --overlay-shadow: 0 8px 24px rgb(11 18 48 / 0.16);
+}

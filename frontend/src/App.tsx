@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
+import LegacySurface from './components/layout/LegacySurface';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -21,13 +22,13 @@ export default function App() {
             <AppLayout>
               <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/pipeline" element={<Pipeline />} />
-                <Route path="/grants" element={<GrantPipeline />} />
-                <Route path="/grants/:id" element={<GrantDetail />} />
-                <Route path="/leads" element={<Leads />} />
-                <Route path="/leads/:id" element={<LeadDetail />} />
-                <Route path="/reports" element={<Reports />} />
+                <Route path="/dashboard" element={<LegacySurface><Dashboard /></LegacySurface>} />
+                <Route path="/pipeline" element={<LegacySurface><Pipeline /></LegacySurface>} />
+                <Route path="/grants" element={<LegacySurface><GrantPipeline /></LegacySurface>} />
+                <Route path="/grants/:id" element={<LegacySurface><GrantDetail /></LegacySurface>} />
+                <Route path="/leads" element={<LegacySurface><Leads /></LegacySurface>} />
+                <Route path="/leads/:id" element={<LegacySurface><LeadDetail /></LegacySurface>} />
+                <Route path="/reports" element={<LegacySurface><Reports /></LegacySurface>} />
               </Routes>
             </AppLayout>
           </ProtectedRoute>
