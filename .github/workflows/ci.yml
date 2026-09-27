@@ -2,8 +2,10 @@ name: CI
 
 # Runs on every push to any branch, and on pull requests. Nothing here needs a secret: the Python
 # suite uses in-memory aiosqlite, the Workers suite uses miniflare with fake bindings declared in
-# api/vitest.config.ts, and `wrangler deploy --dry-run` was verified to succeed with no Cloudflare
-# credentials present. So forks and first-time contributors get a full green run.
+# api/vitest.config.ts, `wrangler deploy --dry-run` was verified to succeed with no Cloudflare
+# credentials present, the frontend suite runs on jsdom with only src/api/client.ts mocked, and the
+# e2e job runs `wrangler dev --local` on a throwaway `--var JWT_SECRET`, with the `ai` binding never
+# opened. So forks and first-time contributors get a full green run.
 on:
   push:
   pull_request:
