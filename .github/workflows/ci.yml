@@ -109,6 +109,7 @@ jobs:
   e2e:
     name: Frontend e2e (Playwright)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     # Not a required check yet (spec 2026-09-26): it runs on every push and becomes required once stable.
     steps:
       - uses: actions/checkout@v4
@@ -147,8 +148,10 @@ jobs:
           path: frontend/playwright-report
           retention-days: 7
 
-      # The desktop and phone captures from e2e/captures.spec.ts, for the finish review. Uploaded on every
-      # run, pass or fail, so the review never depends on a red build.
+      # The captures from e2e/captures.spec.ts, for the finish review: the record beside the list on a desktop
+      # and alone on a phone, and a lead already on the outreach line beside the list, each in both themes;
+      # the bare list; and the Discovery screen. Uploaded on every run, pass or fail, so the review never
+      # depends on a red build.
       - name: Upload the finish-review captures
         if: always()
         uses: actions/upload-artifact@v4
