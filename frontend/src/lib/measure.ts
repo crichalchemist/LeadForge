@@ -15,9 +15,15 @@ export function formatCount(value: number): string {
   return value.toLocaleString('en-US');
 }
 
-/** A name-match score, 0 to 1, to the two decimals the threshold (0.50) is written in. */
+/** A name-match score, 0 to 1, cut (never rounded) to the two decimals the threshold (0.50) is written in, so
+ *  a rejected 0.4996 reads 0.49 rather than the threshold it fell below. The digits are cut from the number's
+ *  own decimal form: arithmetic truncation misreads binary fractions (Math.floor(0.57 * 100) is 56). */
 export function formatNameScore(value: number | null): string {
-  return value === null ? 'not recorded' : value.toFixed(2);
+  if (value === null) return 'not recorded';
+  // Below 1e-6 String() switches to exponent notation; any score under 0.01 is 0.00 to two places.
+  if (value < 0.01) return '0.00';
+  const [whole, fraction = ''] = String(value).split('.');
+  return `${whole}.${fraction.padEnd(2, '0').slice(0, 2)}`;
 }
 
 export function formatDistance(metres: number | null): string {

@@ -26,6 +26,8 @@ interface StripMapProps {
   busy: boolean;
   onStart: () => void;
   onTransfer: (to: PipelineStage) => void;
+  /** A message about the route itself, such as a failed request, shown inside the Route region. */
+  notice?: ReactNode;
 }
 
 /** A lead's route across both lines (DESIGN.md, Strip Map): grant first, where a corridor business meets
@@ -33,7 +35,7 @@ interface StripMapProps {
  *  track, dashed with hollow stations and never traced, because nothing has travelled yet. With one, past
  *  stations are solid, the current one ringed, those ahead hollow, and the grant line dims so the traced
  *  route leads. */
-export function StripMap({ stage, allowed, corridorName, canAct, busy, onStart, onTransfer }: StripMapProps) {
+export function StripMap({ stage, allowed, corridorName, canAct, busy, onStart, onTransfer, notice }: StripMapProps) {
   const interchange = corridorName && <GrantInterchange corridorName={corridorName} onLine={stage !== null} />;
 
   return (
@@ -50,6 +52,7 @@ export function StripMap({ stage, allowed, corridorName, canAct, busy, onStart, 
           </>
         )}
       </div>
+      {notice}
     </section>
   );
 }

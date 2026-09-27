@@ -34,7 +34,10 @@
   --overlay-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
 }
 
-:root[data-theme='porcelain'] {
+/* With no data-theme at all (the pre-paint script never ran), porcelain is the default and the media block
+   below swaps in enamel for a dark system setting (spec 2026-09-26, Tokens). */
+:root[data-theme='porcelain'],
+:root:not([data-theme]) {
   color-scheme: light;
   --ground: #F5F6F8;            /* porcelain-ground */
   --raised: #FFFFFF;            /* porcelain-raised */
@@ -51,4 +54,28 @@
   --line-service: #B07A00;      /* amber-line-light */
   --ink-service: #7A5300;       /* amber-ink-light */
   --overlay-shadow: 0 8px 24px rgb(11 18 48 / 0.16);
+}
+
+/* The enamel set again, for a dark system setting with no data-theme. A selector list cannot reach across
+   the media query, so this copies :root[data-theme='enamel'] value for value: change the two together.
+   It must follow the porcelain rule, whose :root:not([data-theme]) has the same specificity. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --ground: #0B1230;            /* midnight-enamel */
+    --raised: #131C45;            /* enamel-raised */
+    --seam: #2B3769;              /* enamel-rule */
+    --edge: #7C87AA;              /* enamel-edge */
+    --text: #F2F0EA;              /* porcelain */
+    --dim: #A9B1CB;               /* porcelain-dim */
+    --focus: #F2F0EA;             /* porcelain */
+    --error: #FF7A7A;             /* scarlet-light */
+    --line-outreach: #3D74FF;     /* cobalt-line-dark */
+    --ink-outreach: #8FAEFF;      /* cobalt-ink-dark */
+    --line-grant: #22B14C;        /* green-line-dark */
+    --ink-grant: #62D38A;         /* green-ink-dark */
+    --line-service: #FFC20E;      /* amber */
+    --ink-service: #FFC20E;       /* amber */
+    --overlay-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+  }
 }

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders, VIEWER } from '../test/render';
 import { httpError } from '../test/http';
@@ -12,7 +12,7 @@ vi.mock('../api/client', () => ({
   startOutreach: vi.fn(),
   transitionStage: vi.fn(),
 }));
-import { fetchBusiness, fetchProvenance, fetchTransitions, startOutreach } from '../api/client';
+import { fetchBusiness, fetchProvenance, fetchTransitions, startOutreach, transitionStage } from '../api/client';
 import LeadRecord from './LeadRecord';
 
 const SCORE = {
@@ -55,16 +55,25 @@ const PROVENANCE: Provenance = {
   ],
 };
 const TRANSITIONS = { scored: ['queued', 'disqualified'] } as unknown as Transitions;
+const ON_LINE: Business = { ...BUSINESS, outreach_records: [{ id: 'o1', status: 'scored' } as OutreachRecord] };
+const DUPLICATE_START = 'This lead was already on the outreach line; its station is shown above.';
 
 beforeEach(() => {
   vi.mocked(fetchBusiness).mockResolvedValue(BUSINESS);
   vi.mocked(fetchProvenance).mockResolvedValue(PROVENANCE);
   vi.mocked(fetchTransitions).mockResolvedValue(TRANSITIONS);
   vi.mocked(startOutreach).mockReset();
+  vi.mocked(transitionStage).mockReset();
 });
 
 const open = (options: Parameters<typeof renderWithProviders>[1] = {}) =>
   renderWithProviders(<LeadRecord />, { route: '/leads/b1', path: '/leads/:id', ...options });
+// How many times the record has been fetched, so a test can see a failed action refetch it.
+const businessLoads = () => vi.mocked(fetchBusiness).mock.calls.length;
+const withWebsite = (value: string): Provenance => ({
+  ...PROVENANCE,
+  facts: PROVENANCE.facts.map((f) => (f.key === 'website' ? { ...f, value } : f)),
+});
 
 describe('the lead record', () => {
   it('shows which sources supplied each fact', async () => {
@@ -165,7 +174,92 @@ describe('the lead record', () => {
   it('shows the station after a duplicate start instead of failing silently', async () => {
     vi.mocked(startOutreach).mockRejectedValue(httpError(409, { outreach_id: 'o1' }));
     open();
+    const start = await screen.findByRole('button', { name: 'Start outreach' });
+    const loads = businessLoads();
+    await userEvent.click(start);
+    expect(await screen.findByText(DUPLICATE_START)).toBeTruthy();
+    // The station can only be shown if the record is fetched again.
+    await waitFor(() => expect(businessLoads()).toBeGreaterThan(loads));
+  });
+
+  it('clears a duplicate-start message once a later transfer goes through', async () => {
+    vi.mocked(fetchBusiness).mockResolvedValueOnce(BUSINESS).mockResolvedValue(ON_LINE);
+    vi.mocked(startOutreach).mockRejectedValue(httpError(409, { outreach_id: 'o1' }));
+    vi.mocked(transitionStage).mockResolvedValue({});
+    open();
     await userEvent.click(await screen.findByRole('button', { name: 'Start outreach' }));
-    expect(await screen.findByText('This lead was already on the outreach line; its station is shown above.')).toBeTruthy();
+    expect(await screen.findByText(DUPLICATE_START)).toBeTruthy();
+    await userEvent.click(await screen.findByRole('button', { name: 'Transfer to Queued' }));
+    await waitFor(() => expect(vi.mocked(transitionStage)).toHaveBeenCalledWith('o1', 'queued'));
+    await waitFor(() => expect(screen.queryByText(DUPLICATE_START)).toBeNull());
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('tells the operator only an admin can start outreach when the backend refuses it', async () => {
+    vi.mocked(startOutreach).mockRejectedValue(httpError(403));
+    open();
+    await userEvent.click(await screen.findByRole('button', { name: 'Start outreach' }));
+    expect(await screen.findByText('Only an admin can do this.')).toBeTruthy();
+  });
+
+  it('tells the operator only an admin can transfer a lead when the backend refuses it', async () => {
+    vi.mocked(fetchBusiness).mockResolvedValue(ON_LINE);
+    vi.mocked(transitionStage).mockRejectedValue(httpError(403));
+    open();
+    await userEvent.click(await screen.findByRole('button', { name: 'Transfer to Queued' }));
+    expect(await screen.findByText('Only an admin can do this.')).toBeTruthy();
+  });
+
+  it('names the allowed stations and refetches when a transfer is not allowed', async () => {
+    vi.mocked(fetchBusiness).mockResolvedValue(ON_LINE);
+    vi.mocked(transitionStage).mockRejectedValue(httpError(422));
+    open();
+    const transfer = await screen.findByRole('button', { name: 'Transfer to Queued' });
+    const loads = businessLoads();
+    await userEvent.click(transfer);
+    expect(await screen.findByText(/from Scored\. Allowed: Queued, Disqualified\.$/)).toBeTruthy();
+    await waitFor(() => expect(businessLoads()).toBeGreaterThan(loads));
+  });
+
+  it('says the allowed transfers could not be loaded, in the route, and offers Retry', async () => {
+    vi.mocked(fetchBusiness).mockResolvedValue(ON_LINE);
+    vi.mocked(fetchTransitions).mockRejectedValueOnce(httpError(500)).mockResolvedValue(TRANSITIONS);
+    open();
+    const route = await screen.findByRole('region', { name: 'Route' });
+    expect(await within(route).findByText('Couldn’t load the allowed transfers.')).toBeTruthy();
+    expect(within(route).queryAllByRole('button', { name: /Transfer to/ })).toHaveLength(0);
+    await userEvent.click(within(route).getByRole('button', { name: 'Retry' }));
+    expect(await within(route).findByRole('button', { name: 'Transfer to Queued' })).toBeTruthy();
+    expect(within(route).queryByText('Couldn’t load the allowed transfers.')).toBeNull();
+  });
+
+  it('shows a missing composite’s suspended tick without a reason until provenance says which', async () => {
+    vi.mocked(fetchBusiness).mockResolvedValue({
+      ...BUSINESS, lead_scores: [{ ...SCORE, digital_deficit_score: null, composite_acquisition_score: null }],
+    });
+    let arrive: (p: Provenance) => void = () => {};
+    vi.mocked(fetchProvenance).mockReturnValue(new Promise<Provenance>((resolve) => { arrive = resolve; }));
+    open();
+    const score = await screen.findByRole('region', { name: 'Score' });
+    expect(within(score).getByText('Composite')).toBeTruthy();
+    expect(within(score).queryByText(/not measured|not recorded|Places was unavailable/)).toBeNull();
+    arrive({ ...PROVENANCE, google: { ...PROVENANCE.google!, status: 'unavailable' } });
+    expect(await within(score).findByText('Places was unavailable during discovery')).toBeTruthy();
+  });
+
+  it('shows a website that is not a web address as text, never as a link', async () => {
+    vi.mocked(fetchProvenance).mockResolvedValue(withWebsite('javascript:alert(1)'));
+    open();
+    const website = (await screen.findByText('Website')).parentElement!;
+    expect(within(website).getByText('javascript:alert(1)')).toBeTruthy();
+    expect(within(website).queryByRole('link')).toBeNull();
+  });
+
+  it('links a website that is a web address', async () => {
+    vi.mocked(fetchProvenance).mockResolvedValue(withWebsite('https://fixture-barbershop.test'));
+    open();
+    const website = (await screen.findByText('Website')).parentElement!;
+    const link = within(website).getByRole('link', { name: 'https://fixture-barbershop.test' });
+    expect(link.getAttribute('href')).toBe('https://fixture-barbershop.test');
   });
 });

@@ -114,7 +114,14 @@ export default function LeadRecord({ back }: { back?: { to: string; state?: unkn
           canAct={isAdmin}
           busy={start.isPending || transfer.isPending}
           onStart={() => start.mutate()}
-          onTransfer={(to) => outreach && transfer.mutate({ outreachId: outreach.id, to })}
+          onTransfer={(to) => {
+            if (!outreach) return;
+            // A Start outreach error (a 409 that brought the station into view) is settled by now; it
+            // must not outlive the transfer that follows it.
+            start.reset();
+            transfer.mutate({ outreachId: outreach.id, to });
+          }}
+          notice={transitions.isError && <InlineError what="the allowed transfers" onRetry={() => transitions.refetch()} />}
         />
         {actionError && (
           <p role="alert" className="mt-3 text-error">{actionMessage(actionError, stage, allowed)}</p>
@@ -123,7 +130,7 @@ export default function LeadRecord({ back }: { back?: { to: string; state?: unkn
 
       <section aria-labelledby="score-title" className="mt-10">
         <h2 id="score-title" className="font-condensed text-title uppercase">Score</h2>
-        <CompositeLine score={score} provenance={provenance.data ?? null} />
+        <CompositeLine score={score} provenance={provenance.data ?? null} loading={provenance.isPending} />
         {score && score.composite_acquisition_score !== null && (
           <div className="mt-4 max-w-2xl">
             <ScoreSegments score={score} deficitSources={unionSources(facts, DEFICIT_KEYS)} />
@@ -179,16 +186,18 @@ function unionSources(facts: Fact[], keys: FactKey[]): Source[] {
   return [...sources];
 }
 
-function CompositeLine({ score, provenance }: { score: LeadScore | null; provenance: Provenance | null }) {
+function CompositeLine({ score, provenance, loading }: { score: LeadScore | null; provenance: Provenance | null; loading: boolean }) {
   const composite = score?.composite_acquisition_score ?? null;
   if (composite === null) {
     // Discovery stores a null deficit only when a Places lookup was refused (ADR 031); a business stored
-    // before migration 0005 has no Google row to say why.
+    // before migration 0005 has no Google row to say why. Until provenance arrives the reason is not known,
+    // so the tick stands alone rather than showing a reason that is about to be replaced.
     const reason =
-      provenance === null ? 'not measured'
-        : provenance.google?.status === 'unavailable' ? 'Places was unavailable during discovery'
-          : provenance.google === null ? 'not recorded'
-            : 'not measured';
+      loading ? undefined
+        : provenance === null ? 'not measured'
+          : provenance.google?.status === 'unavailable' ? 'Places was unavailable during discovery'
+            : provenance.google === null ? 'not recorded'
+              : 'not measured';
     return (
       <p className="mt-3 flex flex-wrap items-center gap-3">
         <span className="font-condensed text-label uppercase text-dim">Composite</span>
@@ -240,8 +249,12 @@ function factValue(fact: Fact): ReactNode {
   if (fact.state === 'unknown') return <SuspendedTick label="unknown" />;
   if (fact.state === 'not_recorded') return <span className="text-dim">not recorded</span>;
   const { key, value } = fact;
+  // A website comes from Google or Overture, so only a web address becomes a link; anything else, a
+  // javascript: URL included, is shown as the text it is.
   if (key === 'website' && typeof value === 'string') {
-    return <a href={value} target="_blank" rel="noopener noreferrer" className="break-all underline">{value}</a>;
+    return /^https?:\/\//i.test(value)
+      ? <a href={value} target="_blank" rel="noopener noreferrer" className="break-all underline">{value}</a>
+      : <span className="break-all">{value}</span>;
   }
   if (key === 'rating' && typeof value === 'number') return <span className="tabular-nums">{formatRating(value)}</span>;
   if (key === 'review_count' && typeof value === 'number') return <span className="tabular-nums">{formatCount(value)}</span>;
