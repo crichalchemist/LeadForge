@@ -6,7 +6,7 @@ import { hashPassword } from '../src/lib/password';
 type Json = Record<string, unknown>;
 
 const TABLES = [
-  'grant_documents', 'grant_applications', 'outreach_records', 'overture_matches', 'lead_scores',
+  'grant_documents', 'grant_applications', 'outreach_records', 'overture_matches', 'google_matches', 'lead_scores',
   'digital_presences', 'competitive_contexts', 'businesses', 'nof_corridors', 'users',
 ];
 

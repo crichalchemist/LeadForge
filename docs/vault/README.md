@@ -67,3 +67,4 @@ index below agree — they have drifted before.
 | 028 | NOF corridors as a bundled polygon asset, point-in-polygon at ingest | Accepted | 2026-09-02 |
 | 029 | Foursquare Places replaces Google Places as the enrichment source | Superseded by 030 | 2026-09-15 |
 | 030 | Licence account is identity; Google enriches live, Overture precomputed | Accepted | 2026-09-25 |
+| 031 | Enrichment provenance: a Google verdict per business, the licence name kept, facts credited by value | Accepted | 2026-09-26 |
