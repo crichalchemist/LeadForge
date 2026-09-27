@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { runDiscovery } from '../api/client';
@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { statusOf } from '../lib/http';
 import { formatCount, formatNiche, formatScore } from '../lib/measure';
 import { NICHES, type DiscoveryRunResult, type Niche } from '../types';
-import { Field, inputClass } from '../ui/Field';
+import { Field, inputClass, Select } from '../ui/Field';
 import { Plate } from '../ui/Plate';
 
 // api/src/routes/discovery.ts caps a run at 20 businesses (the Worker's 50-subrequest budget), and each
@@ -33,7 +33,9 @@ function rejectedFields(error: unknown): FieldName[] {
 export default function Discovery() {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
+  const zipInput = useRef<HTMLInputElement>(null);
   const [zip, setZip] = useState('');
+  const [zipInvalid, setZipInvalid] = useState(false);
   const [niche, setNiche] = useState<Niche>('barbershops');
   const [limitText, setLimitText] = useState('10');
 
@@ -47,11 +49,20 @@ export default function Discovery() {
   });
   const status = run.isError ? statusOf(run.error) : null;
   const rejected = status === 422 ? rejectedFields(run.error) : [];
-  const fieldError = (field: FieldName) => (rejected.includes(field) ? FIX[field] : null);
+  // A zip the Worker would refuse is marked here, the same way its 422 marks the field, before any call.
+  const fieldError = (field: FieldName) =>
+    rejected.includes(field) || (field === 'zip_code' && zipInvalid) ? FIX[field] : null;
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    run.mutate({ zip_code: zip.trim(), niche, limit: validLimit ?? limit });
+    const zipCode = zip.trim();
+    // The Worker's own rule (api/src/routes/discovery.ts): 5 to 10 characters, so ZIP+4 passes.
+    if (zipCode.length < 5 || zipCode.length > 10) {
+      setZipInvalid(true);
+      zipInput.current?.focus();
+      return;
+    }
+    run.mutate({ zip_code: zipCode, niche, limit: validLimit ?? limit });
   }
 
   return (
@@ -67,21 +78,25 @@ export default function Discovery() {
         <form onSubmit={submit} noValidate className="mt-8 max-w-md space-y-5">
           <Field id="zip" label="Zip code" error={fieldError('zip_code')}>
             <input
-              id="zip" inputMode="numeric" autoComplete="postal-code" value={zip} onChange={(e) => setZip(e.target.value)}
+              ref={zipInput} id="zip" inputMode="numeric" autoComplete="postal-code" value={zip}
+              onChange={(e) => {
+                setZip(e.target.value);
+                setZipInvalid(false);
+              }}
               aria-invalid={fieldError('zip_code') ? true : undefined} aria-describedby={fieldError('zip_code') ? 'zip-error' : undefined}
               className={`${inputClass} w-40`}
             />
           </Field>
           <Field id="niche" label="Niche" error={fieldError('niche')}>
-            <select
+            <Select
               id="niche" value={niche} onChange={(e) => setNiche(e.target.value as Niche)}
               aria-invalid={fieldError('niche') ? true : undefined} aria-describedby={fieldError('niche') ? 'niche-error' : undefined}
-              className={`${inputClass} w-full`}
+              className="w-full"
             >
               {NICHES.map((option) => (
                 <option key={option} value={option}>{formatNiche(option)}</option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field id="limit" label="Businesses to look up" error={fieldError('limit')}>
             <input
@@ -102,7 +117,7 @@ export default function Discovery() {
             <span className="text-dim">Places allows {formatCount(PLACES_PER_DAY)} a day.</span>
           </p>
 
-          <Plate type="submit" disabled={run.isPending || zip.trim() === ''}>
+          <Plate type="submit" disabled={run.isPending}>
             {run.isPending ? 'Running…' : 'Run discovery'}
           </Plate>
         </form>

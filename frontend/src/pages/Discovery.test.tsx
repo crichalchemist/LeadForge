@@ -56,11 +56,42 @@ describe('discovery', () => {
   });
 
   it('names the field the Worker rejected, and how to fix it', async () => {
-    vi.mocked(runDiscovery).mockRejectedValue(httpError(422, { detail: [{ path: ['zip_code'], message: 'too short' }] }));
+    vi.mocked(runDiscovery).mockRejectedValue(httpError(422, { detail: [{ path: ['zip_code'], message: 'unknown' }] }));
     renderWithProviders(<Discovery />);
-    await runWith('606');
+    await runWith();
     expect(await screen.findByText('Enter a zip code of 5 to 10 characters, such as 60619.')).toBeTruthy();
     expect(screen.getByLabelText('Zip code').getAttribute('aria-invalid')).toBe('true');
+    expect(runDiscovery).toHaveBeenCalledTimes(1);
+  });
+
+  it('arrives with Run discovery ready to press', () => {
+    renderWithProviders(<Discovery />);
+    expect(screen.getByRole('button', { name: 'Run discovery' }).hasAttribute('disabled')).toBe(false);
+  });
+
+  it('names the zip and calls nothing when Run discovery is pressed without one', async () => {
+    renderWithProviders(<Discovery />);
+    await userEvent.click(screen.getByRole('button', { name: 'Run discovery' }));
+    expect(screen.getByText('Enter a zip code of 5 to 10 characters, such as 60619.')).toBeTruthy();
+    const zip = screen.getByLabelText('Zip code');
+    expect(zip.getAttribute('aria-invalid')).toBe('true');
+    expect(zip.getAttribute('aria-describedby')).toBe('zip-error');
+    expect(document.activeElement).toBe(zip);
+    expect(runDiscovery).not.toHaveBeenCalled();
+  });
+
+  it('names a zip the Worker would refuse before spending a call on it', async () => {
+    renderWithProviders(<Discovery />);
+    await runWith('606');
+    expect(screen.getByText('Enter a zip code of 5 to 10 characters, such as 60619.')).toBeTruthy();
+    expect(runDiscovery).not.toHaveBeenCalled();
+  });
+
+  it('accepts a ZIP+4, as the Worker does', async () => {
+    vi.mocked(runDiscovery).mockResolvedValue(REPORT);
+    renderWithProviders(<Discovery />);
+    await runWith('60619-1234');
+    expect(vi.mocked(runDiscovery).mock.calls[0][0]).toMatchObject({ zip_code: '60619-1234' });
   });
 
   it('still says something when the Worker rejects a field the form does not show', async () => {

@@ -5,7 +5,8 @@ import { fetchBusiness, fetchProvenance, fetchTransitions, startOutreach, transi
 import { useAuth } from '../hooks/useAuth';
 import { statusOf } from '../lib/http';
 import {
-  formatAccount, formatCount, formatDate, formatDistance, formatNameScore, formatNiche, formatRating, formatScore, formatStage,
+  formatAccount, formatAccountId, formatCount, formatDate, formatDistance, formatNameScore, formatNiche, formatRating, formatScore,
+  formatStage,
 } from '../lib/measure';
 import type { Business, Fact, FactKey, GoogleMatch, GoogleMatchStatus, LeadScore, PipelineStage, Provenance, Source } from '../types';
 import { InlineError } from '../ui/InlineError';
@@ -199,8 +200,12 @@ function CompositeLine({ score, provenance }: { score: LeadScore | null; provena
     <p className="mt-3 flex flex-wrap items-center gap-3">
       <span className="font-condensed text-label uppercase text-dim">Composite</span>
       <span className="text-data tabular-nums">{formatScore(composite)}</span>
-      <span className="text-dim">version {score!.score_version}</span>
-      {score!.score_version === 1 && <PlannedMark>v1 · preliminary</PlannedMark>}
+      {/* The version inline, once: version 1's tag already names it. */}
+      {score!.score_version === 1 ? (
+        <PlannedMark>v1 · preliminary</PlannedMark>
+      ) : (
+        <span className="text-dim">version {score!.score_version}</span>
+      )}
     </p>
   );
 }
@@ -263,7 +268,8 @@ function SourcesPanel({ provenance }: { provenance: Provenance }) {
       <SourceBlock
         source="license"
         rows={[
-          ['Account', formatAccount(license.account_number, license.site_number)],
+          // Bare under the City licence heading; the label grid's "Account" prefix would repeat the row label.
+          ['Account', license.account_number === null ? 'not recorded' : formatAccountId(license.account_number, license.site_number)],
           ['Licence number', license.license_number ?? 'not recorded'],
           ['Status', license.license_status ?? 'not recorded'],
           ['Issued', formatDate(license.license_issue_date)],
@@ -306,11 +312,13 @@ function SourceBlock({ source, rows, empty }: { source: Source; rows: [string, s
         {SOURCE_NAME[source]}
       </h3>
       {rows ? (
-        <dl className="mt-2 space-y-1">
+        // One column on a phone keeps each pair on a row; in the three-column layout a pair stacks, label over
+        // value, so neither an identifier nor a two-word label breaks midway.
+        <dl className="mt-2 space-y-1 rail:space-y-2">
           {rows.map(([label, value]) => (
-            <div key={label} className="flex justify-between gap-3">
+            <div key={label} className="flex justify-between gap-3 rail:block">
               <dt className="text-dim">{label}</dt>
-              <dd className="text-right tabular-nums">{value}</dd>
+              <dd className="text-right tabular-nums rail:text-left">{value}</dd>
             </div>
           ))}
         </dl>

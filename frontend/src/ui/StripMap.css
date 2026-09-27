@@ -5,7 +5,8 @@
    ease-out. Under reduced motion the rule in index.css makes it instant. */
 
 .strip-map__line,
-.strip-map__branch {
+.strip-map__branch,
+.strip-map__planned-line {
   position: relative;
   display: grid;
   gap: 12px;
@@ -74,4 +75,60 @@
   margin-top: -7px;
   background: var(--ground);
   border: 3px solid var(--text);
+}
+
+/* Planned track (DESIGN.md, The Planned Track Rule): before a lead is on the outreach line, the route is the
+   line's own ink dashed 6/4 with hollow stations, at the same spacing as the travelled line, and nothing
+   traces along it. The dashes are an SVG stroke, from the first station's centre to the last. */
+.strip-map__planned {
+  position: relative;
+}
+
+.strip-map__planned-track {
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  width: 4px;
+  height: calc(100% - 16px);
+}
+
+.strip-map__station--planned .strip-map__tick {
+  background: var(--ground);
+  border: 2px solid var(--line-outreach);
+}
+
+/* The interchange: the 14px ring on the line's axis, one station step above the first station, with the
+   grant line leaving it at a right angle. Its first line of text is centred on the ring, as a station's
+   label is on its tick. */
+.strip-map__interchange {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-left: 20px; /* the grant line starts at the ring's edge */
+  padding-bottom: 12px;
+}
+
+.strip-map__ring {
+  position: absolute;
+  left: 6px; /* centre at 13px, on the line */
+  top: 1px; /* centre at 8px, on the first line of text */
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--ground);
+  border: 3px solid var(--text);
+  box-shadow: 0 0 0 2px var(--ground);
+}
+
+/* On the outreach line, the interchange joins the line's track down to the first station. Planned, the
+   planned track's own stroke already runs through it. */
+.strip-map__interchange--on-line::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 8px;
+  bottom: -8px;
+  width: 4px;
+  background: var(--edge);
 }

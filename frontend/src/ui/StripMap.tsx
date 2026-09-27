@@ -1,8 +1,7 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import './StripMap.css';
 import type { PipelineStage } from '../types';
 import { formatStage } from '../lib/measure';
-import { InterchangeMark } from './marks';
 import { Plate } from './Plate';
 import { PlannedMark } from './PlannedMark';
 import { TransferButton } from './TransferButton';
@@ -14,8 +13,10 @@ export const MAIN_ROUTE: PipelineStage[] = [
 ];
 const BRANCH_FROM: Partial<Record<PipelineStage, PipelineStage>> = { voicemail: 'contacted' };
 
-type StationState = 'passed' | 'current' | 'ahead';
-const STATE_WORDS: Record<StationState, string> = { passed: 'passed', current: 'current station', ahead: 'ahead' };
+type StationState = 'passed' | 'current' | 'ahead' | 'planned';
+const STATE_WORDS: Record<StationState, string> = {
+  passed: 'passed', current: 'current station', ahead: 'ahead', planned: 'planned',
+};
 
 interface StripMapProps {
   stage: PipelineStage | null;
@@ -28,32 +29,82 @@ interface StripMapProps {
 }
 
 /** A lead's route across both lines (DESIGN.md, Strip Map): grant first, where a corridor business meets
- *  it; then the outreach line with past stations solid, the current one ringed, and those ahead hollow. */
+ *  it at the interchange; then the outreach line. Without an outreach record the whole route is planned
+ *  track, dashed with hollow stations and never traced, because nothing has travelled yet. With one, past
+ *  stations are solid, the current one ringed, those ahead hollow, and the grant line dims so the traced
+ *  route leads. */
 export function StripMap({ stage, allowed, corridorName, canAct, busy, onStart, onTransfer }: StripMapProps) {
+  const interchange = corridorName && <GrantInterchange corridorName={corridorName} onLine={stage !== null} />;
+
   return (
     <section aria-labelledby="route-title">
       <h2 id="route-title" className="font-condensed text-title uppercase">Route</h2>
 
-      {corridorName && (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <InterchangeMark label="NOF corridor" />
-          <PlannedMark tone="grant">Grant line: not started · {corridorName}</PlannedMark>
-        </div>
-      )}
-
-      {stage === null ? (
-        <div className="mt-4 flex flex-wrap items-center gap-4">
-          <PlannedMark tone="outreach">Not on the outreach line yet</PlannedMark>
-          {canAct && (
-            <Plate onClick={onStart} disabled={busy}>
-              {busy ? 'Starting…' : 'Start outreach'}
-            </Plate>
-          )}
-        </div>
-      ) : (
-        <OutreachLine stage={stage} allowed={allowed} canAct={canAct} busy={busy} onTransfer={onTransfer} />
-      )}
+      <div className="mt-4">
+        {stage === null ? (
+          <PlannedLine interchange={interchange} canAct={canAct} busy={busy} onStart={onStart} />
+        ) : (
+          <>
+            {interchange}
+            <OutreachLine stage={stage} allowed={allowed} canAct={canAct} busy={busy} onTransfer={onTransfer} />
+          </>
+        )}
+      </div>
     </section>
+  );
+}
+
+/** The interchange ring sits on the outreach line's axis, and the grant line leaves it at a right angle.
+ *  Grant work does not run yet, so the grant line is planned track; while the lead rides the outreach
+ *  line it takes the dim role. */
+function GrantInterchange({ corridorName, onLine }: { corridorName: string; onLine: boolean }) {
+  return (
+    <div className={`strip-map__interchange${onLine ? ' strip-map__interchange--on-line' : ''}`}>
+      <span className="strip-map__ring" aria-hidden="true" />
+      <svg width="26" height="4" viewBox="0 0 26 4" aria-hidden="true" className="mt-1.5 shrink-0">
+        <line
+          x1="0" y1="2" x2="26" y2="2" strokeWidth="4" strokeDasharray="6 4"
+          className={onLine ? 'stroke-dim' : 'stroke-line-grant'}
+        />
+      </svg>
+      <span className="min-w-0">
+        <span className={`block font-condensed text-label uppercase ${onLine ? 'text-dim' : 'text-ink-grant'}`}>
+          NOF corridor
+        </span>
+        <span className="block text-dim">Grant line: not started · {corridorName}</span>
+      </span>
+    </div>
+  );
+}
+
+/** The outreach route before the lead is on it: the same stations at the same spacing as OutreachLine, drawn
+ *  as planned track. No trace runs here: the trace draws solid line up to a current station, and an unstarted
+ *  lead has none. */
+function PlannedLine({ interchange, canAct, busy, onStart }: {
+  interchange: ReactNode; canAct: boolean; busy: boolean; onStart: () => void;
+}) {
+  return (
+    <>
+      <div className="strip-map__planned">
+        <svg aria-hidden="true" className="strip-map__planned-track">
+          <line x1="2" y1="0" x2="2" y2="100%" strokeWidth="4" strokeDasharray="6 4" className="stroke-line-outreach" />
+        </svg>
+        {interchange}
+        <ol aria-label="Outreach line, planned" className="strip-map__planned-line">
+          {MAIN_ROUTE.map((station) => (
+            <Station key={station} station={station} state="planned" />
+          ))}
+        </ol>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-4">
+        <PlannedMark tone="outreach">Not on the outreach line yet</PlannedMark>
+        {canAct && (
+          <Plate onClick={onStart} disabled={busy}>
+            {busy ? 'Starting…' : 'Start outreach'}
+          </Plate>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -65,7 +116,7 @@ function OutreachLine({ stage, allowed, canAct, busy, onTransfer }: Omit<StripMa
   const travelled = { '--travelled': reached < 0 ? 0 : reached / (MAIN_ROUTE.length - 1) } as CSSProperties;
 
   return (
-    <div className="mt-4">
+    <div>
       <ol aria-label="Outreach line" className="strip-map__line" style={travelled}>
         {MAIN_ROUTE.map((station, i) => (
           <Station key={station} station={station} state={station === stage ? 'current' : i <= reached ? 'passed' : 'ahead'} />

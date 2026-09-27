@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useLocation } from 'react-router-dom';
 import { renderWithProviders, VIEWER } from '../test/render';
@@ -75,6 +75,27 @@ describe('leads', () => {
     renderWithProviders(<Leads />, { route: '/leads/b1', path: '/leads/:id' });
     expect(await screen.findByRole('heading', { name: 'Fixture Barbershop' })).toBeTruthy();
     expect(screen.getByRole('list', { name: 'Ranked leads' })).toBeTruthy();
+  });
+
+  it('puts the title, the filters and Plan a run on one row on a wide screen with no record open', async () => {
+    setMedia(WIDE, true);
+    renderWithProviders(<Leads />, { route: '/leads', path: '/leads' });
+    await screen.findByText('Fixture Barbershop');
+    const row = screen.getByRole('heading', { name: 'Leads', level: 1 }).parentElement!;
+    expect(within(row).getByRole('search', { name: 'Filter leads' })).toBeTruthy();
+    expect(within(row).getByRole('link', { name: /Plan a run/ }).hasAttribute('data-plate')).toBe(true);
+  });
+
+  it('lets the open lead’s station lead the list while its record is open', async () => {
+    setMedia(WIDE, true);
+    vi.mocked(fetchRankedLeads).mockResolvedValue(
+      listOf([LEAD, { ...LEAD, business_id: 'b2', business_name: 'Fixture Salon' }]),
+    );
+    const { container } = renderWithProviders(<Leads />, { route: '/leads/b1', path: '/leads/:id' });
+    await screen.findByText('Fixture Salon');
+    const station = (id: string) => container.querySelector(`[data-row="${id}"] [data-station]`)!.className;
+    expect(station('b1')).toContain('bg-text');
+    expect(station('b2')).toContain('bg-dim');
   });
 
   it('keeps one scarlet plate on the screen when a record is open', async () => {

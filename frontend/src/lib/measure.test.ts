@@ -16,9 +16,9 @@ describe('measured values', () => {
     expect(formatScore(48.25)).toBe('48.3');
   });
 
-  it('prints the licence account the way the label grid does', () => {
-    expect(formatAccount('478849', '1')).toBe('Licence 478849-1');
-    expect(formatAccount('478849', null)).toBe('Licence 478849');
+  it('labels the account as an account, never as a licence', () => {
+    expect(formatAccount('478849', '1')).toBe('Account 478849-1');
+    expect(formatAccount('478849', null)).toBe('Account 478849');
     expect(formatAccount(null, null)).toBe('no licence account');
   });
 

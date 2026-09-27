@@ -37,10 +37,16 @@ export function formatStage(stage: string): string {
   return STAGE_LABELS[stage] ?? formatNiche(stage);
 }
 
-/** The city's licence account as the label grid prints it: the account, then the site when there is one. */
+/** The city's licence account as one identifier: the account, then the site when there is one. */
+export function formatAccountId(account: string, site: string | null): string {
+  return site === null ? account : `${account}-${site}`;
+}
+
+/** The licence account as the label grid prints it, named as an account so it never reads as the licence
+ *  number, which is a different identifier. */
 export function formatAccount(account: string | null, site: string | null): string {
   if (account === null) return 'no licence account';
-  return site === null ? `Licence ${account}` : `Licence ${account}-${site}`;
+  return `Account ${formatAccountId(account, site)}`;
 }
 
 export function formatDate(iso: string | null): string {

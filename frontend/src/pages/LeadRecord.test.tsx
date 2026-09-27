@@ -100,6 +100,31 @@ describe('the lead record', () => {
     expect(await within(score).findByText('v1 · preliminary')).toBeTruthy();
   });
 
+  it('names the composite’s version once, in its preliminary tag', async () => {
+    open();
+    const score = await screen.findByRole('region', { name: 'Score' });
+    await within(score).findByText('v1 · preliminary');
+    expect(score.textContent).not.toContain('version 1');
+  });
+
+  it('labels the account as an account, never as a licence', async () => {
+    open();
+    const header = (await screen.findByRole('heading', { name: 'Fixture Barbershop', level: 1 })).parentElement!;
+    expect(await within(header).findByText('Barbershops · 60619 · Account 478849-1')).toBeTruthy();
+    const sources = await screen.findByRole('region', { name: 'Sources' });
+    const account = within(sources).getByText('Account').parentElement!;
+    expect(account.querySelector('dd')!.textContent).toBe('478849-1');
+    expect(screen.queryByText(/Licence 478849/)).toBeNull();
+  });
+
+  it('draws an unstarted lead’s outreach route as planned stations, with Start outreach', async () => {
+    open();
+    const route = await screen.findByRole('region', { name: 'Route' });
+    expect(within(route).getByRole('list', { name: 'Outreach line, planned' })).toBeTruthy();
+    expect(within(route).getByText('Grant line: not started · Priority corridor 7')).toBeTruthy();
+    expect(await within(route).findByRole('button', { name: 'Start outreach' })).toBeTruthy();
+  });
+
   it('puts the lead on the outreach line with Start outreach', async () => {
     vi.mocked(startOutreach).mockResolvedValue({} as OutreachRecord);
     open();

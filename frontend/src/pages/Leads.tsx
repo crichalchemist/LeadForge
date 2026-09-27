@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { formatCount, formatNiche } from '../lib/measure';
 import { useMediaQuery } from '../lib/useMediaQuery';
 import { NICHES, type PaginatedResponse, type RankedLead } from '../types';
-import { Field, inputClass } from '../ui/Field';
+import { Field, inputClass, Select } from '../ui/Field';
 import { InlineError } from '../ui/InlineError';
 import { PlateLink } from '../ui/Plate';
 import { RouteRow } from '../ui/RouteRow';
@@ -54,22 +54,39 @@ export default function Leads() {
 
   if (id && !wide) return <LeadRecord key={id} back={{ to: `/leads${search}`, state: { focusRow: id } }} />;
 
+  const title = <h1 id="leads-title" className="font-condensed text-display">Leads</h1>;
+  const filters = <Filters zip={zip} niche={niche} onApply={(next) => setFilters(next)} />;
+  // With a record open the plate belongs to the record, so Plan a run steps down to a secondary link.
+  const planRun =
+    isAdmin &&
+    (id ? (
+      <Link to="/discovery" className={secondaryClass}>Plan a run</Link>
+    ) : (
+      <PlateLink to="/discovery">Plan a run</PlateLink>
+    ));
+
   return (
     <div className={id ? 'wide:grid wide:grid-cols-12' : undefined}>
       <section
         aria-labelledby="leads-title"
         className={`px-6 py-8 ${id ? 'wide:col-span-5 wide:border-r wide:border-seam' : 'wide:px-10'}`}
       >
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 id="leads-title" className="font-condensed text-display">Leads</h1>
-          {isAdmin &&
-            (id ? (
-              <Link to="/discovery" className={secondaryClass}>Plan a run</Link>
-            ) : (
-              <PlateLink to="/discovery">Plan a run</PlateLink>
-            ))}
-        </div>
-        <Filters zip={zip} niche={niche} onApply={(next) => setFilters(next)} />
+        {wide && !id ? (
+          // The full-width list's first row: the title, the filters, and the plate at the far end.
+          <div className="flex items-end gap-6">
+            {title}
+            {filters}
+            {planRun && <div className="ml-auto">{planRun}</div>}
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              {title}
+              {planRun}
+            </div>
+            <div className="mt-6">{filters}</div>
+          </>
+        )}
         <LeadList
           leads={leads}
           page={page}
@@ -97,7 +114,7 @@ function Filters({ zip, niche, onApply }: { zip: string; niche: string; onApply:
     <form
       role="search"
       aria-label="Filter leads"
-      className="mt-6 flex flex-wrap items-end gap-3"
+      className="flex flex-wrap items-end gap-3"
       onSubmit={(event) => {
         event.preventDefault();
         onApply({ zip: zipText.trim(), niche });
@@ -107,17 +124,16 @@ function Filters({ zip, niche, onApply }: { zip: string; niche: string; onApply:
         <input id="filter-zip" inputMode="numeric" value={zipText} onChange={(e) => setZipText(e.target.value)} className={`${inputClass} w-32`} />
       </Field>
       <Field id="filter-niche" label="Niche" error={null}>
-        <select
+        <Select
           id="filter-niche"
           value={niche}
           onChange={(e) => onApply({ zip: zipText.trim(), niche: e.target.value })}
-          className={inputClass}
         >
           <option value="">All niches</option>
           {NICHES.map((option) => (
             <option key={option} value={option}>{formatNiche(option)}</option>
           ))}
-        </select>
+        </Select>
       </Field>
       <button type="submit" className={secondaryClass}>Filter</button>
     </form>
@@ -174,6 +190,7 @@ function LeadList({ leads, page, search, selectedId, filtered, pageHref, onPage 
             rank={(page - 1) * PAGE_SIZE + i + 1}
             to={`/leads/${lead.business_id}${search}`}
             selected={lead.business_id === selectedId}
+            besideRecord={selectedId !== undefined}
           />
         ))}
       </ol>
