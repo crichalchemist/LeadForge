@@ -16,10 +16,12 @@ interface Options {
   /** The route pattern the screen is mounted at, so useParams works: '/leads/:id'. */
   path?: string;
   user?: AuthUser;
+  /** Router location state, as if navigated here via a Link's `state` prop. */
+  state?: unknown;
 }
 
 /** Renders a screen the way the app does: signed in, inside the router, with a fresh query cache. */
-export function renderWithProviders(ui: ReactElement, { route = '/', path = '*', user = ADMIN }: Options = {}) {
+export function renderWithProviders(ui: ReactElement, { route = '/', path = '*', user = ADMIN, state }: Options = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   const auth = {
     user, accessToken: 'fixture-token', isLoading: false, isAuthenticated: true, isAdmin: user.role === 'admin',
@@ -28,7 +30,7 @@ export function renderWithProviders(ui: ReactElement, { route = '/', path = '*',
   const result = render(
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider value={auth}>
-        <MemoryRouter initialEntries={[route]}>
+        <MemoryRouter initialEntries={[state === undefined ? route : { pathname: route, state }]}>
           <Routes>
             <Route path={path} element={ui} />
           </Routes>

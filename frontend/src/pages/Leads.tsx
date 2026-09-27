@@ -40,9 +40,16 @@ export default function Leads() {
     if (focusRow && leads.isSuccess) document.querySelector<HTMLElement>(`[data-row="${focusRow}"]`)?.focus();
   }, [focusRow, leads.isSuccess]);
 
-  const setFilters = (next: { zip?: string; niche?: string; page?: number }) => {
+  // The one URL-building rule for this screen's filters and page: kept by setFilters (which mutates the
+  // address) and pageHref (which links to it), so a page-past-the-end link never drops zip/niche.
+  const buildParams = (next: { zip?: string; niche?: string; page?: number }) => {
     const merged = { zip, niche, page: '', ...next, ...(next.page ? { page: String(next.page) } : {}) };
-    setParams(Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== '')) as Record<string, string>);
+    return Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== '')) as Record<string, string>;
+  };
+  const setFilters = (next: { zip?: string; niche?: string; page?: number }) => setParams(buildParams(next));
+  const pageHref = (targetPage: number) => {
+    const qs = new URLSearchParams(buildParams({ page: targetPage })).toString();
+    return `/leads${qs ? `?${qs}` : ''}`;
   };
 
   if (id && !wide) return <LeadRecord key={id} back={{ to: `/leads${search}`, state: { focusRow: id } }} />;
@@ -63,7 +70,15 @@ export default function Leads() {
             ))}
         </div>
         <Filters zip={zip} niche={niche} onApply={(next) => setFilters(next)} />
-        <LeadList leads={leads} page={page} search={search} selectedId={id} filtered={zip !== '' || niche !== ''} onPage={(p) => setFilters({ page: p })} />
+        <LeadList
+          leads={leads}
+          page={page}
+          search={search}
+          selectedId={id}
+          filtered={zip !== '' || niche !== ''}
+          pageHref={pageHref}
+          onPage={(p) => setFilters({ page: p })}
+        />
       </section>
       {id && (
         <div className="wide:col-span-7">
@@ -115,10 +130,11 @@ interface LeadListProps {
   search: string;
   selectedId: string | undefined;
   filtered: boolean;
+  pageHref: (page: number) => string;
   onPage: (page: number) => void;
 }
 
-function LeadList({ leads, page, search, selectedId, filtered, onPage }: LeadListProps) {
+function LeadList({ leads, page, search, selectedId, filtered, pageHref, onPage }: LeadListProps) {
   if (leads.isPending) return <ListSkeleton />;
   if (leads.isError) return <InlineError what="the leads" onRetry={() => leads.refetch()} />;
 
@@ -136,6 +152,15 @@ function LeadList({ leads, page, search, selectedId, filtered, onPage }: LeadLis
   }
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (page > pages) {
+    return (
+      <p className="mt-8 text-dim">
+        Page {page} doesn’t exist; this list has {pages} {pages === 1 ? 'page' : 'pages'}.{' '}
+        <Link to={pageHref(pages)} className="underline">Go to the last page</Link>
+      </p>
+    );
+  }
+
   return (
     <>
       <p className="mt-6 text-dim">

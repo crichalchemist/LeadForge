@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useLocation } from 'react-router-dom';
 import { renderWithProviders, VIEWER } from '../test/render';
@@ -90,5 +90,19 @@ describe('leads', () => {
     const back = await screen.findByRole('link', { name: 'Back to leads' });
     expect(back.getAttribute('href')).toBe('/leads?zip=60619');
     expect(screen.queryByRole('list', { name: 'Ranked leads' })).toBeNull();
+  });
+
+  it('offers the last page when the address asks for a page past the end', async () => {
+    vi.mocked(fetchRankedLeads).mockResolvedValue({ items: [], total: 100, page: 999, page_size: 50 });
+    renderWithProviders(<Leads />, { route: '/leads?zip=60619&page=999', path: '/leads' });
+    expect(await screen.findByText(/doesn.t exist/)).toBeTruthy();
+    const link = screen.getByRole('link', { name: 'Go to the last page' });
+    expect(link.getAttribute('href')).toBe('/leads?zip=60619&page=2');
+  });
+
+  it('returns focus to the row a record was opened from', async () => {
+    renderWithProviders(<Leads />, { route: '/leads', path: '/leads', state: { focusRow: 'b1' } });
+    const name = await screen.findByText('Fixture Barbershop');
+    await waitFor(() => expect(document.activeElement).toBe(name.closest('[data-row]')));
   });
 });

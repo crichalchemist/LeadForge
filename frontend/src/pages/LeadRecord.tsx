@@ -56,16 +56,21 @@ export default function LeadRecord({ back }: { back?: { to: string; state?: unkn
     onSettled: refresh,
   });
 
-  if (business.isPending) return <RecordSkeleton />;
+  if (business.isPending) return <RecordSkeleton back={back} />;
   if (business.isError) {
     return statusOf(business.error) === 404 ? (
       <div className="px-6 py-8 wide:px-10">
         <h1 className="font-condensed text-headline">This lead isn’t in the system</h1>
         <p className="mt-2 text-dim">It may have been removed after the list was loaded.</p>
-        <Link to="/leads" className="mt-4 inline-block underline">Back to leads</Link>
+        <Link to={back?.to ?? '/leads'} state={back?.state} className="mt-4 inline-block underline">Back to leads</Link>
       </div>
     ) : (
       <div className="px-6 py-8 wide:px-10">
+        {back && (
+          <Link to={back.to} state={back.state} className="font-condensed text-label uppercase text-dim underline">
+            Back to leads
+          </Link>
+        )}
         <InlineError what="this lead" onRetry={() => business.refetch()} />
       </div>
     );
@@ -316,9 +321,14 @@ function SourceBlock({ source, rows, empty }: { source: Source; rows: [string, s
   );
 }
 
-function RecordSkeleton() {
+function RecordSkeleton({ back }: { back?: { to: string; state?: unknown } }) {
   return (
     <div aria-busy="true" className="px-6 py-8 wide:px-10">
+      {back && (
+        <Link to={back.to} state={back.state} className="font-condensed text-label uppercase text-dim underline">
+          Back to leads
+        </Link>
+      )}
       <span className="sr-only">Loading the lead</span>
       <div aria-hidden="true" className="space-y-3">
         <div className="h-7 w-72 max-w-full rounded-plate bg-raised" />

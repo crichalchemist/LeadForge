@@ -128,6 +128,15 @@ describe('the lead record', () => {
     expect(await screen.findByText('This lead isn’t in the system')).toBeTruthy();
   });
 
+  it('keeps the filters in its way back when the lead is unknown on a narrow screen', async () => {
+    vi.mocked(fetchBusiness).mockRejectedValue(httpError(404));
+    renderWithProviders(<LeadRecord back={{ to: '/leads?zip=60619', state: { focusRow: 'b1' } }} />, {
+      route: '/leads/b1', path: '/leads/:id',
+    });
+    const back = await screen.findByRole('link', { name: 'Back to leads' });
+    expect(back.getAttribute('href')).toBe('/leads?zip=60619');
+  });
+
   it('shows the station after a duplicate start instead of failing silently', async () => {
     vi.mocked(startOutreach).mockRejectedValue(httpError(409, { outreach_id: 'o1' }));
     open();
