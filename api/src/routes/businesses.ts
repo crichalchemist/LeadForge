@@ -13,8 +13,8 @@ const router = new Hono<AppEnv>();
 /** Latest score per business (highest score_version). Alias: ls. Reused by leads and reports. */
 export const LATEST_SCORE_JOIN = `
   LEFT JOIN (
-    SELECT business_id, composite_acquisition_score, price_tier FROM (
-      SELECT business_id, composite_acquisition_score, price_tier,
+    SELECT business_id, composite_acquisition_score, price_tier, score_version FROM (
+      SELECT business_id, composite_acquisition_score, price_tier, score_version,
              ROW_NUMBER() OVER (PARTITION BY business_id ORDER BY score_version DESC) AS rn
       FROM lead_scores
     ) WHERE rn = 1
@@ -91,9 +91,9 @@ router.get('/', requireAuth, queryParams(listQuery), async (c) => {
 
 const DETAIL_COLUMNS = `id, name, address, zip_code, phone, email, owner_name, niche, license_number, license_status,
   license_issue_date, incorporation_date, employee_count_est, estimated_monthly_revenue, google_place_id,
-  thumbtack_hires, nextdoor_recommendations, total_customer_ugc, created_at, updated_at`;
+  thumbtack_hires, nextdoor_recommendations, total_customer_ugc, in_nof_corridor, nof_corridor_name, created_at, updated_at`;
 
-type BusinessDetail = Pick<BusinessRow, 'id' | 'name' | 'address' | 'zip_code' | 'phone' | 'email' | 'owner_name' | 'niche' | 'license_number' | 'license_status' | 'license_issue_date' | 'incorporation_date' | 'employee_count_est' | 'estimated_monthly_revenue' | 'google_place_id' | 'thumbtack_hires' | 'nextdoor_recommendations' | 'total_customer_ugc' | 'created_at' | 'updated_at'>;
+type BusinessDetail = Pick<BusinessRow, 'id' | 'name' | 'address' | 'zip_code' | 'phone' | 'email' | 'owner_name' | 'niche' | 'license_number' | 'license_status' | 'license_issue_date' | 'incorporation_date' | 'employee_count_est' | 'estimated_monthly_revenue' | 'google_place_id' | 'thumbtack_hires' | 'nextdoor_recommendations' | 'total_customer_ugc' | 'in_nof_corridor' | 'nof_corridor_name' | 'created_at' | 'updated_at'>;
 
 type DigitalPresenceSummary = Pick<DigitalPresenceRow, 'has_website' | 'website_url' | 'website_quality_score' | 'has_google_business_profile' | 'gbp_completeness_score' | 'google_review_count' | 'google_avg_rating' | 'has_facebook_page' | 'has_instagram' | 'ig_follower_count' | 'has_google_ads' | 'has_meta_ads' | 'yelp_review_count' | 'yelp_rating'>;
 
@@ -118,7 +118,7 @@ async function loadDetail(db: D1Database, id: string) {
                 FROM outreach_records WHERE business_id = ? ORDER BY created_at DESC`).bind(id).all<OutreachSummary>(),
   ]);
   return {
-    ...business,
+    ...withBooleans(business, ['in_nof_corridor']),
     digital_presence: dp ? withBooleans(dp, DIGITAL_PRESENCE_BOOLS) : null,
     lead_scores: scores.results ?? [],
     outreach_records: (outreach.results ?? []).map((r) => withBooleans(r, OUTREACH_BOOLS)),

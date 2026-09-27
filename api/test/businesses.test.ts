@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { env } from 'cloudflare:workers';
 import { accessToken, adminUser, api, createBusiness, createOutreach, createScore, resetDb } from './helpers';
 
 let token: string;
@@ -94,5 +95,15 @@ describe('TestUpdateBusiness', () => {
 
   it('test_patch_not_found', async () => {
     expect((await api('PATCH', `/businesses/${crypto.randomUUID()}`, { token, json: { name: 'X' } })).status).toBe(404);
+  });
+});
+
+describe('corridor membership on the lead record', () => {
+  it('tells the record whether the business sits on an NOF corridor', async () => {
+    const biz = await createBusiness();
+    await env.DB.prepare("UPDATE businesses SET in_nof_corridor = 1, nof_corridor_name = 'Priority corridor 7' WHERE id = ?")
+      .bind(biz).run();
+    const data = await (await api('GET', `/businesses/${biz}`, { token })).json();
+    expect(data).toMatchObject({ in_nof_corridor: true, nof_corridor_name: 'Priority corridor 7' });
   });
 });

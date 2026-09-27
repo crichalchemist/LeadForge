@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { env } from 'cloudflare:workers';
 import { accessToken, adminUser, api, createBusiness, createOutreach, createScore, resetDb } from './helpers';
 
 let token: string;
@@ -45,6 +46,19 @@ describe('TestRankedLeads', () => {
     const data = await (await api('GET', '/leads/ranked', { token })).json() as any;
     expect(data.items.map((i: any) => i.business_name)).toEqual(['High', 'Low']);
     expect(data.items[0].pipeline_stage).toBe('engaged');
+  });
+
+  it('tells the list which scores are preliminary and which leads sit on an NOF corridor', async () => {
+    const biz = await createBusiness({ name: 'Corridor' });
+    await env.DB.prepare(
+      "UPDATE businesses SET in_nof_corridor = 1, nof_corridor_name = 'Priority corridor 7', account_number = '478849', site_number = '1' WHERE id = ?"
+    ).bind(biz).run();
+    await createScore(biz, { score_version: 1, composite_acquisition_score: 64 });
+    const data = (await (await api('GET', '/leads/ranked', { token })).json()) as { items: Record<string, unknown>[] };
+    expect(data.items[0]).toMatchObject({
+      score_version: 1, in_nof_corridor: true, nof_corridor_name: 'Priority corridor 7',
+      account_number: '478849', site_number: '1',
+    });
   });
 });
 
