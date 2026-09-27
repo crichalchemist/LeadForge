@@ -6,8 +6,8 @@
 // returns the nearest candidate whatever its name.
 import { env } from 'cloudflare:workers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { runDiscovery, type DiscoveryEnv } from '../src/lib/discovery';
-import { newPlacesHealth } from '../src/scrapers/google-places';
+import { newDiscoveryTally, runDiscovery, type DiscoveryEnv } from '../src/lib/discovery';
+import { MATCH_RADIUS_M, distanceMeters, newPlacesHealth } from '../src/scrapers/google-places';
 import { accessToken, adminUser, api, createBusiness, jsonResponse, resetDb, stubFetch, viewerUser } from './helpers';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -561,5 +561,143 @@ describe('POST /api/discovery/run', () => {
     const body = (await res.json()) as { discovered: number; places: { unavailable: number; last_status: string } };
     expect(body.discovered).toBe(1);
     expect(body.places).toEqual({ unavailable: 1, last_status: 'KEY_NOT_SET' });
+  });
+});
+
+// ADR 031: the verdict behind each Google decision is kept, one row per business, so a rejection can be
+// explained after the run and a stored value traced to the source that supplied it.
+const verdictOf = (id: string) =>
+  env.DB.prepare('SELECT * FROM google_matches WHERE business_id = ?').bind(id).first<Record<string, unknown>>();
+
+describe('the Google verdict, kept (ADR 031)', () => {
+  it('keeps a corroborated match with its name score, its distance and what Details returned', async () => {
+    routeGoogle();
+    const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(await verdictOf(business.id)).toMatchObject({
+      status: 'matched',
+      place_id: 'ChIJ_sample_place_id_123',
+      matched_name: "John's Barbershop",
+      score: 1,
+      distance_m: Math.round(distanceMeters(41.7514067334, -87.6043524136, 41.7515, -87.6044)),
+      website: 'http://johnsbarbershop.com',
+      phone: '(773) 555-1234',
+    });
+  });
+
+  it('keeps the name score that failed when the nearest place is a different business', async () => {
+    routeGoogle([SOCRATA_ROW], {
+      status: 'OK',
+      candidates: [
+        { place_id: 'ChIJ_unrelated', name: 'Goldberg Weisman Cairo Law Offices', geometry: { location: { lat: 41.7515, lng: -87.6044 } } },
+      ],
+    });
+    const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    const verdict = await verdictOf(business.id);
+    expect(verdict).toMatchObject({
+      status: 'rejected_name', place_id: 'ChIJ_unrelated', matched_name: 'Goldberg Weisman Cairo Law Offices',
+      website: null, phone: null,
+    });
+    expect(verdict?.score as number).toBeLessThan(0.5);
+  });
+
+  it('keeps the distance that failed when the candidate is outside the radius', async () => {
+    routeGoogle([SOCRATA_ROW], {
+      status: 'OK',
+      candidates: [{ place_id: 'ChIJ_far_away', name: "John's Barbershop", geometry: { location: { lat: 41.8789, lng: -87.6359 } } }],
+    });
+    const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    const verdict = await verdictOf(business.id);
+    expect(verdict).toMatchObject({ status: 'rejected_distance', score: 1 });
+    expect(verdict?.distance_m as number).toBeGreaterThan(MATCH_RADIUS_M);
+  });
+
+  it('records a genuine no-match as no candidate, with nothing to score', async () => {
+    routeGoogle([SOCRATA_ROW], { status: 'ZERO_RESULTS', candidates: [] });
+    const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(await verdictOf(business.id)).toMatchObject({
+      status: 'no_candidate', place_id: null, matched_name: null, score: null, distance_m: null,
+    });
+  });
+
+  it('records a lookup that never ran as unavailable', async () => {
+    routeGoogle();
+    const [business] = await runDiscovery(keyless, '60619', 'barbershops', 5);
+    expect(await verdictOf(business.id)).toMatchObject({ status: 'unavailable', score: null });
+  });
+
+  it('lets a refused Details call outrank the candidate it had accepted', async () => {
+    routeGoogle([SOCRATA_ROW], FIND_PLACE, { status: 'OVER_QUERY_LIMIT' });
+    const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(await verdictOf(business.id)).toMatchObject({ status: 'unavailable', score: 1, website: null });
+    expect(business.digital_deficit_score).toBeNull();
+  });
+
+  it('records an accepted candidate whose Details came back empty as no candidate, and still scores it', async () => {
+    routeGoogle([SOCRATA_ROW], FIND_PLACE, { status: 'OK' });
+    const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(await verdictOf(business.id)).toMatchObject({
+      status: 'no_candidate', place_id: 'ChIJ_sample_place_id_123', score: 1,
+    });
+    // website (30) + GBP (15) + reviews SKIPPED + no social (12) + no ads (7) = 64
+    expect(business.digital_deficit_score).toBe(64);
+  });
+
+  it('records an accepted candidate without a place id as no candidate, without paying for Details', async () => {
+    const calls = routeGoogle([SOCRATA_ROW], {
+      status: 'OK',
+      candidates: [{ name: "John's Barbershop", geometry: { location: { lat: 41.7515, lng: -87.6044 } } }],
+    });
+    const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(detailCalls(calls)).toHaveLength(0);
+    expect(await verdictOf(business.id)).toMatchObject({ status: 'no_candidate', place_id: null, score: 1 });
+  });
+
+  it('keeps the licence name when Google names the business differently', async () => {
+    routeGoogle([SOCRATA_ROW], FIND_PLACE, {
+      ...DETAILS,
+      result: { ...DETAILS.result, name: "John's Barbershop & Shave Parlor" },
+    });
+    const [business] = await runDiscovery(keyed, '60619', 'barbershops', 5);
+    expect(await businessRow(business.id)).toMatchObject({
+      name: "John's Barbershop & Shave Parlor",
+      license_name: "John's Barbershop",
+    });
+  });
+});
+
+describe('run counts', () => {
+  it('counts a business it already stored as skipped, not created', async () => {
+    routeGoogle();
+    await runDiscovery(keyed, '60619', 'barbershops', 5);
+    const tally = newDiscoveryTally();
+    const second = await runDiscovery(keyed, '60619', 'barbershops', 5, undefined, tally);
+    expect(second).toHaveLength(0);
+    expect(tally).toEqual({ skipped_known: 1, failed: 0 });
+  });
+
+  it('counts a business whose write failed instead of dropping it silently', async () => {
+    routeGoogle();
+    // D1 is the boundary here: a fake whose batch rejects stands in for a write that fails mid-run.
+    const failingDb = {
+      prepare: (sql: string) => env.DB.prepare(sql),
+      batch: async () => {
+        throw new Error('D1 unavailable');
+      },
+    } as unknown as D1Database;
+    const tally = newDiscoveryTally();
+    const discovered = await runDiscovery({ ...keyed, DB: failingDb }, '60619', 'barbershops', 5, undefined, tally);
+    expect(discovered).toHaveLength(0);
+    expect(tally).toEqual({ skipped_known: 0, failed: 1 });
+  });
+
+  it('reports created, already-known and failed businesses separately from the route', async () => {
+    const token = await accessToken(await adminUser());
+    routeGoogle();
+    const run = async () =>
+      (await (
+        await api('POST', '/discovery/run', { token, json: { zip_code: '60619', niche: 'barbershops', limit: 5 } })
+      ).json()) as Record<string, unknown>;
+    expect(await run()).toMatchObject({ discovered: 1, created: 1, skipped_known: 0, failed: 0 });
+    expect(await run()).toMatchObject({ discovered: 0, created: 0, skipped_known: 1, failed: 0 });
   });
 });
