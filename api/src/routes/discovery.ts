@@ -1,10 +1,10 @@
 // Operator trigger for the discovery pipeline. Python has no HTTP route for this — it runs from the
 // Typer CLI (`leadforge pipeline --zip --niche --limit`), and a Worker has no CLI, so this is the
-// Workers stand-in. It is not part of the CRM contract and nothing in the frontend calls it.
+// Workers stand-in. It is not part of the Python contract; the CRM's Discovery screen calls it (wave 1).
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { requireAdmin, requireAuth } from '../middleware/auth';
-import { runDiscovery } from '../lib/discovery';
+import { newDiscoveryTally, runDiscovery } from '../lib/discovery';
 import { newPlacesHealth } from '../scrapers/google-places';
 import { NICHES } from '../lib/stages';
 import { jsonBody } from '../lib/validate';
@@ -32,8 +32,19 @@ router.post('/run', requireAuth, requireAdmin, jsonBody(runSchema), async (c) =>
   // malformed request with HTTP 200 plus a `status` field, so nothing throws and the payload merely
   // lacks its results key — which would otherwise read as "no such business" for every shop.
   const places = newPlacesHealth();
-  const businesses = await runDiscovery(c.env, zip_code, niche, limit, places);
-  return c.json({ zip_code, niche, limit, discovered: businesses.length, places, businesses });
+  const tally = newDiscoveryTally();
+  const businesses = await runDiscovery(c.env, zip_code, niche, limit, places, tally);
+  // `discovered` keeps its meaning (businesses stored by this run) and equals `created`; the other two
+  // counts are the ones the operator could not see before: licences already stored, and failures.
+  return c.json({
+    zip_code, niche, limit,
+    discovered: businesses.length,
+    created: businesses.length,
+    skipped_known: tally.skipped_known,
+    failed: tally.failed,
+    places,
+    businesses,
+  });
 });
 
 export default router;

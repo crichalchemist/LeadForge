@@ -2,7 +2,7 @@
 import { locateCorridor } from './corridors';
 import { applyOvertureMatch, fetchOvertureMatch, type PresenceFacts } from './overture';
 import { computeDigitalDeficit } from './scoring';
-import { nameCorroborates } from './name-match';
+import { NAME_MATCH_THRESHOLD, nameMatchScore } from './name-match';
 import {
   MATCH_RADIUS_M,
   distanceMeters,
@@ -23,6 +23,7 @@ import {
   type SocrataEnv,
 } from '../scrapers/socrata';
 import { nowIso } from '../db/serialize';
+import type { GoogleMatchRow } from '../types';
 
 export type DiscoveryEnv = { DB: D1Database } & SocrataEnv & PlacesEnv;
 
@@ -41,6 +42,20 @@ export interface DiscoveredBusiness {
   nof_corridor: string | null;
 }
 
+/** Per-run counts the route reports beside the businesses it created (spec 2026-09-26). */
+export interface DiscoveryTally {
+  /** Licence rows already stored under the same account, or name and zip: skipped before any lookup. */
+  skipped_known: number;
+  /** Businesses whose enrichment or write threw. They are not stored. */
+  failed: number;
+}
+
+export function newDiscoveryTally(): DiscoveryTally {
+  return { skipped_known: 0, failed: 0 };
+}
+
+type GoogleVerdict = Omit<GoogleMatchRow, 'business_id' | 'looked_up_at'>;
+
 // =py run_discovery — Socrata → Google Places → score → persist (ADR 030)
 export async function runDiscovery(
   env: DiscoveryEnv,
@@ -48,6 +63,7 @@ export async function runDiscovery(
   niche: Niche,
   limit?: number,
   health?: PlacesHealth,
+  tally?: DiscoveryTally,
 ): Promise<DiscoveredBusiness[]> {
   console.log('pipeline_start', { zip_code: zipCode, niche, limit });
 
@@ -69,9 +85,10 @@ export async function runDiscovery(
   const persisted: DiscoveredBusiness[] = [];
   for (const bizData of normalized) {
     try {
-      const business = await enrichAndPersist(env, bizData, niche, health);
+      const business = await enrichAndPersist(env, bizData, niche, health, tally);
       if (business) persisted.push(business);
     } catch (error) {
+      if (tally) tally.failed += 1;
       console.error('business_enrichment_failed', {
         name: bizData.name,
         error: error instanceof Error ? error.message : String(error),
@@ -92,6 +109,7 @@ async function enrichAndPersist(
   bizData: NormalizedBusiness,
   niche: Niche,
   health?: PlacesHealth,
+  tally?: DiscoveryTally,
 ): Promise<DiscoveredBusiness | null> {
   const name = bizData.name.trim();
   if (!name) return null;
@@ -115,6 +133,7 @@ async function enrichAndPersist(
         account_number: bizData.account_number,
         site_number: bizData.site_number,
       });
+      if (tally) tally.skipped_known += 1;
       return null;
     }
   } else {
@@ -125,6 +144,7 @@ async function enrichAndPersist(
       .first();
     if (existing) {
       console.log('dedup_name_zip', { name, zip_code: zipCode });
+      if (tally) tally.skipped_known += 1;
       return null;
     }
   }
@@ -138,30 +158,46 @@ async function enrichAndPersist(
     longitude: bizData.longitude,
   });
 
-  // Corroborate the Find Place answer BEFORE paying for Details. Find Place already returns the name
-  // and the geometry, which is everything the check needs, and Details is the call that carries the
-  // dear SKU. Measured: 102 candidates inside the radius, 77 of them the business actually asked
-  // for — so this skips 25 Details calls per 157 businesses and, more importantly, keeps the other
-  // business's website out of this business's row. A false match is worse than no match: it flips
-  // the deficit's 30-point website term on evidence belonging to someone else.
+  // What Google said about this business is kept whatever the verdict (ADR 031). The score and the
+  // distance used to be computed, used once and discarded, so a rejection could not be explained after
+  // the run and a stored value could not be traced to the source that supplied it.
+  let verdict: GoogleVerdict = {
+    status: 'no_candidate', place_id: null, matched_name: null, score: null, distance_m: null, website: null, phone: null,
+  };
   if (candidate) {
     const location = candidate.geometry?.location;
-    const far =
-      bizData.latitude !== null &&
-      bizData.longitude !== null &&
-      location?.lat !== undefined &&
-      location?.lng !== undefined &&
-      distanceMeters(bizData.latitude, bizData.longitude, location.lat, location.lng) > MATCH_RADIUS_M;
+    // Rounded once, here, so the radius is judged on the whole metres the record displays: a candidate
+    // shown at 200 m is inside the 200 m cut, never rejected beside it.
+    const distance =
+      bizData.latitude !== null && bizData.longitude !== null && location?.lat !== undefined && location?.lng !== undefined
+        ? Math.round(distanceMeters(bizData.latitude, bizData.longitude, location.lat, location.lng))
+        : null;
+    const score = nameMatchScore(name, candidate.name ?? '');
+    verdict = {
+      ...verdict,
+      place_id: candidate.place_id ?? null,
+      matched_name: candidate.name ?? null,
+      score,
+      distance_m: distance,
+    };
 
-    if (far) {
+    if (distance !== null && distance > MATCH_RADIUS_M) {
       // locationbias is a bias, not a filter, so Google answers outside the circle rather than
       // returning nothing. The cut is ours to enforce.
+      verdict.status = 'rejected_distance';
       console.log('place_rejected_out_of_radius', { name, candidate: candidate.name ?? null });
-    } else if (!nameCorroborates(name, candidate.name ?? '')) {
+    } else if (score < NAME_MATCH_THRESHOLD) {
+      // The same test nameCorroborates applies; the score is computed once so it can be kept.
+      verdict.status = 'rejected_name';
       console.log('place_rejected_name', { name, candidate: candidate.name ?? null });
     } else if (candidate.place_id) {
       const details = await getPlaceDetails(env, candidate.place_id, lookups);
-      if (details) enrichment = extractEnrichment(details);
+      if (details) {
+        enrichment = extractEnrichment(details);
+        verdict = { ...verdict, status: 'matched', website: enrichment.website ?? null, phone: enrichment.phone ?? null };
+      }
+      // Details with no result leaves the verdict at no_candidate, which is how the score below treats
+      // it: no profile, no review count. An accepted candidate with no place id is recorded the same way.
     }
   }
 
@@ -169,6 +205,9 @@ async function enrichAndPersist(
     health.unavailable += lookups.unavailable;
     health.last_status = lookups.last_status;
   }
+  // A refused lookup outranks every verdict. Whatever Google said first, this business was not measured,
+  // which is exactly the rule that stores its deficit as null below.
+  if (lookups.unavailable > 0) verdict.status = 'unavailable';
 
   const businessId = crypto.randomUUID();
   const presenceId = crypto.randomUUID();
@@ -244,15 +283,17 @@ async function enrichAndPersist(
   // transaction here, so each business is its own atomic batch — a failure leaves no partial row.
   await env.DB.batch([
     env.DB.prepare(
-      `INSERT INTO businesses (id, name, address, zip_code, phone, niche, license_number, license_status,
-         license_issue_date, account_number, site_number, google_place_id, latitude, longitude,
+      `INSERT INTO businesses (id, name, license_name, address, zip_code, phone, niche, license_number,
+         license_status, license_issue_date, account_number, site_number, google_place_id, latitude, longitude,
          in_nof_corridor, nof_corridor_name, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
       businessId,
       // Python passes enrichment.get("name", name), which yields None when Google returns a null
       // name. Workers is the implementation of record here, so an absent value falls back instead.
       enrichment.name ?? name,
+      // The city's name for the business: the trimmed licence name every Google candidate is scored against.
+      name,
       enrichment.address ?? address,
       zipCode,
       facts.phone,
@@ -273,6 +314,14 @@ async function enrichAndPersist(
       corridor?.corridor_name ?? null,
       timestamp,
       timestamp,
+    ),
+    env.DB.prepare(
+      `INSERT INTO google_matches (business_id, status, place_id, matched_name, score, distance_m,
+         website, phone, looked_up_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(
+      businessId, verdict.status, verdict.place_id, verdict.matched_name, verdict.score, verdict.distance_m,
+      verdict.website, verdict.phone, timestamp,
     ),
     env.DB.prepare(
       `INSERT INTO digital_presences (id, business_id, has_website, website_url,

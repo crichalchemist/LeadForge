@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
+import LegacySurface from './components/layout/LegacySurface';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -7,8 +8,8 @@ import Pipeline from './pages/Pipeline';
 import GrantPipeline from './pages/GrantPipeline';
 import GrantDetail from './pages/GrantDetail';
 import Leads from './pages/Leads';
-import LeadDetail from './pages/LeadDetail';
 import Reports from './pages/Reports';
+import Discovery from './pages/Discovery';
 
 export default function App() {
   return (
@@ -20,14 +21,15 @@ export default function App() {
           <ProtectedRoute>
             <AppLayout>
               <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/pipeline" element={<Pipeline />} />
-                <Route path="/grants" element={<GrantPipeline />} />
-                <Route path="/grants/:id" element={<GrantDetail />} />
+                <Route path="/" element={<Navigate to="/leads" replace />} />
+                <Route path="/dashboard" element={<LegacySurface><Dashboard /></LegacySurface>} />
+                <Route path="/pipeline" element={<LegacySurface><Pipeline /></LegacySurface>} />
+                <Route path="/grants" element={<LegacySurface><GrantPipeline /></LegacySurface>} />
+                <Route path="/grants/:id" element={<LegacySurface><GrantDetail /></LegacySurface>} />
                 <Route path="/leads" element={<Leads />} />
-                <Route path="/leads/:id" element={<LeadDetail />} />
-                <Route path="/reports" element={<Reports />} />
+                <Route path="/leads/:id" element={<Leads />} />
+                <Route path="/discovery" element={<Discovery />} />
+                <Route path="/reports" element={<LegacySurface><Reports /></LegacySurface>} />
               </Routes>
             </AppLayout>
           </ProtectedRoute>

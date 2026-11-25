@@ -4,8 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LeadForge CRM</title>
+    <script>
+      // Pre-paint copy of resolveTheme() in src/lib/theme.ts: keep the two in step. It runs before the
+      // first paint, so a porcelain page never flashes enamel, or the reverse.
+      (function () {
+        var pick = null;
+        try { pick = localStorage.getItem('leadforge.theme'); } catch (e) {}
+        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme =
+          pick === 'enamel' || pick === 'porcelain' ? pick : dark ? 'enamel' : 'porcelain';
+      })();
+    </script>
   </head>
-  <body class="bg-gray-50">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

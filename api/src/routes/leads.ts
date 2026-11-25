@@ -4,6 +4,7 @@ import { requireAuth } from '../middleware/auth';
 import { queryParams } from '../lib/validate';
 import { NICHES } from '../lib/stages';
 import { LATEST_OUTREACH_JOIN, LATEST_SCORE_JOIN } from './businesses';
+import { withBooleans } from '../db/serialize';
 import type { AppEnv, LeadScoreRow } from '../types';
 
 const router = new Hono<AppEnv>();
@@ -31,14 +32,18 @@ router.get('/ranked', requireAuth, queryParams(rankedQuery), async (c) => {
   const count = await c.env.DB.prepare(`SELECT COUNT(*) AS n ${from}`).bind(...binds).first<{ n: number }>();
   const rows = await c.env.DB
     .prepare(`SELECT b.id AS business_id, b.name AS business_name, b.zip_code, b.niche,
-                     ls.composite_acquisition_score, ls.price_tier, lo.status AS pipeline_stage
+                     ls.composite_acquisition_score, ls.score_version, ls.price_tier, lo.status AS pipeline_stage,
+                     b.in_nof_corridor, b.nof_corridor_name, b.account_number, b.site_number
               ${from}
-              ORDER BY ls.composite_acquisition_score DESC NULLS LAST
+              ORDER BY ls.composite_acquisition_score DESC NULLS LAST, b.id
               LIMIT ? OFFSET ?`)
     .bind(...binds, q.page_size, (q.page - 1) * q.page_size)
-    .all();
+    .all<Record<string, unknown>>();
 
-  return c.json({ items: rows.results ?? [], total: count?.n ?? 0, page: q.page, page_size: q.page_size });
+  // score_version lets the list mark a version-1 score as preliminary; the corridor fields draw the
+  // interchange; the licence account completes the label grid (DESIGN.md, Route Row).
+  const items = (rows.results ?? []).map((row) => withBooleans(row, ['in_nof_corridor']));
+  return c.json({ items, total: count?.n ?? 0, page: q.page, page_size: q.page_size });
 });
 
 // =py routes/leads.get_score_history

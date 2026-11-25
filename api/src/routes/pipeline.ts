@@ -13,6 +13,10 @@ interface Card {
   niche: string | null; call_attempts: number; last_contact: string | null;
 }
 
+// The rules themselves, so the frontend offers only moves the PATCH below accepts and never keeps a second
+// copy of VALID_TRANSITIONS that could drift from this one.
+router.get('/transitions', requireAuth, (c) => c.json(VALID_TRANSITIONS));
+
 // =py routes/pipeline.get_pipeline_board
 router.get('/board', requireAuth, async (c) => {
   const db = c.env.DB;

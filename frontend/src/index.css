@@ -1,3 +1,43 @@
+@import './styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* The browser's own surfaces take the theme too (DESIGN.md, Do's). */
+@layer base {
+  html {
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--font-sans);
+    scrollbar-color: var(--edge) var(--ground);
+  }
+  body {
+    background: var(--ground);
+    color: var(--text);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    caret-color: var(--text);
+  }
+  ::selection {
+    background: var(--text);
+    color: var(--ground);
+  }
+  a {
+    text-underline-offset: 3px;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced motion: the route trace and every state change become instant (DESIGN.md, Strip Map). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}

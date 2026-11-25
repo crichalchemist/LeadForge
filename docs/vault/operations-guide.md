@@ -159,7 +159,9 @@ npm install   # first time only
 npm run dev   # serves on http://localhost:5173
 ```
 
-The Vite dev server proxies `/api` requests to `http://localhost:8000`. See `frontend/vite.config.ts`.
+Since CRM wave 1 (2026-09-26) the proxy forwards `/api/*` requests to `wrangler dev` on
+`http://localhost:8787` and keeps the prefix, so the FastAPI server is no longer reachable from
+`npm run dev`. See `frontend/vite.config.ts`.
 
 ### vLLM (local CPU inference)
 
@@ -283,6 +285,31 @@ The one live path is: `POST /api/webhooks/retell/*` enqueues on `SENTIMENT_QUEUE
 caller of `api/src/lib/llm/` — the outreach-brief and entity-resolution modules are ported and
 tested but reached by nothing.
 
+CRM wave 1 (2026-09-26) added three routes worth naming here: `GET /api/businesses/:id/provenance`
+admits any signed-in user (not just admin) and returns which source — Google's verdict, Overture's,
+or the licence itself — backs each fact on the record (ADR 031); `POST /api/outreach` is admin-only
+and puts a business on the outreach line, answering `201` on success or `409` (with the existing
+record's id) if it is already there; and `GET /api/pipeline/transitions` returns the same
+`VALID_TRANSITIONS` map the stage-change route enforces, so the frontend never keeps a second copy
+that could drift from it.
+
+### Local development against the Worker
+
+Since CRM wave 1, local frontend development runs against a real Worker instead of the Python
+backend (see [Frontend dev server](#frontend-dev-server)):
+
+```bash
+cd api && npx wrangler d1 migrations apply leadforge-db --local
+npx wrangler dev --local --var JWT_SECRET:<any-local-value> --var GOOGLE_PLACES_API_KEY:<key from the gitignored .env>
+cd frontend && npm run dev       # http://localhost:5173, proxied to the Worker on 8787
+npm run e2e                      # Playwright: its own fresh seeded D1; stop the two servers above first
+```
+
+The Places key is passed with `--var` and never written to `api/.dev.vars` — that file is tracked in
+git, so anything placed there is staged by default (see [Secrets](#secrets) below). On macOS 13
+Intel, Playwright ships no Chromium, so `npm run e2e` fails to launch there; any OS Playwright
+supports can run it locally, and it otherwise runs in CI.
+
 ### Secrets
 
 ```bash
@@ -321,6 +348,18 @@ npm run build          # wrangler deploy --dry-run: bundles and validates bindin
 npx wrangler deploy
 ```
 
+**Deploy CRM wave 1 in this order**, because it carries migration 0005 and new routes:
+
+```bash
+npx wrangler d1 migrations apply leadforge-db --remote   # 1. the schema
+npx wrangler deploy                                      # 2. the Worker
+# 3. the Pages deploy, --branch=master (Frontend on Pages, below)
+```
+
+The migration goes first because a Worker without 0005 fails every discovered business in its batch after
+its Places calls are paid for. The Worker goes before Pages because a frontend ahead of the Worker gets
+404s on the new routes.
+
 ### Frontend on Pages
 
 ```bash
@@ -343,9 +382,23 @@ The Workers user table is not interchangeable with Python's. Passwords are PBKDF
 Crypto, stored as `pbkdf2$<iterations>$<salt_b64url>$<hash_b64url>`; Python's bcrypt hashes are not
 portable to the Workers runtime, so no user row migrates between backends.
 
-There is **no bootstrap CLI** — this is a known gap. The first admin row has to be inserted into D1
-directly with a hash in the format above. After that, `POST /api/auth/signup` creates users and
-requires an existing admin token.
+There is still no bootstrap CLI for the *remote* D1 — the first production admin row was inserted by
+hand, and `POST /api/auth/signup` creates every user after that, requiring an existing admin token.
+
+Locally this is no longer a procedure nobody has run. `frontend/e2e/seed.mjs`'s `admin` CLI form
+prints the same insert, hashed in the format above, for one operator-supplied admin against the
+default local D1:
+
+```bash
+cd frontend
+LEADFORGE_LOCAL_PASSWORD=<password> node e2e/seed.mjs admin <you@example.com> > ../api/.wrangler/local-admin.sql
+cd ../api && npx wrangler d1 execute leadforge-db --local --file .wrangler/local-admin.sql
+```
+
+The identical `adminSql()` path — same file, called from `frontend/e2e/start-api.mjs` via
+`seedSql()` — now runs unattended on every push: the `e2e` CI job seeds a fresh local D1 this way
+before each Playwright run, just with its own fixture credentials rather than an operator-supplied
+email and password.
 
 ### Rebuilding the Overture match table
 
@@ -368,9 +421,14 @@ small limit just means calling it again.
 
 ## CI and commit hooks
 
-Applies to both backends. `.github/workflows/ci.yml` runs on every push and pull request as three
+Applies to both backends. `.github/workflows/ci.yml` runs on every push and pull request as four
 parallel jobs: ruff check, `ruff format --check`, and pytest; then typecheck, vitest, and
-`wrangler deploy --dry-run`; then the frontend build. It needs **no secrets**.
+`wrangler deploy --dry-run`; then the frontend's Vitest suite followed by its build (the job is still
+named `Frontend (build)`, because branch protection requires that name); and `e2e`, which installs
+Chromium and runs Playwright against `wrangler dev --local` on a freshly seeded local D1. The `e2e`
+job uploads `finish-review-captures` on every run, pass or fail, and the Playwright report only on
+failure; it is not yet a required check, so a red run reports without blocking a merge. It needs
+**no secrets**.
 
 Install the hooks once per clone:
 
@@ -451,7 +509,20 @@ object in the route's response, not the exit status: it tallies lookups that fai
 configuration or quota reason, separately from businesses Google genuinely has no record of. A
 business whose lookup failed is stored with a **null** `digital_deficit_score` — deliberately, rather
 than with Python's constant 74 — and every later run then skips it at the pre-lookup dedup. Recovery
-is to delete those `businesses` rows and re-run; all four child tables cascade.
+is to delete those `businesses` rows and re-run; all five child tables cascade (`digital_presences`,
+`lead_scores`, `outreach_records`, `grant_applications` and `google_matches`), and `grant_documents`
+cascades beneath `grant_applications`. `SELECT business_id FROM google_matches WHERE status = 'unavailable'`
+finds the unmeasured rows (on the remote only once migration 0005 is applied there).
+
+Since CRM wave 1, the response also answers `created` (equal to `discovered`), `skipped_known`
+(licences already stored, skipped before any Places call), and `failed`, so those no longer have to
+be inferred from `places` alone. Each business's Google verdict survives the run in `google_matches`
+(ADR 031) — but only once migration 0005 has reached the target D1, which as of this writing is true
+for the throwaway databases the test suites create and not yet for the remote:
+
+```bash
+npx wrangler d1 execute leadforge-db --remote --command "SELECT status, count(*) AS n FROM google_matches GROUP BY status"
+```
 
 ### Workers: the Overture backfill returns `{examined: 0, updated: 0, skipped: 0}`
 

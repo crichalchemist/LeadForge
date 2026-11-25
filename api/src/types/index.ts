@@ -60,8 +60,18 @@ export interface BusinessRow {
   ig_hashtag_mention_count: number | null; fb_checkin_count: number | null;
   fb_ugc_tag_count: number | null; total_customer_ugc: number | null;
   latitude: number | null; longitude: number | null;
+  account_number: string | null; site_number: string | null; license_name: string | null;
   in_nof_corridor: number; nof_corridor_name: string | null;
   created_at: string; updated_at: string;
+}
+
+/** One Google verdict per business (migration 0005, ADR 031). */
+export type GoogleMatchStatus = 'matched' | 'rejected_distance' | 'rejected_name' | 'no_candidate' | 'unavailable';
+
+export interface GoogleMatchRow {
+  business_id: string; status: GoogleMatchStatus; place_id: string | null; matched_name: string | null;
+  score: number | null; distance_m: number | null; website: string | null; phone: string | null;
+  looked_up_at: string;
 }
 
 export interface DigitalPresenceRow {

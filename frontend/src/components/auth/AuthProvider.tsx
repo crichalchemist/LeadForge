@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { loginUser, logoutUser, refreshToken, setAccessToken } from '../../api/client';
+import { fetchMe, loginUser, logoutUser, refreshToken, setAccessToken } from '../../api/client';
 import { AuthContext, type AuthUser } from '../../hooks/useAuth';
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
@@ -13,15 +13,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       .then((token) => {
         setAccessToken(token);
         setAccessTokenState(token);
-        // Decode user from login response is not available here;
-        // use /auth/me to get user info
-        return fetch('/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      })
-      .then((res) => {
-        if (!res.ok) throw new Error('Not authenticated');
-        return res.json();
+        // Through the client, so the call reaches the Worker in production (VITE_API_BASE_URL) and in
+        // development alike; a bare fetch('/api/…') only ever worked behind the Vite proxy.
+        return fetchMe();
       })
       .then((userData: AuthUser) => {
         setUser(userData);
