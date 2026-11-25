@@ -16,6 +16,8 @@ test('an operator sees the Places budget, runs discovery, and reads the service 
   );
   await signIn(page);
   await page.getByRole('link', { name: /Plan a run/ }).click();
+  // Leads has its own "Zip code" filter, so filling before Discovery renders types into the wrong page.
+  await expect(page.getByRole('heading', { name: 'Discovery', level: 1 })).toBeVisible();
   await page.getByLabel('Zip code').fill('60619');
   await page.getByLabel('Businesses to look up').fill('5');
   await expect(page.getByText('Up to 10 Places calls')).toBeVisible();
